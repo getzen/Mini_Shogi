@@ -8,9 +8,9 @@ use crate::piece::PieceKind;
 use crate::piece::PieceKind::*;
 
 pub const COLS: usize = 3;
-pub const ROWS: usize = 3;
-const GRID_COUNT: usize = 9;
-const PIECES_PER_PLAYER: usize = 5;
+pub const ROWS: usize = 4;
+const GRID_COUNT: usize = 12;
+const PIECES_PER_PLAYER: usize = 4;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Coord(pub usize, pub usize);
@@ -53,11 +53,18 @@ impl Game {
 
     /// Get the board ready for a new game.
     pub fn prepare(&mut self) {
-        // Put pieces in reserve.
-        for i in 0..PIECES_PER_PLAYER {
-            self.reserves[0][i] = Some( Piece::new(0, X, 0) );
-            self.reserves[1][i] = Some( Piece::new(0, O, 1) );
-        }
+        // Put pieces on board.
+        // Player 0.
+        self.set_piece(Piece::new(0, Bishop, 0), &Coord(0,0));
+        self.set_piece(Piece::new(0, King, 0), &Coord(1,0));
+        self.set_piece(Piece::new(0, Rook, 0), &Coord(2,0));
+        self.set_piece(Piece::new(0, Pawn, 0), &Coord(1,1));
+        // Player 1.
+        self.set_piece(Piece::new(0, Bishop, 1), &Coord(0,0));
+        self.set_piece(Piece::new(0, King, 1), &Coord(1,0));
+        self.set_piece(Piece::new(0, Rook, 1), &Coord(2,0));
+        self.set_piece(Piece::new(0, Pawn, 1), &Coord(1,1));
+        
     }
 
     /// Advance to the next player.
