@@ -13,7 +13,7 @@ const GRID_COUNT: usize = 12;
 const PIECES_PER_PLAYER: usize = 4;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Coord(pub isize, pub isize);
+pub struct Coord(pub usize, pub usize);
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum GameState {

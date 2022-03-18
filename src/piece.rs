@@ -26,20 +26,19 @@ impl Piece {
         }
     }
 
-    pub fn move_coords(&self) -> Vec<Coord> {
+    pub fn move_coords(&self) -> Vec<(i8, i8)> {
         match self.kind {
-            PieceKind::King => vec![Coord(1,0), Coord(0,1), Coord(-1,0), Coord(0,-1),
-                                    Coord(1,1), Coord(-1,1), Coord(-1,-1), Coord(1,-1)],
+            PieceKind::King => vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (-1,-1), (1,-1)],
 
-            PieceKind::Rook => vec![Coord(1,0), Coord(0,1), Coord(-1,0), Coord(0,-1)],
+            PieceKind::Rook => vec![(1,0), (0,1), (-1,0), (0,-1)],
 
-            PieceKind::Bishop => vec![Coord(1,1), Coord(-1,1), Coord(-1,-1), Coord(1,-1)],
+            PieceKind::Bishop => vec![(1,1), (-1,1), (-1,-1), (1,-1)],
 
             PieceKind::Pawn => {
                 if self.player == 0 {
-                    vec![Coord(0,1)]
+                    vec![(0,1)]
                 } else {
-                    vec![Coord(0,-1)]
+                    vec![(0,-1)]
                 }
             },
         }
