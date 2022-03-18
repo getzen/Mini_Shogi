@@ -2,8 +2,10 @@
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PieceKind {
-    X,
-    O,
+    King,
+    Rook,
+    Bishop,
+    Pawn,
 }
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
@@ -25,8 +27,10 @@ impl Piece {
     #[allow(dead_code)]
     pub fn string_rep(&self) -> &str {
         match self.kind {
-            PieceKind::X => "X",
-            PieceKind::O => "O",
+            King => "K",
+            Rook => "R",
+            Bishop => "B",
+            Pawn => "P",
         }
     }
 }
