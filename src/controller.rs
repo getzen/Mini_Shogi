@@ -138,7 +138,7 @@ impl Controller {
                 Message::SearchCompleted(progress) => {
                     let action = progress.pv.first().unwrap();
                     self.view_game.add_piece_to(&action.coord, self.game.current_player).await;
-                    self.game.perform_action(&action, true);
+                    self.game.perform_action(action, true);
                     self.action_history.push(action.clone());
                     self.pv_text = self.format_ai_progress(&progress);
 
@@ -178,15 +178,12 @@ impl Controller {
         match self.game.update_state() {
             GameState::Draw => {
                 self.state = Draw;
-                return;
             },
             GameState::WinPlayer0 => {
                 self.state = Player0Won;
-                return;
             },
             GameState::WinPlayer1 => {
                 self.state = Player1Won;
-                return;
             },
             _ => {
                 let p = self.game.current_player;
@@ -205,7 +202,7 @@ impl Controller {
 
         // These variables are captured by the thread.
         let ai_kind = self.player_kinds[self.game.current_player];
-        let game_clone = self.game.clone();
+        let game_clone = self.game;
         let message_sender = MessageSender::new(self.tx.clone(), None);
 
         std::thread::spawn(move || {
@@ -222,7 +219,7 @@ impl Controller {
 
             self.view_game.add_piece_to(&coord, self.game.current_player).await;
 
-            self.game.perform_action(&action, true);
+            self.game.perform_action(action, true);
             self.action_history.push(action.clone());
         }
     }

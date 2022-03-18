@@ -2,38 +2,24 @@
 
 use macroquad::prelude::*;
 
-mod controller;
-use crate::controller::Controller;
-
 mod action;
 use action::Action;
-
 mod ai;
 mod ai_minimax;
 mod ai_monte_carlo;
 mod ai_monte_carlo_tree;
 mod ai_random;
-
-// mod board;
-// use board::Board;
-
-//mod coord;
-//use coord::Coord;
-
+mod controller;
+use crate::controller::Controller;
 mod game;
 use game::{Game, GameState};
-
 mod message_sender;
-
 mod piece;
 use piece::Piece;
-
 mod sprite;
 mod text;
-
 mod view_game;
 mod view_intro;
-
 
 fn conf() -> Conf {
     Conf {

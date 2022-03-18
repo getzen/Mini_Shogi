@@ -76,7 +76,7 @@ impl AIMonteCarloTree {
 
     pub fn one_iteration(&mut self, node: &Game) {
         let path = self.select(node);
-        let mut leaf = path.last().unwrap().clone();
+        let mut leaf = *path.last().unwrap();
         self.expand(&mut leaf);
         let mut reward = 0.0;
         for _ in 0..1 {
@@ -89,8 +89,8 @@ impl AIMonteCarloTree {
         let mut node = root;
         let mut path = Vec::new();
         loop {
-            path.push(node.clone());
-            if !self.children.contains_key(&node) || node.state != Ongoing {
+            path.push(*node);
+            if !self.children.contains_key(node) || node.state != Ongoing {
                 //println!("children does not contain node");
                 break;
             }
@@ -98,8 +98,8 @@ impl AIMonteCarloTree {
             let mut unexplored = Vec::new();
             let node_kids = self.children.get(node).unwrap();
             for kid in node_kids {
-                if !self.children.contains_key(&kid) {
-                    unexplored.push(kid.clone());
+                if !self.children.contains_key(kid) {
+                    unexplored.push(*kid);
                 }
             }
             if !unexplored.is_empty() {

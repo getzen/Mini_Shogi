@@ -68,7 +68,7 @@ impl AIMinimax {
         if maximizing {
             best_score = f64::MIN;
             for action in &actions_available {
-                self.game.perform_action(&action, true);
+                self.game.perform_action(action, true);
                 let child_score = self.alpha_beta(depth-1, false, alpha, beta, &mut child_pv);
                 self.game.perform_action(&action.undo(), true);
 
@@ -95,7 +95,7 @@ impl AIMinimax {
         else {
             best_score = f64::MAX;
             for action in &actions_available {
-                self.game.perform_action(&action, true);
+                self.game.perform_action(action, true);
                 let child_score = self.alpha_beta(depth-1, true, alpha, beta, &mut child_pv);
                 self.game.perform_action(&action.undo(), true);
 

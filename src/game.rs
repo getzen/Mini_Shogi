@@ -74,18 +74,18 @@ impl Game {
     #[allow(dead_code)]
     /// Returns a reference to the piece at the given coord.
     pub fn get_piece(&mut self, coord: &Coord) -> &Option<Piece> {
-        &self.grid[Game::coord_to_index(&coord)]
+        &self.grid[Game::coord_to_index(coord)]
     }
 
     /// Sets the piece at the given coord.
     pub fn set_piece(&mut self, piece: Piece, coord: &Coord) {
         // warn if space not empty?
-        self.grid[Game::coord_to_index(&coord)] = Some(piece);
+        self.grid[Game::coord_to_index(coord)] = Some(piece);
     }
 
     /// Removes and returns the piece at the given coord.
     pub fn remove_piece(&mut self, coord: &Coord) -> Piece {
-        let i = Game::coord_to_index(&coord);
+        let i = Game::coord_to_index(coord);
         let piece = self.grid[i]; // assume this makes a copy..
         self.grid[i] = None; // ...so we need to explicity set to None.
         piece.unwrap() // we want this to panic if None
