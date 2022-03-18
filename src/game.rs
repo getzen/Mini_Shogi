@@ -13,7 +13,7 @@ const GRID_COUNT: usize = 12;
 const PIECES_PER_PLAYER: usize = 4;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Coord(pub usize, pub usize);
+pub struct Coord(pub isize, pub isize);
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum GameState {
@@ -134,34 +134,12 @@ impl Game {
 
     /// Determines if the given player has won.
     fn is_win(&mut self, player: usize) -> bool {
-        // Grid indices to check for win.     |----- horiz -----|  |------ vert -----|  |-- diag --|
-        const WINNING_INDICES: [usize; 24] = [0,1,2, 3,4,5, 6,7,8, 0,3,6, 1,4,7, 2,5,8, 0,4,8, 6,4,2];
-        
-        let mut indices = WINNING_INDICES.iter();
-        loop {
-            // If next is None, array is exhausted.
-            let next_i = indices.next();
-            if next_i.is_none() {
-                break;
-            }
-            // Get the next three grid indices.
-            let i_0 = *next_i.unwrap();
-            let i_1 = *indices.next().unwrap();
-            let i_2 = *indices.next().unwrap();
+        // If opponent king is capture: true.
 
-            //println!("{} {} {}", i_0, i_1, i_2);
-            let mut count = 0;
-            if self.grid[i_0].is_some() && self.grid[i_0].unwrap().player == player {
-                count += 1;
-            } else {continue};
-            if self.grid[i_1].is_some() && self.grid[i_1].unwrap().player == player {
-                count += 1;
-            } else {continue};
-            if self.grid[i_2].is_some() && self.grid[i_2].unwrap().player == player {
-                count += 1;
-            }
-            if count == 3 {return true;}
-        }
+        // If player king on back row and not in "check": true.
+
+        // If 3-move repeat: true
+
         false
     }
 
@@ -184,9 +162,9 @@ impl Game {
     pub fn actions_available(&mut self) -> Vec<Action> {
         let mut actions = Vec::new();
         let available_coords = self.empty_coords();
-        let mut piece_kind = X;
+        let mut piece_kind = Pawn;
         if self.current_player == 1 {
-            piece_kind = O;
+            piece_kind = Pawn;
         }
         for coord in available_coords {
             let action = Action::new(FromReserve, piece_kind, coord);

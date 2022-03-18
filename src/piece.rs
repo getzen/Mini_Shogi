@@ -1,5 +1,7 @@
 // Piece
 
+use crate::game::Coord;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PieceKind {
     King,
@@ -24,13 +26,32 @@ impl Piece {
         }
     }
 
+    pub fn move_coords(&self) -> Vec<Coord> {
+        match self.kind {
+            PieceKind::King => vec![Coord(1,0), Coord(0,1), Coord(-1,0), Coord(0,-1),
+                                    Coord(1,1), Coord(-1,1), Coord(-1,-1), Coord(1,-1)],
+
+            PieceKind::Rook => vec![Coord(1,0), Coord(0,1), Coord(-1,0), Coord(0,-1)],
+
+            PieceKind::Bishop => vec![Coord(1,1), Coord(-1,1), Coord(-1,-1), Coord(1,-1)],
+
+            PieceKind::Pawn => {
+                if self.player == 0 {
+                    vec![Coord(0,1)]
+                } else {
+                    vec![Coord(0,-1)]
+                }
+            },
+        }
+    }
+
     #[allow(dead_code)]
     pub fn string_rep(&self) -> &str {
         match self.kind {
-            King => "K",
-            Rook => "R",
-            Bishop => "B",
-            Pawn => "P",
+            PieceKind::King => "K",
+            PieceKind::Rook => "R",
+            PieceKind::Bishop => "B",
+            PieceKind::Pawn => "P",
         }
     }
 }
