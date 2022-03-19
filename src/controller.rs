@@ -145,7 +145,8 @@ impl Controller {
                 }
                 Message::SearchCompleted(progress) => {
                     let action = progress.pv.first().unwrap();
-                    self.view_game.add_piece_to(&action.coord, action.piece_kind, self.game.current_player).await;
+                    
+                    //self.view_game.add_piece_to(&action.coord, action.piece_kind, self.game.current_player).await;
                     self.game.perform_action(action, true);
                     self.action_history.push(action.clone());
                     self.pv_text = self.format_ai_progress(&progress);
@@ -173,7 +174,7 @@ impl Controller {
         text.push_str(&format!(". score: {}", score_string));
         text.push_str(". pv: ");
         for i in 0..progress.pv.len() {
-            let coord = &progress.pv[i].coord;
+            let coord = &progress.pv[i].to;
             text.push_str(&format!("{},{}", coord.0, coord.1));
             if i < progress.pv.len() - 1 {
                 text.push_str(", ");

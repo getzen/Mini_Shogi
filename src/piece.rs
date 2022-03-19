@@ -15,16 +15,18 @@ pub struct Piece {
     pub id: usize,
     pub kind: PieceKind,
     pub player: usize,
+    pub coord: Option<Coord>,
 }
 
 impl Piece {
     pub fn new(id: usize, kind: PieceKind, player: usize) -> Self {
         Self {
             id, kind, player,
+            coord: None,
         }
     }
 
-    pub fn move_coords(&self) -> Vec<(i8, i8)> {
+    pub fn move_vectors(&self) -> Vec<(i8, i8)> {
         match self.kind {
             PieceKind::King => vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (-1,-1), (1,-1)],
 

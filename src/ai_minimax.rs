@@ -36,7 +36,7 @@ impl Think for AIMinimax {
 
         print!("score:{}", score);
         for p in &self.progress.pv {
-            print!(" ({},{})", p.coord.0, p.coord.1);
+            print!(" ({},{})", p.to.0, p.to.1);
         }
         println!();
         self.progress.clone()

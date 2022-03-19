@@ -15,7 +15,7 @@ pub const ROWS: usize = 4;
 const GRID_COUNT: usize = 12;
 const PIECES_PER_PLAYER: usize = 4;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Coord(pub usize, pub usize);
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -124,34 +124,33 @@ impl Game {
 
     /// Sets the piece at the given coord.
     pub fn set_piece(&mut self, piece_id: usize, coord: &Coord) {
+        self.pieces[piece_id].coord = Some(*coord);
         self.grid[Game::coord_to_index(coord)] = piece_id;
     }
 
     /// Removes and returns the piece at the given coord.
     pub fn remove_piece(&mut self, coord: &Coord) -> usize {
         let i = Game::coord_to_index(coord);
-        let piece = self.grid[i];
+        let piece_id = self.grid[i];
+        self.pieces[piece_id].coord = None;
         self.grid[i] = NONE;
-        piece
+        piece_id
     }
 
-    pub fn remove_reserve_piece(&mut self, kind: PieceKind, player: usize) -> usize {
+    pub fn remove_reserve_piece(&mut self, piece_id: usize, player: usize) {
         let mut piece = NONE;
-        for i in self.reserves[player] {
-            let p = self.pieces[i];
-            if p.kind == kind {
-                piece = i;
-                self.reserves[player][i] = NONE;
+        for (index, id) in self.reserves[player].iter().enumerate() {
+            if *id == piece_id {
+                self.reserves[player][index] = NONE;
                 break;
             }
         }
-        piece
     }
 
     pub fn add_reserve_piece(&mut self, piece_id: usize, player: usize) {
-        for i in self.reserves[player] {
-            if i == NONE {
-                self.reserves[player][i] = piece_id;
+        for (index, id) in self.reserves[player].iter().enumerate() {
+            if *id == NONE {
+                self.reserves[player][index] = piece_id;
                 break;
             }
         }
@@ -198,26 +197,43 @@ impl Game {
 
     pub fn actions_available(&mut self) -> Vec<Action> {
         let mut actions = Vec::new();
-        let available_coords = self.empty_coords();
-        let mut piece_kind = Pawn;
-        if self.current_player == 1 {
-            piece_kind = Pawn;
+        // Get player's pieces. Optimization opportunity here.
+        let mut player_pieces = Vec::new();
+        for id in self.grid {
+            if id == NONE { continue; }
+            let piece = self.pieces[id];
+            if piece.player == self.current_player {
+                player_pieces.push(piece);
+            }
         }
-        for coord in available_coords {
-            let action = Action::new(FromReserve, piece_kind, coord);
-            actions.push(action);
+        for piece in &player_pieces {
+            let vectors = piece.move_vectors();
+            let pc_coord = piece.coord.unwrap();
+            for (x, y) in vectors {
+                if x < 0 || (x as usize) >= COLS || y < 0 || (y as usize) >= ROWS {
+                    continue; // out of bounds
+                }
+                let to_coord = Coord(pc_coord.0 + x as usize, pc_coord.1 + y as usize);
+                let action = Action::new(MoveNoCapture, piece.id, Some(pc_coord), to_coord );
+            }
         }
         actions
     }
 
     pub fn perform_action(&mut self, action: &Action, advance_player: bool) {
         match action.action_kind {
+            MoveNoCapture => {
+                self.remove_piece(&action.from.unwrap());
+                self.set_piece(action.piece_id, &action.to);
+            }
+            MoveWithCapture => {
+            }
             FromReserve => {
-                let piece_id = self.remove_reserve_piece(action.piece_kind, self.current_player);
-                self.set_piece(piece_id, &action.coord);
+                let piece_id = self.remove_reserve_piece(action.piece_id, self.current_player);
+                self.set_piece(action.piece_id, &action.to);
             },
             ToReserve => {
-                let piece_id = self.remove_piece(&action.coord);
+                let piece_id = self.remove_piece(&action.from.unwrap());
                 self.add_reserve_piece(piece_id, self.current_player);
             },
         }
