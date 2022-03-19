@@ -15,14 +15,12 @@ pub struct Piece {
     pub id: usize,
     pub kind: PieceKind,
     pub player: usize,
-    //move_vectors: Vec<Coord>,
 }
 
 impl Piece {
     pub fn new(id: usize, kind: PieceKind, player: usize) -> Self {
         Self {
             id, kind, player,
-            //move_vectors: Vec::<Coord>::new()
         }
     }
 

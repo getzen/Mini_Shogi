@@ -80,10 +80,18 @@ impl Controller {
 
     pub async fn prepare(&mut self) {
         self.player_kinds.push(PlayerKind::Human);
-        self.player_kinds.push(PlayerKind::AIMinimax);
+        self.player_kinds.push(PlayerKind::Human);
         self.game.prepare();
         self.view_intro.prepare();
         self.view_game.prepare().await;
+
+        // Add the game's pieces to the view.
+        for (index, piece_id) in self.game.grid.iter().enumerate() {
+            if *piece_id == NONE { continue; }
+            let piece = self.game.pieces[*piece_id];
+            let coord = Game::index_to_coord(index);
+            self.view_game.add_piece_to(&coord, piece.kind, piece.player).await;
+        }
     }
 
     /// The main control loop.
@@ -137,7 +145,7 @@ impl Controller {
                 }
                 Message::SearchCompleted(progress) => {
                     let action = progress.pv.first().unwrap();
-                    self.view_game.add_piece_to(&action.coord, self.game.current_player).await;
+                    self.view_game.add_piece_to(&action.coord, action.piece_kind, self.game.current_player).await;
                     self.game.perform_action(action, true);
                     self.action_history.push(action.clone());
                     self.pv_text = self.format_ai_progress(&progress);
@@ -216,7 +224,7 @@ impl Controller {
             let mut some_action: Vec<&Action> = actions.iter().filter(|a| a.coord == coord).collect();
             let action = some_action.swap_remove(0);
 
-            self.view_game.add_piece_to(&coord, self.game.current_player).await;
+            self.view_game.add_piece_to(&coord, action.piece_kind, self.game.current_player).await;
 
             self.game.perform_action(action, true);
             self.action_history.push(action.clone());

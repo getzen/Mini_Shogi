@@ -1,6 +1,7 @@
-// Board2
+// Game
+// Primitives are used to keep Game instances on the stack and hashable.
 
-use slotmap::{DefaultKey, SlotMap};
+//use slotmap::{DefaultKey, SlotMap};
 
 use crate::Action;
 use crate::action::ActionKind::*;
@@ -25,29 +26,28 @@ pub enum GameState {
     WinPlayer1,
 }
 
-#[derive(Clone)]
+pub const NONE: usize = usize::MAX;
+const STARTING_POSITION: &str = "BKR-P--p-rkb";
+
+#[derive(Clone, Copy, Hash)]
 pub struct Game {
-    pieces: SlotMap<DefaultKey, Piece>,
-    grid: [Option<Piece>; GRID_COUNT],
-    reserves: [[Option<Piece>; PIECES_PER_PLAYER]; 2],
+    // This owns all the pieces. grid and reserves just hold the indices.
+    pub pieces: [Piece; PIECES_PER_PLAYER * 2],
+    pub grid: [usize; GRID_COUNT],
+    reserves: [[usize; PIECES_PER_PLAYER]; 2],
+
     pub current_player: usize,
     pub state: GameState,
-
-    ////////
-    // pieces: SlotMap<>?
-    // reserves: [u64; 8]; 2] // use 'swap' to make it like a stack!
-    // reserves_len
-    // board_pieces: [[Option<Piece>; 9] ; 2]
-    // board_pieces_len
-    ///////
 }
 
 impl Game {
     pub fn new() -> Self {
+        // This will be replaced by the proper pieces during 'prepare'.
+        let default_piece = Piece::new(0, Pawn, 0);
         Self {
-            pieces: SlotMap::new(),
-            grid: [None; GRID_COUNT],
-            reserves: [[None; PIECES_PER_PLAYER]; 2],
+            pieces: [default_piece; PIECES_PER_PLAYER * 2],
+            grid: [NONE; GRID_COUNT],
+            reserves: [[NONE; PIECES_PER_PLAYER]; 2],
             current_player: 0,
             state: Ongoing,
         }
@@ -63,22 +63,46 @@ impl Game {
         Coord(index % COLS, index / COLS)
     }
 
+    // fn piece_id_for(&self, player: usize, kind: PieceKind) -> usize {
+    //     let option_item = self.pieces.iter().enumerate().find(
+    //         |(i, p)| p.kind == kind && p.player == player);
+    //     option_item.unwrap().0
+    // }
+
+    pub fn piece_for(kind: char, id: usize) -> Piece {
+        match kind {
+            'K' => Piece::new(id, King, 0),
+            'R' => Piece::new(id, Rook, 0),
+            'B' => Piece::new(id, Bishop, 0),
+            'P' => Piece::new(id, Pawn, 0),
+            'k' => Piece::new(id, King, 1),
+            'r' => Piece::new(id, Rook, 1),
+            'b' => Piece::new(id, Bishop, 1),
+            'p' => Piece::new(id, Pawn, 1),
+            _ => panic!("piece kind not recognized"),
+        }
+    }
+
     /// Get the board ready for a new game.
     pub fn prepare(&mut self) {
-        
-            let id = self.pieces.insert(Piece::new(0, Bishop, 0));
-        
-        // Put pieces on board.
-        // Player 0.
-        self.set_piece(Piece::new(0, Bishop, 0), &Coord(0,0));
-        self.set_piece(Piece::new(0, King, 0), &Coord(1,0));
-        self.set_piece(Piece::new(0, Rook, 0), &Coord(2,0));
-        self.set_piece(Piece::new(0, Pawn, 0), &Coord(1,1));
-        // Player 1.
-        self.set_piece(Piece::new(0, Bishop, 1), &Coord(0,0));
-        self.set_piece(Piece::new(0, King, 1), &Coord(1,0));
-        self.set_piece(Piece::new(0, Rook, 1), &Coord(2,0));
-        self.set_piece(Piece::new(0, Pawn, 1), &Coord(1,1));
+        self.setup_position(STARTING_POSITION);
+    }
+
+    fn setup_position(&mut self, position: &str) {
+        let mut piece_id = 0;
+        let mut index = 0;
+        for kind in position.chars() {
+            if kind != '-' {
+                // Add to pieces array.
+                let piece = Game::piece_for(kind, piece_id);
+                self.pieces[piece_id] = piece;
+                // Set piece on grid.
+                let coord = Game::index_to_coord(index);
+                self.set_piece(piece_id, &coord);
+                piece_id += 1;
+            }
+            index += 1;
+        }
     }
 
     /// Advance to the next player.
@@ -94,41 +118,40 @@ impl Game {
 
     #[allow(dead_code)]
     /// Returns a reference to the piece at the given coord.
-    pub fn get_piece(&mut self, coord: &Coord) -> &Option<Piece> {
-        &self.grid[Game::coord_to_index(coord)]
+    pub fn get_piece(&mut self, coord: &Coord) -> usize {
+        self.grid[Game::coord_to_index(coord)]
     }
 
     /// Sets the piece at the given coord.
-    pub fn set_piece(&mut self, piece: Piece, coord: &Coord) {
-        // warn if space not empty?
-        self.grid[Game::coord_to_index(coord)] = Some(piece);
+    pub fn set_piece(&mut self, piece_id: usize, coord: &Coord) {
+        self.grid[Game::coord_to_index(coord)] = piece_id;
     }
 
     /// Removes and returns the piece at the given coord.
-    pub fn remove_piece(&mut self, coord: &Coord) -> Piece {
+    pub fn remove_piece(&mut self, coord: &Coord) -> usize {
         let i = Game::coord_to_index(coord);
-        let piece = self.grid[i]; // assume this makes a copy..
-        self.grid[i] = None; // ...so we need to explicity set to None.
-        piece.unwrap() // we want this to panic if None
+        let piece = self.grid[i];
+        self.grid[i] = NONE;
+        piece
     }
 
-    pub fn remove_reserve_piece(&mut self, kind: PieceKind, player: usize) -> Option<Piece> {
-        let mut piece: Option<Piece> = None;
-        for (i, p) in self.reserves[player as usize].iter().enumerate() {
-            if p.is_some() && p.unwrap().kind == kind {
-                piece = *p;
-                self.reserves[player as usize][i] = None;
+    pub fn remove_reserve_piece(&mut self, kind: PieceKind, player: usize) -> usize {
+        let mut piece = NONE;
+        for i in self.reserves[player] {
+            let p = self.pieces[i];
+            if p.kind == kind {
+                piece = i;
+                self.reserves[player][i] = NONE;
                 break;
             }
         }
         piece
     }
 
-    pub fn add_reserve_piece(&mut self, piece: Piece) {
-        let player = piece.player;
-        for (i, p) in self.reserves[player as usize].iter().enumerate() {
-            if p.is_none() {
-                self.reserves[player as usize][i] = Some(piece);
+    pub fn add_reserve_piece(&mut self, piece_id: usize, player: usize) {
+        for i in self.reserves[player] {
+            if i == NONE {
+                self.reserves[player][i] = piece_id;
                 break;
             }
         }
@@ -138,8 +161,8 @@ impl Game {
     /// Returns vector of coords that have no pieces.
     pub fn empty_coords(&self) -> Vec<Coord> {
         let mut empties = Vec::new();
-        for (i, p) in self.grid.iter().enumerate() {
-            if p.is_none() {
+        for i in self.grid {
+            if i == NONE {
                 empties.push(Game::index_to_coord(i));
             }
         }
@@ -175,8 +198,6 @@ impl Game {
 
     pub fn actions_available(&mut self) -> Vec<Action> {
         let mut actions = Vec::new();
-        
-
         let available_coords = self.empty_coords();
         let mut piece_kind = Pawn;
         if self.current_player == 1 {
@@ -192,12 +213,12 @@ impl Game {
     pub fn perform_action(&mut self, action: &Action, advance_player: bool) {
         match action.action_kind {
             FromReserve => {
-                let piece = self.remove_reserve_piece(action.piece_kind, self.current_player);
-                self.set_piece(piece.unwrap(), &action.coord);
+                let piece_id = self.remove_reserve_piece(action.piece_kind, self.current_player);
+                self.set_piece(piece_id, &action.coord);
             },
             ToReserve => {
-                let piece = self.remove_piece(&action.coord);
-                self.add_reserve_piece(piece);
+                let piece_id = self.remove_piece(&action.coord);
+                self.add_reserve_piece(piece_id, self.current_player);
             },
         }
         if advance_player {

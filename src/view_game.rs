@@ -9,10 +9,12 @@ use crate::game::Coord;
 use crate::controller::{Message, AppState};
 use crate::controller::AppState::*;
 use crate::message_sender::MessageSender;
+use crate::piece::PieceKind;
+use crate::piece::PieceKind::*;
 use crate::sprite::Sprite;
 use crate::text::Text;
 
-const BOARD_POS: (f32, f32) = (100.0, 100.0);
+const BOARD_POS: (f32, f32) = (240.0, 40.0);
 const SQUARE_SIZE: f32 = 100.0; // matches the square.png size
 const SQUARE_GAP: f32 = 5.0;
 // const RESERVE_0_ORIGIN
@@ -86,14 +88,19 @@ impl ViewGame {
         (x, y)
     }
 
-    pub async fn add_piece_to(&mut self, coord: &Coord, player: usize) {
-        let texture = match player {
-            0 => Sprite::load_texture("x.png").await,
-            1 => Sprite::load_texture("o.png").await,
-            _ => panic!("add_piece_to: player not found")
+    pub async fn add_piece_to(&mut self, coord: &Coord, kind: PieceKind, player: usize) {
+        let texture = match kind {
+            King => Sprite::load_texture("king.png").await,
+            Rook => Sprite::load_texture("rook.png").await,
+            Bishop => Sprite::load_texture("bishop.png").await,
+            Pawn => Sprite::load_texture("pawn.png").await,
         };    
         let position = self.center_position_for(coord);
-        let piece = Sprite::new(texture, position);
+        let mut piece = Sprite::new(texture, position);
+        piece.set_size(Some((80., 80.)));
+        if player == 1 {
+            piece.set_rotation(std::f32::consts::PI);
+        }
         self.pieces.push(piece);
     }
 
