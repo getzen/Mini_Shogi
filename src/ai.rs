@@ -7,7 +7,7 @@ use crate::Action;
 use crate::ai_random::AIRandom;
 use crate::ai_minimax::AIMinimax;
 use crate::ai_monte_carlo::AIMonteCarlo;
-use crate::ai_monte_carlo_tree::AIMonteCarloTree;
+//use crate::ai_monte_carlo_tree::AIMonteCarloTree;
 
 use crate::controller::Message;
 use crate::controller::PlayerKind;
@@ -71,11 +71,11 @@ impl AI {
                 let mut ai = AIMonteCarlo::new(game, 1000, sender_clone);
                 ai.think()
             },
-            AIMonteCarloTree => {
-                sender_clone.min_time_between = Some(Duration::from_millis(100));
-                let mut ai = AIMonteCarloTree::new(game, Duration::from_millis(1000), sender_clone);
-                ai.think()
-            },
+            // AIMonteCarloTree => {
+            //     sender_clone.min_time_between = Some(Duration::from_millis(100));
+            //     let mut ai = AIMonteCarloTree::new(game, Duration::from_millis(1000), sender_clone);
+            //     ai.think()
+            // },
             _ => {panic!("AI::think panic!")},
         };
         message_sender.send(Message::SearchCompleted(progress));

@@ -202,7 +202,7 @@ impl Controller {
 
         // These variables are captured by the thread.
         let ai_kind = self.player_kinds[self.game.current_player];
-        let game_clone = self.game;
+        let game_clone = self.game.clone();
         let message_sender = MessageSender::new(self.tx.clone(), None);
 
         std::thread::spawn(move || {
@@ -211,7 +211,6 @@ impl Controller {
     }
 
     async fn coord_selected(&mut self, coord: Coord) {
-
         if self.state == HumanTurn {
             let actions = self.game.actions_available();
             let mut some_action: Vec<&Action> = actions.iter().filter(|a| a.coord == coord).collect();

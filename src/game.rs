@@ -1,5 +1,7 @@
 // Board2
 
+use slotmap::{DefaultKey, SlotMap};
+
 use crate::Action;
 use crate::action::ActionKind::*;
 use crate::GameState::*;
@@ -23,8 +25,9 @@ pub enum GameState {
     WinPlayer1,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone)]
 pub struct Game {
+    pieces: SlotMap<DefaultKey, Piece>,
     grid: [Option<Piece>; GRID_COUNT],
     reserves: [[Option<Piece>; PIECES_PER_PLAYER]; 2],
     pub current_player: usize,
@@ -42,6 +45,7 @@ pub struct Game {
 impl Game {
     pub fn new() -> Self {
         Self {
+            pieces: SlotMap::new(),
             grid: [None; GRID_COUNT],
             reserves: [[None; PIECES_PER_PLAYER]; 2],
             current_player: 0,
@@ -61,6 +65,9 @@ impl Game {
 
     /// Get the board ready for a new game.
     pub fn prepare(&mut self) {
+        
+            let id = self.pieces.insert(Piece::new(0, Bishop, 0));
+        
         // Put pieces on board.
         // Player 0.
         self.set_piece(Piece::new(0, Bishop, 0), &Coord(0,0));
