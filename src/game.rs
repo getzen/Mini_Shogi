@@ -29,6 +29,14 @@ pub struct Game {
     reserves: [[Option<Piece>; PIECES_PER_PLAYER]; 2],
     pub current_player: usize,
     pub state: GameState,
+
+    ////////
+    // pieces: SlotMap<>?
+    // reserves: [u64; 8]; 2] // use 'swap' to make it like a stack!
+    // reserves_len
+    // board_pieces: [[Option<Piece>; 9] ; 2]
+    // board_pieces_len
+    ///////
 }
 
 impl Game {
@@ -64,7 +72,6 @@ impl Game {
         self.set_piece(Piece::new(0, King, 1), &Coord(1,0));
         self.set_piece(Piece::new(0, Rook, 1), &Coord(2,0));
         self.set_piece(Piece::new(0, Pawn, 1), &Coord(1,1));
-        
     }
 
     /// Advance to the next player.
@@ -161,6 +168,8 @@ impl Game {
 
     pub fn actions_available(&mut self) -> Vec<Action> {
         let mut actions = Vec::new();
+        
+
         let available_coords = self.empty_coords();
         let mut piece_kind = Pawn;
         if self.current_player == 1 {
