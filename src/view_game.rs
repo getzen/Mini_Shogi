@@ -121,7 +121,7 @@ impl ViewGame {
         .unwrap()
     }
 
-    #[allow(dead_code)]
+    //#[allow(dead_code)]
     fn square_id_for(&self, coord: &Coord) -> usize {
         let sprite = self.sprites.iter()
         .find(|s| s.kind == Square && s.coord == *coord);
@@ -218,14 +218,35 @@ impl ViewGame {
         next_frame().await;
     }
 
-    #[allow(dead_code)]
-    pub fn highlight_piece(&mut self, coord: &Coord) {
-        // Turn off all piece highlighting.
+    /// Toggles highlighting for the piece with the given coord.
+    /// Turns off highlighting for all others, since only one piece
+    /// may be selected at a time.
+    pub fn toggle_piece_highlighting(&mut self, coord: &Coord) {
+        for piece in self.sprites_for(Piece) {
+            if piece.coord == *coord {
+                piece.highlighted = !piece.highlighted;
+            } else {
+                piece.highlighted = false;
+            }
+        }
+    }
+
+    /// Highlights the given square coords and turns it off for all others.
+    pub fn highlight_squares(&mut self, coords: Vec<&Coord>) {
+        // Turn off all square highlighting.
         self.sprites.iter_mut()
-        .filter(|s| s.kind == Piece)
+        .filter(|s| s.kind == Square)
         .for_each(|s| s.highlighted = false);
+
         // Highlight the new.
-        let id = self.piece_id_for(coord);
-        self.sprites[id].highlighted = true;
+        for coord in coords {
+            self.square_for(coord).highlighted = true;
+        }
+    }
+
+    pub fn unhighlight_all_squares(&mut self) {
+        for square in self.sprites_for(Square) {
+            square.highlighted = false;
+        }
     }
 }
