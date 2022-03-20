@@ -215,13 +215,14 @@ impl Game {
                 }
                 let to_coord = Coord(pc_coord.0 + x as usize, pc_coord.1 + y as usize);
                 let action = Action::new(MoveNoCapture, piece.id, Some(pc_coord), to_coord );
+                actions.push(action);
             }
         }
         actions
     }
 
     pub fn perform_action(&mut self, action: &Action, advance_player: bool) {
-        match action.action_kind {
+        match action.kind {
             MoveNoCapture => {
                 self.remove_piece(&action.from.unwrap());
                 self.set_piece(action.piece_id, &action.to);

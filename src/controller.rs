@@ -43,7 +43,8 @@ pub enum PlayerKind {
 // Messages sent by the view or the AI to this controller.
 pub enum Message {
     IntroEnded,
-    CoordSelected(Coord),
+    PieceSelected(Coord),
+    SquareSelected(Coord),
     AIUpdate(AIProgress),
     SearchCompleted(AIProgress),
     ShouldExit,
@@ -134,9 +135,15 @@ impl Controller {
         if received.is_ok() {
             match received.unwrap() {
                 Message::IntroEnded => { self.next_player(); },
-                Message::CoordSelected(coord) => {
+                Message::SquareSelected(coord) => {
+                    // if piece selected and square is legal
+                    // turn off highlighting
+                    // move piece
                     self.coord_selected(coord).await;
                     self.state = NextPlayer;
+                },
+                Message::PieceSelected(coord) => {
+                    // if player piece, tell view to unlight any others, highlight this
                 },
                 Message::AIUpdate(progress) => {
                     if self.state == AIThinking {
@@ -222,10 +229,10 @@ impl Controller {
     async fn coord_selected(&mut self, coord: Coord) {
         if self.state == HumanTurn {
             let actions = self.game.actions_available();
-            let mut some_action: Vec<&Action> = actions.iter().filter(|a| a.coord == coord).collect();
+            let mut some_action: Vec<&Action> = actions.iter().filter(|a| a.to == coord).collect();
             let action = some_action.swap_remove(0);
 
-            self.view_game.add_piece_to(&coord, action.piece_kind, self.game.current_player).await;
+            //self.view_game.add_piece_to(&coord, action.to, self.game.current_player).await;
 
             self.game.perform_action(action, true);
             self.action_history.push(action.clone());

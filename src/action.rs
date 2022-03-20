@@ -3,7 +3,7 @@
 
 use crate::{game::Coord};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum ActionKind {
     MoveNoCapture,
     MoveWithCapture,
@@ -12,9 +12,9 @@ pub enum ActionKind {
     ToReserve,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Action {
-    pub action_kind: ActionKind,
+    pub kind: ActionKind,
     pub piece_id: usize,
     pub from: Option<Coord>,
     pub to: Coord,
@@ -27,12 +27,12 @@ pub struct Action {
 impl Action {
     pub fn new(action_kind: ActionKind, piece_id: usize, from: Option<Coord>, to: Coord) -> Self {
         Self {
-            action_kind, piece_id, from, to,
+            kind: action_kind, piece_id, from, to,
         }
     }
 
     pub fn undo(&self) -> Action {
-        match self.action_kind {
+        match self.kind {
             ActionKind::MoveNoCapture => {
                 let to_coord = self.to;
                 Action {
@@ -47,12 +47,12 @@ impl Action {
             }
             ActionKind::FromReserve => {
                 Action {
-                    action_kind: ActionKind::ToReserve, ..*self
+                    kind: ActionKind::ToReserve, ..*self
                 }
             }
             ActionKind::ToReserve => {
                 Action {
-                    action_kind: ActionKind::FromReserve, ..*self
+                    kind: ActionKind::FromReserve, ..*self
                 }
             }
         }

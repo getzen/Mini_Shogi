@@ -30,10 +30,7 @@ pub struct ViewGame {
     pieces: Vec<Sprite>,
     status_text: Text,
     ai_progress_text: Text,
-    // reserve0, // Player 0 piece reserve area.
-    // reserve1,
-    // text_status,  // Your turn. Game over. Etc.
-    // text_ai_thinking, // nodes/sec, pv
+    selected_piece: Option<usize>,
 }
 
 impl ViewGame {
@@ -58,6 +55,7 @@ impl ViewGame {
                 Some("Menlo.ttc"),
             ).await,
             ai_progress_text,
+            selected_piece: None,
         }
     }
 
@@ -111,14 +109,47 @@ impl ViewGame {
         }
 
         // Mouse position and buttons.
+        let mouse_pos = mouse_position();
         let left_button_released = is_mouse_button_released(MouseButton::Left);
         
         for square in &mut self.squares {
             let on_square = square.highlight_on_mouse_over();
             if on_square && left_button_released {
-                self.message_sender.send(Message::CoordSelected(square.coord));
+                //self.message_sender.send(Message::SquareSelected(square.coord));
             }
         }
+
+        // // Unselected current piece
+        // if let Some(p) = self.selected_piece {
+        //     let mut old = self.piece_sprite_with(p);
+        //     if old.is_some() {
+        //        old.unwrap().highlighted = false;
+        //     }
+        // }
+
+        for piece in &mut self.pieces {
+            //piece.highlighted = false; // assume no selection
+            let on_piece = piece.contains(mouse_pos);
+            if on_piece && left_button_released {
+                // Select new piece
+                self.selected_piece = Some(piece.id);
+                piece.highlighted = true;
+                //self.message_sender.send(Message::PieceSelected(piece.coord));
+                
+                    
+            }
+                
+            
+        }
+    }
+
+    fn piece_sprite_with(&self, id: usize) -> Option<&Sprite> {
+        for piece in &self.pieces {
+            if piece.id == id {
+                return Some(piece);
+            }
+        }
+        None
     }
 
     pub fn draw_board(&mut self) {
