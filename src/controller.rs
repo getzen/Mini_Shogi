@@ -139,10 +139,12 @@ impl Controller {
                     // if piece selected and square is legal
                     // turn off highlighting
                     // move piece
-                    self.coord_selected(coord).await;
-                    self.state = NextPlayer;
+                    //self.coord_selected(coord).await;
+                    //self.state = NextPlayer;
+                    println!("square selected");
                 },
                 Message::PieceSelected(coord) => {
+                    println!("piece selected");
                     // if player piece, tell view to unlight any others, highlight this
                 },
                 Message::AIUpdate(progress) => {
@@ -227,6 +229,26 @@ impl Controller {
     }
 
     async fn coord_selected(&mut self, coord: Coord) {
+        if self.state == HumanTurn {
+            let id = self.game.get_piece(&coord);
+            let piece = self.game.pieces[id];
+            if piece.player == self.game.current_player {
+                self.view_game.highlight_square(&coord);
+            }
+
+
+            let actions = self.game.actions_available();
+            let mut some_action: Vec<&Action> = actions.iter().filter(|a| a.to == coord).collect();
+            let action = some_action.swap_remove(0);
+
+            //self.view_game.add_piece_to(&coord, action.to, self.game.current_player).await;
+
+            self.game.perform_action(action, true);
+            self.action_history.push(action.clone());
+        }
+    }
+
+    async fn coord_selected_OLD(&mut self, coord: Coord) {
         if self.state == HumanTurn {
             let actions = self.game.actions_available();
             let mut some_action: Vec<&Action> = actions.iter().filter(|a| a.to == coord).collect();

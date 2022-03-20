@@ -7,7 +7,8 @@ use macroquad::prelude::*;
 
 use crate::controller::Message;
 use crate::message_sender::MessageSender;
-use crate::sprite::Sprite;
+use crate::sprite::*;
+
 
 const TITLE_CORNER: (f32, f32) = (260., 250.);
 const START_CORNER: (f32, f32) = (350., 350.);
@@ -34,9 +35,9 @@ impl ViewIntro {
         let exit_pos = texture_position(&exit_tex, EXIT_CORNER);
         Self {
             message_sender: MessageSender::new(tx, None),
-            title: Sprite::new(title_tex, title_pos),
-            start_button: Sprite::new(start_tex, start_pos),
-            exit_button: Sprite::new(exit_tex, exit_pos),
+            title: Sprite::new(SpriteKind::Default, title_tex, title_pos),
+            start_button: Sprite::new(SpriteKind::Default, start_tex, start_pos),
+            exit_button: Sprite::new(SpriteKind::Default, exit_tex, exit_pos),
         }
     }
 

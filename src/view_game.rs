@@ -5,13 +5,15 @@ use std::sync::mpsc::Sender;
 
 use macroquad::prelude::*;
 
-use crate::game::Coord;
+use crate::game::{Coord, NONE};
 use crate::controller::{Message, AppState};
 use crate::controller::AppState::*;
 use crate::message_sender::MessageSender;
 use crate::piece::PieceKind;
 use crate::piece::PieceKind::*;
-use crate::sprite::Sprite;
+use crate::sprite::*;
+use crate::sprite::SpriteKind;
+use crate::sprite::SpriteKind::*;
 use crate::text::Text;
 
 const BOARD_POS: (f32, f32) = (240.0, 40.0);
@@ -26,11 +28,12 @@ pub struct ViewGame {
     message_sender: MessageSender, // sends event messages to controller
     columns: usize,
     rows: usize,
-    squares: Vec<Sprite>,
-    pieces: Vec<Sprite>,
+    sprites: Vec<Sprite>,
+    //squares: Vec<usize>, // indices to sprites
+    //pieces: Vec<usize>, // indices to sprites
+    pub selected_piece: Option<usize>,
     status_text: Text,
     ai_progress_text: Text,
-    selected_piece: Option<usize>,
 }
 
 impl ViewGame {
@@ -46,8 +49,10 @@ impl ViewGame {
         Self {
             message_sender: MessageSender::new(tx, None),
             columns, rows,
-            squares: Vec::<Sprite>::new(),
-            pieces: Vec::<Sprite>::new(),
+            sprites: Vec::new(),
+            //squares: Vec::new(),
+            //pieces: Vec::new(),
+            selected_piece: None,
             status_text: Text::new(
                 "Welcome!".to_owned(), 
                 TEXT_STATUS_POS,
@@ -55,7 +60,6 @@ impl ViewGame {
                 Some("Menlo.ttc"),
             ).await,
             ai_progress_text,
-            selected_piece: None,
         }
     }
 
@@ -64,9 +68,10 @@ impl ViewGame {
         for c in 0..self.columns {
             for r in 0..self.rows {
                 let position = self.center_position_for(&Coord(c,r));
-                let mut square = Sprite::new(texture, position);
+                let mut square = Sprite::new(Square, texture, position);
                 square.coord = Coord(c,r);
-                self.squares.push(square);
+                square.id = self.sprites.len();
+                self.sprites.push(square);
             }
         }        
     }
@@ -86,6 +91,32 @@ impl ViewGame {
         (x, y)
     }
 
+    // fn sprites_with(&self, kind: SpriteKind) -> Vec<&Sprite> {
+    //     self.sprites.iter().filter(|s| s.kind == kind).collect()
+    // }
+
+    fn sprite_ids_for(&self, kind: SpriteKind) -> Vec<usize> {
+        let mut ids = Vec::new();
+        for (index, sprite) in self.sprites.iter().enumerate() {
+            if sprite.kind == kind {
+                ids.push(index);
+            }
+        }
+        ids
+    }
+
+    fn square_id_for(&self, coord: &Coord) -> usize {
+        let sprite = self.sprites.iter().find(
+            |s| s.kind == Square && s.coord == *coord);
+        sprite.unwrap().id
+    }
+
+    fn piece_id_for(&self, coord: &Coord) -> usize {
+        let sprite = self.sprites.iter().find(
+            |s| s.kind == Piece && s.coord == *coord);
+        sprite.unwrap().id
+    }
+
     pub async fn add_piece_to(&mut self, coord: &Coord, kind: PieceKind, player: usize) {
         let texture = match kind {
             King => Sprite::load_texture("king.png").await,
@@ -94,12 +125,16 @@ impl ViewGame {
             Pawn => Sprite::load_texture("pawn.png").await,
         };    
         let position = self.center_position_for(coord);
-        let mut piece = Sprite::new(texture, position);
+        let mut piece = Sprite::new(Piece, texture, position);
         piece.set_size(Some((80., 80.)));
         if player == 1 {
             piece.set_rotation(std::f32::consts::PI);
         }
-        self.pieces.push(piece);
+        let id = self.sprites.len();
+        piece.id = id;
+        let square_id = self.square_id_for(coord);
+        self.sprites[square_id].contains_id = Some(id);
+        self.sprites.push(piece);
     }
 
     pub fn handle_events(&mut self) {
@@ -110,61 +145,25 @@ impl ViewGame {
 
         // Mouse position and buttons.
         let mouse_pos = mouse_position();
-        let left_button_released = is_mouse_button_released(MouseButton::Left);
-        
-        for square in &mut self.squares {
-            let on_square = square.highlight_on_mouse_over();
-            if on_square && left_button_released {
-                //self.message_sender.send(Message::SquareSelected(square.coord));
+        let left_button = is_mouse_button_released(MouseButton::Left);
+
+        for id in self.sprite_ids_for(Square) {
+            if left_button && self.sprites[id].contains(mouse_pos) {
+                let coord = self.sprites[id].coord;
+                if self.sprites[id].contains_id.is_some() {
+                    self.message_sender.send(Message::PieceSelected(coord));
+                } else {
+                    self.message_sender.send(Message::SquareSelected(coord));
+                }
             }
         }
-
-        // // Unselected current piece
-        // if let Some(p) = self.selected_piece {
-        //     let mut old = self.piece_sprite_with(p);
-        //     if old.is_some() {
-        //        old.unwrap().highlighted = false;
-        //     }
-        // }
-
-        for piece in &mut self.pieces {
-            //piece.highlighted = false; // assume no selection
-            let on_piece = piece.contains(mouse_pos);
-            if on_piece && left_button_released {
-                // Select new piece
-                self.selected_piece = Some(piece.id);
-                piece.highlighted = true;
-                //self.message_sender.send(Message::PieceSelected(piece.coord));
-                
-                    
-            }
-                
-            
-        }
-    }
-
-    fn piece_sprite_with(&self, id: usize) -> Option<&Sprite> {
-        for piece in &self.pieces {
-            if piece.id == id {
-                return Some(piece);
-            }
-        }
-        None
     }
 
     pub fn draw_board(&mut self) {
         clear_background(Color::from_rgba(81, 81, 81, 255));
 
-        // Squares
-        for square in &mut self.squares {
-            square.draw();
-        }
-
-        // Square coord labels
-
-        // Pieces
-        for piece in &mut self.pieces {
-            piece.draw();
+        for sprite in &mut self.sprites {
+            sprite.draw();
         }
         
         // Reserves
@@ -195,11 +194,6 @@ impl ViewGame {
 
     #[allow(dead_code)]
     pub fn highlight_square(&mut self, coord: &Coord) {
-        for square in &mut self.squares {
-            if square.coord == *coord {
-                square.highlighted = true;
-                break;
-            }
-        }
+        //self.square_with(coord).highlight = true;
     }
 }

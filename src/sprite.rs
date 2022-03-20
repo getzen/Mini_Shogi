@@ -14,7 +14,16 @@ use crate::game::Coord;
 
 const TEXTURE_PATH: &str = "./assets/";
 
+#[derive(PartialEq, Eq)]
+pub enum SpriteKind {
+    Default,
+    Square,
+    Piece,
+}
+
+
 pub struct Sprite {
+    pub kind: SpriteKind,
     pub texture: Texture2D,
     pub position: (f32, f32),
     pub color: Color,
@@ -24,10 +33,11 @@ pub struct Sprite {
     // For this game in particular:
     pub id: usize,
     pub coord: Coord,
+    pub contains_id: Option<usize>, // a square containing a piece, for example
 }
 
 impl Sprite {
-    pub fn new(texture: Texture2D, position: (f32, f32)) -> Self {
+    pub fn new(kind: SpriteKind, texture: Texture2D, position: (f32, f32)) -> Self {
         let draw_params = DrawTextureParams {
             dest_size: None,
             source: None,
@@ -35,13 +45,14 @@ impl Sprite {
             flip_x: false, flip_y: false,
             pivot: None};
         Self {
-            texture, position,
+            kind, texture, position,
             color: WHITE,
             highlighted: false,
             highlight_color: LIGHTGRAY,
             draw_params,
             id: 0,
             coord: Coord(0,0),
+            contains_id: None,
         }
     }
 
