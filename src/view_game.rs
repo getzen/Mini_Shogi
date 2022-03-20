@@ -29,8 +29,6 @@ pub struct ViewGame {
     columns: usize,
     rows: usize,
     sprites: Vec<Sprite>,
-    //squares: Vec<usize>, // indices to sprites
-    //pieces: Vec<usize>, // indices to sprites
     pub selected_piece: Option<usize>,
     status_text: Text,
     ai_progress_text: Text,
@@ -50,8 +48,6 @@ impl ViewGame {
             message_sender: MessageSender::new(tx, None),
             columns, rows,
             sprites: Vec::new(),
-            //squares: Vec::new(),
-            //pieces: Vec::new(),
             selected_piece: None,
             status_text: Text::new(
                 "Welcome!".to_owned(), 
@@ -121,7 +117,7 @@ impl ViewGame {
         .unwrap()
     }
 
-    //#[allow(dead_code)]
+    #[allow(dead_code)]
     fn square_id_for(&self, coord: &Coord) -> usize {
         let sprite = self.sprites.iter()
         .find(|s| s.kind == Square && s.coord == *coord);
@@ -135,6 +131,7 @@ impl ViewGame {
         .unwrap()
     }
 
+    #[allow(dead_code)]
     fn piece_id_for(&self, coord: &Coord) -> usize {
         let sprite = self.sprites.iter().find(
             |s| s.kind == Piece && s.coord == *coord);
@@ -158,8 +155,6 @@ impl ViewGame {
         let id = self.sprites.len();
         piece.id = id;
         self.square_for(coord).contains_id = Some(id);
-        //let square_id = self.square_id_for(coord);
-        //self.sprites[square_id].contains_id = Some(id);
         self.sprites.push(piece);
     }
 
@@ -244,6 +239,7 @@ impl ViewGame {
         }
     }
 
+    /// Does what is says on the tin.
     pub fn unhighlight_all_squares(&mut self) {
         for square in self.sprites_for(Square) {
             square.highlighted = false;
