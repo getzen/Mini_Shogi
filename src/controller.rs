@@ -145,6 +145,7 @@ impl Controller {
                 },
                 Message::PieceSelected(coord) => {
                     println!("piece selected");
+                    self.view_game.highlight_piece(&coord);
                     // if player piece, tell view to unlight any others, highlight this
                 },
                 Message::AIUpdate(progress) => {
@@ -233,7 +234,7 @@ impl Controller {
             let id = self.game.get_piece(&coord);
             let piece = self.game.pieces[id];
             if piece.player == self.game.current_player {
-                self.view_game.highlight_square(&coord);
+                //self.view_game.highlight_square(&coord);
             }
 
 

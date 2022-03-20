@@ -5,7 +5,7 @@ use std::sync::mpsc::Sender;
 
 use macroquad::prelude::*;
 
-use crate::game::{Coord, NONE};
+use crate::game::Coord;
 use crate::controller::{Message, AppState};
 use crate::controller::AppState::*;
 use crate::message_sender::MessageSender;
@@ -91,24 +91,48 @@ impl ViewGame {
         (x, y)
     }
 
-    // fn sprites_with(&self, kind: SpriteKind) -> Vec<&Sprite> {
-    //     self.sprites.iter().filter(|s| s.kind == kind).collect()
-    // }
-
-    fn sprite_ids_for(&self, kind: SpriteKind) -> Vec<usize> {
-        let mut ids = Vec::new();
-        for (index, sprite) in self.sprites.iter().enumerate() {
-            if sprite.kind == kind {
-                ids.push(index);
-            }
-        }
-        ids
+    #[allow(dead_code)]
+    fn sprites_for(&mut self, kind: SpriteKind) -> Vec<&mut Sprite> {
+        self.sprites.iter_mut()
+        .filter(|s| s.kind == kind)
+        .collect()
     }
 
+    fn sprite_ids_for(&self, kind: SpriteKind) -> Vec<usize> {
+        self.sprites.iter()
+        .enumerate()
+        .filter(|s| s.1.kind == kind)
+        .map(|s| s.0)
+        .collect()
+        // Old school:
+        // let mut ids = Vec::new();
+        // for (index, sprite) in self.sprites.iter().enumerate() {
+        //     if sprite.kind == kind {
+        //         ids.push(index);
+        //     }
+        // }
+        // ids
+    }
+
+    #[allow(dead_code)]
+    fn square_for(&mut self, coord: &Coord) -> &mut Sprite {
+        self.sprites.iter_mut()
+        .find(|s| s.kind == Square && s.coord == *coord)
+        .unwrap()
+    }
+
+    #[allow(dead_code)]
     fn square_id_for(&self, coord: &Coord) -> usize {
-        let sprite = self.sprites.iter().find(
-            |s| s.kind == Square && s.coord == *coord);
+        let sprite = self.sprites.iter()
+        .find(|s| s.kind == Square && s.coord == *coord);
         sprite.unwrap().id
+    }
+
+    #[allow(dead_code)]
+    fn piece_for(&mut self, coord: &Coord) -> &mut Sprite {
+        self.sprites.iter_mut()
+        .find(|s| s.kind == Piece && s.coord == *coord)
+        .unwrap()
     }
 
     fn piece_id_for(&self, coord: &Coord) -> usize {
@@ -130,10 +154,12 @@ impl ViewGame {
         if player == 1 {
             piece.set_rotation(std::f32::consts::PI);
         }
+        piece.coord = *coord;
         let id = self.sprites.len();
         piece.id = id;
-        let square_id = self.square_id_for(coord);
-        self.sprites[square_id].contains_id = Some(id);
+        self.square_for(coord).contains_id = Some(id);
+        //let square_id = self.square_id_for(coord);
+        //self.sprites[square_id].contains_id = Some(id);
         self.sprites.push(piece);
     }
 
@@ -193,7 +219,13 @@ impl ViewGame {
     }
 
     #[allow(dead_code)]
-    pub fn highlight_square(&mut self, coord: &Coord) {
-        //self.square_with(coord).highlight = true;
+    pub fn highlight_piece(&mut self, coord: &Coord) {
+        // Turn off all piece highlighting.
+        self.sprites.iter_mut()
+        .filter(|s| s.kind == Piece)
+        .for_each(|s| s.highlighted = false);
+        // Highlight the new.
+        let id = self.piece_id_for(coord);
+        self.sprites[id].highlighted = true;
     }
 }
