@@ -156,6 +156,12 @@ impl Game {
         }
     }
 
+    /// Controller needs to know for piece selection logic.
+    pub fn coord_has_current_player_piece(&mut self, coord: &Coord) -> bool {
+        let id = self.get_piece(coord);
+        self.pieces[id].player == self.current_player
+    }
+
     // **** empty_indices instead, and avoid Coord2 conversion? ***
     /// Returns vector of coords that have no pieces.
     pub fn empty_coords(&self) -> Vec<Coord> {

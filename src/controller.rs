@@ -136,12 +136,7 @@ impl Controller {
             match received.unwrap() {
                 Message::IntroEnded => { self.next_player(); },
                 Message::SquareSelected(coord) => {
-                    // if piece selected and square is legal
-                    // turn off highlighting
-                    // move piece
-                    //self.square_selected(&coord).await;
-                    //self.state = NextPlayer;
-                    
+                    self.square_selected(&coord);
                 },
                 Message::PieceSelected(coord) => {
                     self.piece_selected(&coord);
@@ -167,6 +162,11 @@ impl Controller {
     }
 
     fn piece_selected(&mut self, coord: &Coord) {
+        // Ignore if not human turn.
+        if self.state != HumanTurn { return; }
+        // Ignore if opponent's piece.
+        if !self.game.coord_has_current_player_piece(coord) { return; }
+
         let on = self.view_game.toggle_piece_highlighting(&coord);
         if on {
             let mut coords = Vec::new();
@@ -179,6 +179,29 @@ impl Controller {
         } else {
             self.view_game.unhighlight_all_squares();
         }
+    }
+
+    fn square_selected(&mut self, coord: &Coord) {
+        // Ignore if not human turn.
+        if self.state != HumanTurn { return; }
+        // Return if no piece is selected.
+        let piece_coord = self.view_game.highlighted_piece_coord();
+        if piece_coord.is_none() { return; }
+
+        for action in self.game.actions_available() {
+            if action.from == piece_coord {
+                if action.to == *coord {
+                    // Highlight the 'from' and 'to' squares to show the move.
+                    self.view_game.highlight_squares(vec![action.from.unwrap(), action.to]);
+                    self.view_game.toggle_piece_highlighting(&action.from.unwrap());
+                    self.view_game.move_piece(&action.from.unwrap(), &action.to);
+
+                    self.game.perform_action(&action, true);
+                    self.action_history.push(action.clone());
+                }
+            }
+        }
+
     }
 
     fn format_ai_progress(&self, progress: &AIProgress) -> String {
@@ -242,10 +265,10 @@ impl Controller {
         });
     }
 
-    async fn square_selected(&mut self, coord: &Coord) {
-        println!("square selected");
-        if self.state == HumanTurn {
-            self.view_game.highlight_squares(vec![*coord]);
+    // async fn square_selected(&mut self, coord: &Coord) {
+    //     println!("square selected");
+    //     if self.state == HumanTurn {
+    //         self.view_game.highlight_squares(vec![*coord]);
 
 
             // let id = self.game.get_piece(&coord);
@@ -263,8 +286,8 @@ impl Controller {
 
             // self.game.perform_action(action, true);
             // self.action_history.push(action.clone());
-        }
-    }
+    //     }
+    // }
 
     async fn coord_selected_OLD(&mut self, coord: Coord) {
         if self.state == HumanTurn {
