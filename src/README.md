@@ -1,6 +1,6 @@
 TO-DO:
 
-- Add sound.
+- Add sounds: welcome, move made, win/loss
 
 - Add difficulty/ai options to title view.
 
