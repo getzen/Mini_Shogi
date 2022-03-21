@@ -8,9 +8,12 @@
 //  - flip_x, flip_y: bool,
 //  - pivot: Option<Vec2>
 
+use std::time::Duration;
+
 use macroquad::prelude::*;
 
 use crate::game::Coord;
+use crate::lerp::Lerp;
 
 const TEXTURE_PATH: &str = "./assets/";
 
@@ -30,6 +33,8 @@ pub struct Sprite {
     pub highlighted: bool,
     pub highlight_color: Color,
     pub draw_params: DrawTextureParams,
+    position_lerp: Option<Lerp>,
+    
     // For this game in particular:
     pub id: usize,
     pub coord: Coord,
@@ -50,6 +55,7 @@ impl Sprite {
             highlighted: false,
             highlight_color: LIGHTGRAY,
             draw_params,
+            position_lerp: None,
             id: 0,
             coord: Coord(0,0),
             contains_id: None,
@@ -76,6 +82,20 @@ impl Sprite {
         } else {
             self.draw_params.dest_size = None;
         }
+    }
+
+    pub fn update(&mut self, time_delta: Duration) {
+        if let Some(lerp) = &mut self.position_lerp {
+            let results = lerp.update(time_delta);
+            self.position = (results.0, results.1);
+            if results.2 == true {
+                self.position_lerp = None;
+            }
+        }
+    }
+
+    pub fn animate_move(&mut self, to: (f32, f32), duration: Duration) {
+        self.position_lerp = Some(Lerp::new(self.position, to, duration));
     }
 
     /// Returns the position at which the sprite should be drawn,

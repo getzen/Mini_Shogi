@@ -13,6 +13,7 @@ mod controller;
 use crate::controller::Controller;
 mod game;
 use game::{Game, GameState};
+mod lerp;
 mod message_sender;
 mod piece;
 use piece::Piece;

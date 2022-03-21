@@ -3,7 +3,9 @@
 
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
+use std::time::Duration;
 
+use macroquad::prelude::get_frame_time;
 use num_format::{Locale, ToFormattedString};
 
 use crate::Action;
@@ -114,6 +116,9 @@ impl Controller {
                 Exit => break,
                 _ => {},
             }
+
+            // Update view
+            self.view_game.update(Duration::from_secs_f32(get_frame_time()));
 
             // Draw view
             match self.state {

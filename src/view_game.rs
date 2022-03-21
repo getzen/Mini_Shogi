@@ -2,6 +2,7 @@
 // Responsible for drawing and polling for events.
 
 use std::sync::mpsc::Sender;
+use std::time::Duration;
 
 use macroquad::prelude::*;
 
@@ -159,14 +160,13 @@ impl ViewGame {
     }
 
     pub fn move_piece(&mut self, from: &Coord, to: &Coord) {
-        
         let id = self.piece_id_for(from);
         self.sprites[id].coord = *to;
-        let position = self.center_position_for(to);
-        self.sprites[id].position = position;
+        let to_position = self.center_position_for(to);
+        self.sprites[id].animate_move(to_position, Duration::from_secs_f32(0.75));
+
         self.square_for(from).contains_id = None;
         self.square_for(to).contains_id = Some(id);
-
     }
 
     pub fn handle_events(&mut self) {
@@ -188,6 +188,12 @@ impl ViewGame {
                     self.message_sender.send(Message::SquareSelected(coord));
                 }
             }
+        }
+    }
+
+    pub fn update(&mut self, time_delta: Duration) {
+        for sprite in &mut self.sprites {
+            sprite.update(time_delta);
         }
     }
 
