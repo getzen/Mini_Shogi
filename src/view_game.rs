@@ -112,6 +112,7 @@ impl ViewGame {
 
     #[allow(dead_code)]
     fn square_for(&mut self, coord: &Coord) -> &mut Sprite {
+        println!("{:?}", coord);
         self.sprites.iter_mut()
         .find(|s| s.kind == Square && s.coord == *coord)
         .unwrap()
@@ -216,18 +217,21 @@ impl ViewGame {
     /// Toggles highlighting for the piece with the given coord.
     /// Turns off highlighting for all others, since only one piece
     /// may be selected at a time.
-    pub fn toggle_piece_highlighting(&mut self, coord: &Coord) {
+    pub fn toggle_piece_highlighting(&mut self, coord: &Coord) -> bool {
+        let mut on = false;
         for piece in self.sprites_for(Piece) {
             if piece.coord == *coord {
                 piece.highlighted = !piece.highlighted;
+                on = piece.highlighted;
             } else {
                 piece.highlighted = false;
             }
         }
+        on
     }
 
     /// Highlights the given square coords and turns it off for all others.
-    pub fn highlight_squares(&mut self, coords: Vec<&Coord>) {
+    pub fn highlight_squares(&mut self, coords: Vec<Coord>) {
         // Turn off all square highlighting.
         self.sprites.iter_mut()
         .filter(|s| s.kind == Square)
@@ -235,7 +239,7 @@ impl ViewGame {
 
         // Highlight the new.
         for coord in coords {
-            self.square_for(coord).highlighted = true;
+            self.square_for(&coord).highlighted = true;
         }
     }
 

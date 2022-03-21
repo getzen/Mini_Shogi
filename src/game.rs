@@ -138,7 +138,7 @@ impl Game {
     }
 
     pub fn remove_reserve_piece(&mut self, piece_id: usize, player: usize) {
-        let mut piece = NONE;
+        let piece = NONE;
         for (index, id) in self.reserves[player].iter().enumerate() {
             if *id == piece_id {
                 self.reserves[player][index] = NONE;
@@ -210,10 +210,14 @@ impl Game {
             let vectors = piece.move_vectors();
             let pc_coord = piece.coord.unwrap();
             for (x, y) in vectors {
-                if x < 0 || (x as usize) >= COLS || y < 0 || (y as usize) >= ROWS {
-                    continue; // out of bounds
+                let move_x = pc_coord.0 as i8 + x;
+                let move_y = pc_coord.1 as i8 + y;
+
+                // Is this move out of bounds?
+                if move_x < 0 || move_x as usize  >= COLS || move_y < 0 || move_y as usize >= ROWS {
+                    continue;
                 }
-                let to_coord = Coord(pc_coord.0 + x as usize, pc_coord.1 + y as usize);
+                let to_coord = Coord(move_x as usize, move_y as usize);
                 let action = Action::new(MoveNoCapture, piece.id, Some(pc_coord), to_coord );
                 actions.push(action);
             }
