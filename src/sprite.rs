@@ -84,6 +84,7 @@ impl Sprite {
         }
     }
 
+    /// Perform animation updates and the like with the time_delta.
     pub fn update(&mut self, time_delta: Duration) {
         if let Some(lerp) = &mut self.position_lerp {
             let results = lerp.update(time_delta);
@@ -94,6 +95,7 @@ impl Sprite {
         }
     }
 
+    /// Use the Lerp struct to move the sprite.
     pub fn animate_move(&mut self, to: (f32, f32), duration: Duration) {
         self.position_lerp = Some(Lerp::new(self.position, to, duration));
     }

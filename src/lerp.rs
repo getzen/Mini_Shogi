@@ -17,6 +17,9 @@ impl Lerp {
         }
     }
 
+    /// Get the position based on the given percentage. Values above 100%
+    /// return the end position and true as the third tuple argument,
+    /// otherwise false.
     pub fn calc_position(&self, percentage: f32) -> (f32, f32, bool) {
         if percentage >= 1.0 {
             return (self.end.0, self.end.1, true);
@@ -26,6 +29,8 @@ impl Lerp {
         (x, y, false)
     }
 
+    /// Update the lerp with the time_delta and return the new position plus
+    /// 'true' if the animation is finished or 'false' if it isn't.
     pub fn update(&mut self, time_delta: Duration) -> (f32, f32, bool) {
         self.elasped += time_delta;
         let percentage = self.elasped.as_secs_f32() / self.duration.as_secs_f32();
