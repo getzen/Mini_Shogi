@@ -169,6 +169,10 @@ impl ViewGame {
         self.square_for(to).contains_id = Some(id);
     }
 
+    pub fn capture_piece(&mut self, coord: &Coord, capturing_player: usize) {
+        let id = self.piece_id_for(from);
+    }
+
     pub fn handle_events(&mut self) {
         // Key presses.
         if is_key_down(KeyCode::Escape) {

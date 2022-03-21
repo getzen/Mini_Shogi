@@ -18,16 +18,15 @@ pub struct Action {
     pub piece_id: usize,
     pub from: Option<Coord>,
     pub to: Coord,
-    // pub captured_piece_id,
-    // pub from: Coord,
-    // pub to: Coord,
-    // pub captured_piece: Option<Piece>
+    pub captured_id: Option<usize>,
 }
 
 impl Action {
-    pub fn new(action_kind: ActionKind, piece_id: usize, from: Option<Coord>, to: Coord) -> Self {
+    pub fn new(action_kind: ActionKind, 
+        piece_id: usize, from: Option<Coord>, to: Coord, 
+        captured_id: Option<usize>) -> Self {
         Self {
-            kind: action_kind, piece_id, from, to,
+            kind: action_kind, piece_id, from, to, captured_id,
         }
     }
 

@@ -199,6 +199,13 @@ impl Controller {
                     // Highlight the 'from' and 'to' squares to show the move.
                     self.view_game.highlight_squares(vec![action.from.unwrap(), action.to]);
                     self.view_game.toggle_piece_highlighting(&action.from.unwrap());
+
+                    // Move captured piece to reserve.
+                    if let Some(id) = action.captured_id {
+                        self.view_game.capture_piece(&action.to, self.game.current_player);
+                    }
+
+                    // Move the player piece.
                     self.view_game.move_piece(&action.from.unwrap(), &action.to);
 
                     self.game.perform_action(&action, true);

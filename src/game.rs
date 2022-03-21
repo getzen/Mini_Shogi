@@ -223,8 +223,22 @@ impl Game {
                 if move_x < 0 || move_x as usize  >= COLS || move_y < 0 || move_y as usize >= ROWS {
                     continue;
                 }
+                // Does it move onto another piece?
                 let to_coord = Coord(move_x as usize, move_y as usize);
-                let action = Action::new(MoveNoCapture, piece.id, Some(pc_coord), to_coord );
+                let onto_id = self.get_piece(&to_coord);
+                if onto_id == NONE { // no capture
+                    let action = Action::new(
+                        MoveNoCapture, piece.id, Some(pc_coord), to_coord, None);
+                    actions.push(action);
+                    continue;
+                }
+                let onto_piece = self.pieces[onto_id];
+                if onto_piece.player == self.current_player { // landing on own piece
+                    continue;
+                }
+                // Must be landing on opponent's piece. Capture.
+                let action = Action::new(
+                    MoveWithCapture, piece.id, Some(pc_coord), to_coord, Some(onto_id));
                 actions.push(action);
             }
         }
@@ -238,6 +252,13 @@ impl Game {
                 self.set_piece(action.piece_id, &action.to);
             }
             MoveWithCapture => {
+                // Move captured piece to player reserve.
+                let captured_id = self.remove_piece(&action.to);
+                self.pieces[captured_id].player = self.current_player;
+                self.add_reserve_piece(captured_id, self.current_player);
+                // Move player piece.
+                self.remove_piece(&action.from.unwrap());
+                self.set_piece(action.piece_id, &action.to);
             }
             FromReserve => {
                 let piece_id = self.remove_reserve_piece(action.piece_id, self.current_player);
