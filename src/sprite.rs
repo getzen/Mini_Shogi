@@ -21,6 +21,7 @@ const TEXTURE_PATH: &str = "./assets/";
 pub enum SpriteKind {
     Default,
     Square,
+    Reserve,
     Piece,
 }
 

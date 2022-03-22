@@ -17,13 +17,14 @@ use crate::sprite::SpriteKind;
 use crate::sprite::SpriteKind::*;
 use crate::text::Text;
 
-const BOARD_POS: (f32, f32) = (240.0, 40.0);
-const SQUARE_SIZE: f32 = 100.0; // matches the square.png size
+const BOARD_POS: (f32, f32) = (240.0, 95.0);
+const SQUARE_SIZE: f32 = 90.0; // matches the square.png size
 const SQUARE_GAP: f32 = 5.0;
-// const RESERVE_0_ORIGIN
-// const RESERVE_1_ORIGIN
-const TEXT_STATUS_POS: (f32, f32) = (400., 500.0);
-const AI_PROGRESS_POS: (f32, f32) = (20., 570.);
+const RESERVE_0_CTR: (f32, f32) = (715., 615.);
+const RESERVE_1_CTR: (f32, f32) = (95., 140.);
+const TEXT_STATUS_POS: (f32, f32) = (400., 60.0);
+const AI_PROGRESS_POS: (f32, f32) = (20., 770.);
+const PIECE_SIZE: (f32, f32) = (70., 75.);
 
 pub struct ViewGame {
     message_sender: MessageSender, // sends event messages to controller
@@ -61,7 +62,8 @@ impl ViewGame {
     }
 
     pub async fn prepare(&mut self) {
-        let texture = Sprite::load_texture("square.png").await;
+        // board
+        let mut texture = Sprite::load_texture("square.png").await;
         for c in 0..self.columns {
             for r in 0..self.rows {
                 let position = self.center_position_for(&Coord(c,r));
@@ -70,7 +72,16 @@ impl ViewGame {
                 square.id = self.sprites.len();
                 self.sprites.push(square);
             }
-        }        
+        }
+        // Reserve, player 0
+        texture = Sprite::load_texture("reserve.png").await;
+        let mut reserve = Sprite::new(Reserve, texture, RESERVE_0_CTR);
+        reserve.id = self.sprites.len();
+        self.sprites.push(reserve);
+        // Reserve, player 1
+        reserve = Sprite::new(Reserve, texture, RESERVE_1_CTR);
+        reserve.id = self.sprites.len();
+        self.sprites.push(reserve);
     }
 
     fn corner_position_for(&self, coord: &Coord) -> (f32, f32) {
@@ -148,7 +159,7 @@ impl ViewGame {
         };    
         let position = self.center_position_for(coord);
         let mut piece = Sprite::new(Piece, texture, position);
-        piece.set_size(Some((80., 80.)));
+        piece.set_size(Some(PIECE_SIZE));
         if player == 1 {
             piece.set_rotation(std::f32::consts::PI);
         }

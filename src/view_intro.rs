@@ -10,9 +10,9 @@ use crate::message_sender::MessageSender;
 use crate::sprite::*;
 
 
-const TITLE_CORNER: (f32, f32) = (260., 250.);
-const START_CORNER: (f32, f32) = (350., 350.);
-const EXIT_CORNER: (f32, f32) = (680., 530.);
+const TITLE_CORNER: (f32, f32) = (0., 0.);
+const START_CORNER: (f32, f32) = (350., 480.);
+const EXIT_CORNER: (f32, f32) = (350., 620.);
 
 fn texture_position(texture: &Texture2D, corner: (f32, f32)) -> (f32, f32) {
     (corner.0 + texture.width() / 2.0, corner.1 + texture.height() / 2.0)
