@@ -202,7 +202,8 @@ impl Controller {
 
                     // Move captured piece to reserve.
                     if let Some(id) = action.captured_id {
-                        self.view_game.capture_piece(&action.to, self.game.current_player);
+                        self.view_game.capture_piece(
+                            &action.to, self.game.current_player);
                     }
 
                     // Move the player piece.

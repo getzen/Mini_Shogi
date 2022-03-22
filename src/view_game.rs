@@ -17,13 +17,14 @@ use crate::sprite::SpriteKind;
 use crate::sprite::SpriteKind::*;
 use crate::text::Text;
 
-const BOARD_POS: (f32, f32) = (240.0, 95.0);
+const BACKGROUND_COLOR: (u8, u8, u8) = (144, 144, 137);
+const BOARD_CORNER: (f32, f32) = (240.0, 95.0);
 const SQUARE_SIZE: f32 = 90.0; // matches the square.png size
 const SQUARE_GAP: f32 = 5.0;
-const RESERVE_0_CTR: (f32, f32) = (715., 615.);
-const RESERVE_1_CTR: (f32, f32) = (95., 140.);
-const TEXT_STATUS_POS: (f32, f32) = (400., 60.0);
-const AI_PROGRESS_POS: (f32, f32) = (20., 770.);
+const RESERVE_0_CENTER: (f32, f32) = (715., 615.);
+const RESERVE_1_CENTER: (f32, f32) = (95., 140.);
+const TEXT_STATUS_CENTER: (f32, f32) = (400., 60.0);
+const AI_PROGRESS_CORNER: (f32, f32) = (20., 770.);
 const PIECE_SIZE: (f32, f32) = (70., 75.);
 
 pub struct ViewGame {
@@ -40,7 +41,7 @@ impl ViewGame {
     pub async fn new(tx: Sender<Message>, columns: usize, rows: usize) -> Self {
         let mut ai_progress_text = Text::new(
             "".to_owned(), 
-            AI_PROGRESS_POS,
+            AI_PROGRESS_CORNER,
             12,
             Some("Menlo.ttc"),
         ).await;
@@ -53,7 +54,7 @@ impl ViewGame {
             selected_piece: None,
             status_text: Text::new(
                 "Welcome!".to_owned(), 
-                TEXT_STATUS_POS,
+                TEXT_STATUS_CENTER,
                 18,
                 Some("Menlo.ttc"),
             ).await,
@@ -75,11 +76,11 @@ impl ViewGame {
         }
         // Reserve, player 0
         texture = Sprite::load_texture("reserve.png").await;
-        let mut reserve = Sprite::new(Reserve, texture, RESERVE_0_CTR);
+        let mut reserve = Sprite::new(Reserve, texture, RESERVE_0_CENTER);
         reserve.id = self.sprites.len();
         self.sprites.push(reserve);
         // Reserve, player 1
-        reserve = Sprite::new(Reserve, texture, RESERVE_1_CTR);
+        reserve = Sprite::new(Reserve, texture, RESERVE_1_CENTER);
         reserve.id = self.sprites.len();
         self.sprites.push(reserve);
     }
@@ -87,8 +88,8 @@ impl ViewGame {
     fn corner_position_for(&self, coord: &Coord) -> (f32, f32) {
         // We want row 0 at the bottom of the board, not the top, so flip the row.
         let flip_r = self.rows - coord.1 - 1;
-        let x = BOARD_POS.0 + SQUARE_GAP + (SQUARE_SIZE + SQUARE_GAP) * coord.0 as f32;
-        let y = BOARD_POS.1 + SQUARE_GAP + (SQUARE_SIZE + SQUARE_GAP) * flip_r as f32;
+        let x = BOARD_CORNER.0 + SQUARE_GAP + (SQUARE_SIZE + SQUARE_GAP) * coord.0 as f32;
+        let y = BOARD_CORNER.1 + SQUARE_GAP + (SQUARE_SIZE + SQUARE_GAP) * flip_r as f32;
         (x, y)
     }
 
@@ -181,7 +182,12 @@ impl ViewGame {
     }
 
     pub fn capture_piece(&mut self, coord: &Coord, capturing_player: usize) {
-        //let id = self.piece_id_for(from);
+        let id = self.piece_id_for(coord);
+        let mut to_position = RESERVE_0_CENTER;
+        if capturing_player == 1 {
+            to_position = RESERVE_1_CENTER;
+        }
+        self.sprites[id].animate_move(to_position, Duration::from_secs_f32(0.75));
     }
 
     pub fn handle_events(&mut self) {
@@ -213,14 +219,11 @@ impl ViewGame {
     }
 
     pub fn draw_board(&mut self) {
-        clear_background(Color::from_rgba(81, 81, 81, 255));
-
+        clear_background(Color::from_rgba(
+            BACKGROUND_COLOR.0, BACKGROUND_COLOR.1, BACKGROUND_COLOR.2, 255));
         for sprite in &mut self.sprites {
             sprite.draw();
         }
-        
-        // Reserves
-        // self.reserve0.draw();
     }
 
     pub fn draw_ui(&mut self, state: &AppState, other_text: &str) {

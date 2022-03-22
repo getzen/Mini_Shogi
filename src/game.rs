@@ -239,7 +239,7 @@ impl Game {
                 // Must be landing on opponent's piece. Capture.
                 let action = Action::new(
                     MoveWithCapture, piece.id, Some(pc_coord), to_coord, Some(onto_id));
-                actions.push(action);
+                    actions.push(action);
             }
         }
         actions
