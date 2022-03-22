@@ -9,6 +9,7 @@ use macroquad::prelude::get_frame_time;
 use num_format::{Locale, ToFormattedString};
 
 use crate::Action;
+use crate::ActionKind::*;
 use crate::ai::AI;
 use crate::ai::AIProgress;
 use crate::message_sender::MessageSender;
@@ -186,35 +187,55 @@ impl Controller {
         }
     }
 
-    fn square_selected(&mut self, coord: &Coord) {
+    fn square_selected(&mut self, square_coord: &Coord) {
         // Ignore if not human turn.
         if self.state != HumanTurn { return; }
         // Return if no piece is selected.
         let piece_coord = self.view_game.highlighted_piece_coord();
-        if piece_coord.is_none() { return; }
-
-        for action in self.game.actions_available() {
-            if action.from == piece_coord {
-                if action.to == *coord {
-                    // Highlight the 'from' and 'to' squares to show the move.
-                    self.view_game.highlight_squares(vec![action.from.unwrap(), action.to]);
-                    self.view_game.toggle_piece_highlighting(&action.from.unwrap());
-
-                    // Move captured piece to reserve.
-                    if let Some(id) = action.captured_id {
-                        self.view_game.capture_piece(
-                            &action.to, self.game.current_player);
-                    }
-
-                    // Move the player piece.
-                    self.view_game.move_piece(&action.from.unwrap(), &action.to);
-
-                    self.game.perform_action(&action, true);
-                    self.action_history.push(action.clone());
-                }
-            }
+        if piece_coord.is_none() {
+            println!("no piece_coord!");
+            return; 
         }
 
+        // Find the matching action.
+        for action in &self.game.actions_available() {
+            let to = action.to;
+            if to != *square_coord {
+                println!("no 'to' coord!");
+                continue;
+            }
+
+            match action.kind {
+                MoveNoCapture => {
+                    println!("move no capture");
+                    if action.from.is_none() { continue; }
+                    let from = action.from.unwrap();
+                    if from != *square_coord { continue; }
+                    self.view_game.move_piece(&from, &to)
+                }
+                MoveWithCapture => {
+                    println!("move with capture!");
+                    if action.from.is_none() { continue; }
+                    let from = action.from.unwrap();
+                    if from != *square_coord { continue; }
+                    self.view_game.move_piece(&from, &to);
+                }
+                _ => {
+                    println!("Other action!");
+                }
+            }
+
+            // Highlight the 'from' and 'to' squares to show the move.
+            let from = action.from.unwrap();
+            self.view_game.highlight_squares(vec![from, to]);
+            self.view_game.toggle_piece_highlighting(&from);
+
+            println!("finding action");
+
+            self.game.perform_action(&action, true);
+            self.action_history.push(action.clone());
+
+        }
     }
 
     fn format_ai_progress(&self, progress: &AIProgress) -> String {
@@ -277,30 +298,6 @@ impl Controller {
             AI::think(ai_kind, game_clone, message_sender);
         });
     }
-
-    // async fn square_selected(&mut self, coord: &Coord) {
-    //     println!("square selected");
-    //     if self.state == HumanTurn {
-    //         self.view_game.highlight_squares(vec![*coord]);
-
-
-            // let id = self.game.get_piece(&coord);
-            // let piece = self.game.pieces[id];
-            // if piece.player == self.game.current_player {
-            //     //self.view_game.highlight_square(&coord);
-            // }
-
-
-            // let actions = self.game.actions_available();
-            // let mut some_action: Vec<&Action> = actions.iter().filter(|a| a.to == coord).collect();
-            // let action = some_action.swap_remove(0);
-
-            // //self.view_game.add_piece_to(&coord, action.to, self.game.current_player).await;
-
-            // self.game.perform_action(action, true);
-            // self.action_history.push(action.clone());
-    //     }
-    // }
 
     async fn coord_selected_OLD(&mut self, coord: Coord) {
         if self.state == HumanTurn {

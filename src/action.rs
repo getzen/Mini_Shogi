@@ -9,7 +9,7 @@ pub enum ActionKind {
     MoveWithCapture,
     // MoveWithPromotion,
     FromReserve,
-    ToReserve,
+    ToReserve, // needed as undo for FromReserve
 }
 
 #[derive(Debug, Clone, Copy)]
