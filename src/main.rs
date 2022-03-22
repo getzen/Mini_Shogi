@@ -26,7 +26,7 @@ fn conf() -> Conf {
     Conf {
         window_title: String::from("My Game"),
         window_width: 800,
-        window_height: 600,
+        window_height: 800,
         high_dpi: true,
         //fullscreen: bool,
         //sample_count: i32,

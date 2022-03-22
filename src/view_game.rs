@@ -170,7 +170,7 @@ impl ViewGame {
     }
 
     pub fn capture_piece(&mut self, coord: &Coord, capturing_player: usize) {
-        let id = self.piece_id_for(from);
+        //let id = self.piece_id_for(from);
     }
 
     pub fn handle_events(&mut self) {
