@@ -33,6 +33,7 @@ pub struct ViewGame {
     rows: usize,
     sprites: Vec<Sprite>,
     pub selected_piece: Option<usize>,
+    pub move_to_coords: Vec<Coord>,
     status_text: Text,
     ai_progress_text: Text,
 }
@@ -52,6 +53,7 @@ impl ViewGame {
             columns, rows,
             sprites: Vec::new(),
             selected_piece: None,
+            move_to_coords: Vec::new(),
             status_text: Text::new(
                 "Welcome!".to_owned(), 
                 TEXT_STATUS_CENTER,
@@ -248,37 +250,79 @@ impl ViewGame {
         next_frame().await;
     }
 
-    /// Toggles highlighting for the piece with the given coord.
-    /// Turns off highlighting for all others, since only one piece
-    /// may be selected at a time.
-    pub fn toggle_piece_highlighting(&mut self, coord: &Coord) -> bool {
-        let mut on = false;
-        for piece in self.sprites_for(Piece) {
-            if piece.coord == *coord {
-                piece.highlighted = !piece.highlighted;
-                on = piece.highlighted;
-            } else {
-                piece.highlighted = false;
-            }
-        }
-        on
-    }
-
-    pub fn highlighted_piece_coord(&mut self) -> Option<Coord> {
-        for piece in self.sprites_for(Piece) {
-            if piece.highlighted {
-                return Some(piece.coord);
-            }
+    pub fn selected_piece_coord(&self) -> Option<Coord> {
+        if let Some(selected) = self.selected_piece {
+            return Some(self.sprites[selected].coord);
         }
         None
     }
 
+    pub fn select_piece(&mut self, coord: &Coord) {
+        if let Some(old_selected) = self.selected_piece {
+            if old_selected == self.piece_id_for(coord) {
+                return; // piece is already selected
+            }
+            self.unselect_piece();
+        }
+        for piece in self.sprites_for(Piece) {
+            if piece.coord == *coord {
+                piece.highlighted = true;
+                self.selected_piece = Some(piece.id);
+                break;
+            }
+        }
+    }
+
+    pub fn unselect_piece(&mut self) {
+        if let Some(selected) = self.selected_piece {
+            self.sprites[selected].highlighted = false;
+            self.selected_piece = None;
+        }
+    }
+
+    pub fn set_move_to_coords(&mut self, coords:Vec<Coord>) {
+        for square in self.sprites_for(Square) {
+            square.highlighted = coords.contains(&square.coord);
+        }
+        self.move_to_coords = coords;
+
+        //     let id = self.square_id_for(coord);
+        //     self.sprites[id].highlighted = coords.contains(coord);
+        // }
+    }
+
+    pub fn is_move_to_coord(&self, coord: &Coord) -> bool {
+        self.move_to_coords.contains(coord)
+    }
+
+    // /// Toggles highlighting for the piece with the given coord.
+    // /// Turns off highlighting for all others, since only one piece
+    // /// may be selected at a time.
+    // pub fn toggle_piece_highlighting(&mut self, coord: &Coord) -> bool {
+    //     let mut on = false;
+    //     for piece in self.sprites_for(Piece) {
+    //         if piece.coord == *coord {
+    //             piece.highlighted = !piece.highlighted;
+    //             on = piece.highlighted;
+    //         } else {
+    //             piece.highlighted = false;
+    //         }
+    //     }
+    //     on
+    // }
+
+    // pub fn highlighted_piece_coord(&mut self) -> Option<Coord> {
+    //     for piece in self.sprites_for(Piece) {
+    //         if piece.highlighted {
+    //             return Some(piece.coord);
+    //         }
+    //     }
+    //     None
+    // }
+
     /// Highlights the given square coords and turns it off for all others.
     pub fn highlight_squares(&mut self, coords: Vec<Coord>) {
-        // Turn off all square highlighting.
-        self.sprites.iter_mut()
-        .filter(|s| s.kind == Square)
-        .for_each(|s| s.highlighted = false);
+        self.unhighlight_all_squares();
 
         // Highlight the new.
         for coord in coords {

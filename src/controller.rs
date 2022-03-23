@@ -142,10 +142,10 @@ impl Controller {
             match received.unwrap() {
                 Message::IntroEnded => { self.next_player(); },
                 Message::SquareSelected(coord) => {
-                    self.square_selected(&coord);
+                    self.square_selected_2(&coord);
                 },
                 Message::PieceSelected(coord) => {
-                    self.piece_selected(&coord);
+                    self.square_selected_2(&coord);
                 },
                 Message::AIUpdate(progress) => {
                     if self.state == AIThinking {
@@ -167,31 +167,97 @@ impl Controller {
         }
     }
 
-    fn piece_selected(&mut self, coord: &Coord) {
+    // A square with a piece was selected.
+    fn square_selected_2(&mut self, coord: &Coord) {
         // Ignore if not human turn.
         if self.state != HumanTurn { return; }
-        // Ignore if opponent's piece.
-        if !self.game.coord_has_current_player_piece(coord) { return; }
 
-        let on = self.view_game.toggle_piece_highlighting(&coord);
-        if on {
-            let mut coords = Vec::new();
-            for action in self.game.actions_available() {
-                if action.from == Some(*coord) {
-                    coords.push(action.to);
+        // If piece selected is some.
+        if let Some(from) = self.view_game.selected_piece_coord() {
+            println!("piece is selected");
+            // If square is move-to.
+            if self.view_game.is_move_to_coord(coord) {
+                println!("square is move-to");
+                // If square has opponent.
+                if self.game.is_player_at(1 - self.game.current_player, coord) {
+                    // Capture
+                    println!("capture");
+                    //self.view_game.capture_piece(&to, self.game.current_player);
+                    //self.game.perform_action(&action, true);
+                    //self.action_history.push(action.clone());
+                }
+                else {
+                    // Move
+                    println!("move");
+                    self.perform_move(&from, coord);
+                }
+                self.view_game.unselect_piece();
+                self.view_game.unhighlight_all_squares();
+            }
+            else {
+                // Not a move-to square.
+                println!("square is NOT move-to");
+                self.view_game.unselect_piece();
+                self.view_game.unhighlight_all_squares();
+
+                // Is it another player piece?
+                if self.game.is_player_at(self.game.current_player, coord) {
+                    // Select piece and move-to's
+                    self.view_game.select_piece(coord);
+    
+                    let mut coords = Vec::new();
+                    for action in self.game.actions_available() {
+                        if action.from == Some(*coord) {
+                            coords.push(action.to);
+                        }
+                    }
+                    self.view_game.set_move_to_coords(coords);
+                    return;
                 }
             }
-            self.view_game.highlight_squares(coords);
-        } else {
-            self.view_game.unhighlight_all_squares();
+        }
+        else { // No piece selected.
+            // If player piece at coord.
+            if self.game.is_player_at(self.game.current_player, coord) {
+                // Select piece and move-to's
+                self.view_game.select_piece(coord);
+
+                let mut coords = Vec::new();
+                for action in self.game.actions_available() {
+                    if action.from == Some(*coord) {
+                        coords.push(action.to);
+                    }
+                }
+                self.view_game.set_move_to_coords(coords);
+                return;
+            }
+            else { // No piece selected and no player piece at coord.
+                return;
+            }
         }
     }
 
+    fn perform_move(&mut self, from: &Coord, to: &Coord) {
+        // view
+        self.view_game.move_piece(from, to);
+        // game
+        for action in self.game.actions_available() {
+            if let Some(action_from) = action.from {
+                if action_from == *from && action.to == *to {
+                    self.game.perform_action(&action, true);
+                    self.action_history.push(action.clone());
+                    break;
+                }
+            }
+        }
+    }
+
+    // An empty square was selected.
     fn square_selected(&mut self, square_coord: &Coord) {
         // Ignore if not human turn.
         if self.state != HumanTurn { return; }
         // Return if no piece is selected.
-        let piece_coord = self.view_game.highlighted_piece_coord();
+        let piece_coord = self.view_game.selected_piece_coord();
         if piece_coord.is_none() {
             println!("no piece_coord!");
             return; 
@@ -228,7 +294,7 @@ impl Controller {
             // Highlight the 'from' and 'to' squares to show the move.
             let from = action.from.unwrap();
             self.view_game.highlight_squares(vec![from, to]);
-            self.view_game.toggle_piece_highlighting(&from);
+            //self.view_game.toggle_piece_highlighting(&from);
 
             println!("finding action");
 

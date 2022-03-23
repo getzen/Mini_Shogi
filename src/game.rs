@@ -156,10 +156,11 @@ impl Game {
         }
     }
 
-    /// Controller needs to know for piece selection logic.
-    pub fn coord_has_current_player_piece(&mut self, coord: &Coord) -> bool {
-        let id = self.get_piece(coord);
-        self.pieces[id].player == self.current_player
+    pub fn is_player_at(&self, player: usize, coord: &Coord) -> bool {
+        let option_item = self.pieces
+        .iter()
+        .find(|p| p.coord == Some(*coord) && p.player == player);
+        option_item.is_some()
     }
 
     // **** empty_indices instead, and avoid Coord2 conversion? ***
