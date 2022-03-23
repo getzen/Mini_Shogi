@@ -182,9 +182,7 @@ impl Controller {
                 if self.game.is_player_at(1 - self.game.current_player, coord) {
                     // Capture
                     println!("capture");
-                    //self.view_game.capture_piece(&to, self.game.current_player);
-                    //self.game.perform_action(&action, true);
-                    //self.action_history.push(action.clone());
+                    self.perform_capture(&from, coord);
                 }
                 else {
                     // Move
@@ -252,57 +250,76 @@ impl Controller {
         }
     }
 
-    // An empty square was selected.
-    fn square_selected(&mut self, square_coord: &Coord) {
-        // Ignore if not human turn.
-        if self.state != HumanTurn { return; }
-        // Return if no piece is selected.
-        let piece_coord = self.view_game.selected_piece_coord();
-        if piece_coord.is_none() {
-            println!("no piece_coord!");
-            return; 
-        }
+    fn perform_capture(&mut self, from: &Coord, to: &Coord) {
+        // view
+        self.view_game.capture_piece(&to, self.game.current_player);
+        self.view_game.move_piece(from, to);
 
-        // Find the matching action.
-        for action in &self.game.actions_available() {
-            let to = action.to;
-            if to != *square_coord {
-                println!("no 'to' coord!");
-                continue;
-            }
-
-            match action.kind {
-                MoveNoCapture => {
-                    println!("move no capture");
-                    if action.from.is_none() { continue; }
-                    let from = action.from.unwrap();
-                    if from != *square_coord { continue; }
-                    self.view_game.move_piece(&from, &to)
-                }
-                MoveWithCapture => {
-                    println!("move with capture!");
-                    if action.from.is_none() { continue; }
-                    let from = action.from.unwrap();
-                    if from != *square_coord { continue; }
-                    self.view_game.move_piece(&from, &to);
-                }
-                _ => {
-                    println!("Other action!");
+        // game
+        for action in self.game.actions_available() {
+            if let Some(action_from) = action.from {
+                if action_from == *from && action.to == *to {
+                    self.game.perform_action(&action, true);
+                    self.action_history.push(action.clone());
+                    break;
                 }
             }
-
-            // Highlight the 'from' and 'to' squares to show the move.
-            let from = action.from.unwrap();
-            self.view_game.highlight_squares(vec![from, to]);
-            //self.view_game.toggle_piece_highlighting(&from);
-
-            println!("finding action");
-
-            self.game.perform_action(&action, true);
-            self.action_history.push(action.clone());
-
         }
+                    //self.game.perform_action(&action, true);
+                    //self.action_history.push(action.clone());
     }
+
+    // // An empty square was selected.
+    // fn square_selected(&mut self, square_coord: &Coord) {
+    //     // Ignore if not human turn.
+    //     if self.state != HumanTurn { return; }
+    //     // Return if no piece is selected.
+    //     let piece_coord = self.view_game.selected_piece_coord();
+    //     if piece_coord.is_none() {
+    //         println!("no piece_coord!");
+    //         return; 
+    //     }
+
+    //     // Find the matching action.
+    //     for action in &self.game.actions_available() {
+    //         let to = action.to;
+    //         if to != *square_coord {
+    //             println!("no 'to' coord!");
+    //             continue;
+    //         }
+
+    //         match action.kind {
+    //             MoveNoCapture => {
+    //                 println!("move no capture");
+    //                 if action.from.is_none() { continue; }
+    //                 let from = action.from.unwrap();
+    //                 if from != *square_coord { continue; }
+    //                 self.view_game.move_piece(&from, &to)
+    //             }
+    //             MoveWithCapture => {
+    //                 println!("move with capture!");
+    //                 if action.from.is_none() { continue; }
+    //                 let from = action.from.unwrap();
+    //                 if from != *square_coord { continue; }
+    //                 self.view_game.move_piece(&from, &to);
+    //             }
+    //             _ => {
+    //                 println!("Other action!");
+    //             }
+    //         }
+
+    //         // Highlight the 'from' and 'to' squares to show the move.
+    //         let from = action.from.unwrap();
+    //         self.view_game.highlight_squares(vec![from, to]);
+    //         //self.view_game.toggle_piece_highlighting(&from);
+
+    //         println!("finding action");
+
+    //         self.game.perform_action(&action, true);
+    //         self.action_history.push(action.clone());
+
+    //     }
+    // }
 
     fn format_ai_progress(&self, progress: &AIProgress) -> String {
         let nodes_string = progress.nodes.to_formatted_string(&Locale::en);
