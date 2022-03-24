@@ -243,6 +243,14 @@ impl Game {
                     actions.push(action);
             }
         }
+        // Get pieces in player's reserve.
+        for id in self.reserves[self.current_player] {
+            if id == NONE { continue; }
+            let piece = self.pieces[id];
+            if piece.player == self.current_player {
+                player_pieces.push(piece);
+            }
+        }
         actions
     }
 
