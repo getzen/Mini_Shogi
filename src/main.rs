@@ -16,6 +16,7 @@ mod game;
 use game::{Game, GameState};
 mod lerp;
 mod message_sender;
+use message_sender::{Message, MessageSender};
 mod piece;
 use piece::Piece;
 mod sprite;

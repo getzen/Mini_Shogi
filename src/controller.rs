@@ -9,10 +9,9 @@ use macroquad::prelude::get_frame_time;
 use num_format::{Locale, ToFormattedString};
 
 use crate::Action;
-use crate::ActionKind::*;
 use crate::ai::AI;
 use crate::ai::AIProgress;
-use crate::message_sender::MessageSender;
+use crate::message_sender::{Message, MessageSender};
 use crate::game::*;
 use crate::GameState;
 use crate::controller::AppState::*;
@@ -41,16 +40,6 @@ pub enum PlayerKind {
     AIMinimax,
     AIMonteCarlo,
     AIMonteCarloTree,
-}
-
-// Messages sent by the view or the AI to this controller.
-pub enum Message {
-    IntroEnded,
-    PieceSelected(Coord),
-    SquareSelected(Coord),
-    AIUpdate(AIProgress),
-    SearchCompleted(AIProgress),
-    ShouldExit,
 }
 
 pub struct Controller {

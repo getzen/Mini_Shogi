@@ -4,10 +4,9 @@ use std::time::Instant;
 
 use crate::Action;
 use crate::ai::{AIProgress, Think};
-use crate::controller::Message;
 use crate::Game;
 use crate::GameState;
-use crate::message_sender::MessageSender;
+use crate::message_sender::{Message, MessageSender};
 
 pub struct AIMinimax {
     game: Game, // a clone of the original

@@ -5,8 +5,7 @@ use std::sync::mpsc::Sender;
 
 use macroquad::prelude::*;
 
-use crate::controller::Message;
-use crate::message_sender::MessageSender;
+use crate::message_sender::{Message, MessageSender};
 use crate::sprite::*;
 
 

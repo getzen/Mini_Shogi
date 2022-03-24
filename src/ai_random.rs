@@ -1,7 +1,7 @@
 // AI Random
 
 use crate::ai::{AIProgress, Think};
-use crate::controller::Message;
+use crate::message_sender::Message;
 use crate::Game;
 use crate::message_sender::MessageSender;
 

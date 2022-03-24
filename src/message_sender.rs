@@ -3,12 +3,10 @@
 use std::sync::mpsc::Sender;
 use std::time::{Duration, Instant};
 
-use crate::controller::Message;
-
 /// Sends messages using the owned transmitter (tx). If min_time_between is
-/// not None, then subsequent messages will *not* be sent until that amount
-/// of time has passed. Used to not overload the receiver (rx) with, for
-/// example, progress updates.
+/// Messages will be ignored unless min_time has passed since the last message
+/// was sent. (Useful to not overload the receiver (rx) with, for example,
+/// progress update messages.) Set min_time to None to alway send right away.
 #[derive(Clone)]
 pub struct MessageSender {
     pub tx: Sender<Message>,
@@ -43,4 +41,16 @@ impl MessageSender {
         }
         
     }
+}
+
+// Messages for this particular app.
+use crate::game::Coord;
+use crate::ai::AIProgress;
+pub enum Message {
+    IntroEnded,
+    PieceSelected(Coord),
+    SquareSelected(Coord),
+    AIUpdate(AIProgress),
+    SearchCompleted(AIProgress),
+    ShouldExit,
 }

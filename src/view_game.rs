@@ -7,9 +7,9 @@ use std::time::Duration;
 use macroquad::prelude::*;
 
 use crate::game::Coord;
-use crate::controller::{Message, AppState};
+use crate::controller::AppState;
 use crate::controller::AppState::*;
-use crate::message_sender::MessageSender;
+use crate::message_sender::{Message, MessageSender};
 use crate::piece::PieceKind;
 use crate::piece::PieceKind::*;
 use crate::sprite::*;

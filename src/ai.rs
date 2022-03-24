@@ -9,7 +9,7 @@ use crate::ai_minimax::AIMinimax;
 use crate::ai_monte_carlo::AIMonteCarlo;
 //use crate::ai_monte_carlo_tree::AIMonteCarloTree;
 
-use crate::controller::Message;
+use crate::message_sender::Message;
 use crate::controller::PlayerKind;
 use crate::controller::PlayerKind::*;
 
