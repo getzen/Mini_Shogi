@@ -205,13 +205,17 @@ impl ViewGame {
         for id in self.sprite_ids_for(Square) {
             if left_button && self.sprites[id].contains(mouse_pos) {
                 let coord = self.sprites[id].coord;
-                if self.sprites[id].contains_id.is_some() {
-                    self.message_sender.send(Message::PieceSelected(coord));
-                } else {
-                    self.message_sender.send(Message::SquareSelected(coord));
-                }
+                self.message_sender.send(Message::SquareSelected(coord));
             }
         }
+        for id in self.sprite_ids_for(Reserve) {
+            if left_button && self.sprites[id].contains(mouse_pos) {
+                let coord = self.sprites[id].coord;
+                self.message_sender.send(Message::SquareSelected(coord));
+            }
+        }
+
+
     }
 
     pub fn update(&mut self, time_delta: Duration) {

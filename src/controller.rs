@@ -131,11 +131,11 @@ impl Controller {
             match received.unwrap() {
                 Message::IntroEnded => { self.next_player(); },
                 Message::SquareSelected(coord) => {
-                    self.square_selected_2(&coord);
+                    self.square_selected(&coord);
                 },
-                Message::PieceSelected(coord) => {
-                    self.square_selected_2(&coord);
-                },
+                // Message::PieceSelected(coord) => {
+                //     self.square_selected(&coord);
+                // },
                 Message::AIUpdate(progress) => {
                     if self.state == AIThinking {
                         self.pv_text = self.format_ai_progress(&progress);
@@ -157,7 +157,7 @@ impl Controller {
     }
 
     // A square with a piece was selected.
-    fn square_selected_2(&mut self, coord: &Coord) {
+    fn square_selected(&mut self, coord: &Coord) {
         // Ignore if not human turn.
         if self.state != HumanTurn { return; }
 

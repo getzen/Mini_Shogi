@@ -4,7 +4,6 @@ use macroquad::prelude::*;
 
 mod action;
 use action::Action;
-use action::ActionKind;
 mod ai;
 mod ai_minimax;
 mod ai_monte_carlo;
@@ -16,7 +15,6 @@ mod game;
 use game::{Game, GameState};
 mod lerp;
 mod message_sender;
-use message_sender::{Message, MessageSender};
 mod piece;
 use piece::Piece;
 mod sprite;

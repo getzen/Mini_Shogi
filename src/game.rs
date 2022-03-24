@@ -177,6 +177,34 @@ impl Game {
         empties
     }
 
+    // Parachuting rules:
+    // 1. A pawns can never be parachuted into the last row since it could not move.
+    // 2. Two pawns belonging to the same player can never be positioned in the same column.
+    // However, having a pawn and a upgraded pawn in the same column is allowed.
+    // 3. It is forbidden to put a parachuting pawn in front of the opponent king if it
+    // creates “checkmate”.
+    pub fn parachute_coords(&self, for_pawn: bool) -> Vec<Coord> {
+        let mut empties = Vec::new();
+        for i in self.grid {
+            if i != NONE { continue };
+            if for_pawn {
+                // Rule 1. Need to skip the last row per the rules.
+                if self.current_player == 0 && i >= GRID_COUNT - COLS {
+                    continue;
+                } else if i < COLS { // player 1
+                    continue;
+                }
+            }
+
+            // need fns for attacked coords, piece move coords, is_checkmate
+
+            // All clear. Add to empties.
+            empties.push(Game::index_to_coord(i));
+            
+        }
+        empties
+    }
+
     /// Determines if the given player has won.
     fn is_win(&mut self, player: usize) -> bool {
         // If opponent king is capture: true.
@@ -245,13 +273,9 @@ impl Game {
                     actions.push(action);
             }
         }
+        
+        // Parachute actions.
         // Get pieces in player's reserve.
-        // Parachuting rules:
-        // 1. A pawns can never be parachuted into the last row since it could not move.
-        // 2. Two pawns belonging to the same player can never be positioned in the same column.
-        // However, having a pawn and a upgraded pawn in the same column is allowed.
-        // 3. It is forbidden to put a parachuting pawn in front of the opponent king if it
-        // creates “checkmate”.
         player_pieces.clear();
         for id in self.reserves[self.current_player]  {
             if id == NONE { continue; }
@@ -265,19 +289,16 @@ impl Game {
             // Parachute coords checks for rules 1, 2, 3
             let mut to_coords = Vec::new();
             if piece.kind == Pawn {
-                to_coords = self.parachute_coords(pawn = true);
+                to_coords = self.parachute_coords(true);
             } else {
-                to_coords = self.parachute_coords(pawn = false);
+                to_coords = self.parachute_coords(false);
             }
 
-            // need fns for attacked coords, piece move coords, is_checkmate
-            
-
-
-            let action = Action::new(
-                FromReserve, piece.id, Some(pc_coord), to_coord, None);
-            actions.push(action);
-
+            for to_coord in to_coords {
+                let action = Action::new(
+                    FromReserve, piece.id, piece.coord, to_coord, None);
+                actions.push(action);
+            }
         }
         actions
     }
