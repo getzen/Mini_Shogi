@@ -12,7 +12,6 @@ use std::time::Duration;
 
 use macroquad::prelude::*;
 
-use crate::game::Coord;
 use crate::lerp::Lerp;
 
 const TEXTURE_PATH: &str = "./assets/";
@@ -27,6 +26,7 @@ pub enum SpriteKind {
 
 
 pub struct Sprite {
+    pub id: Option<usize>, // usually a hash value
     pub kind: SpriteKind,
     pub texture: Texture2D,
     pub position: (f32, f32),
@@ -34,12 +34,7 @@ pub struct Sprite {
     pub highlighted: bool,
     pub highlight_color: Color,
     pub draw_params: DrawTextureParams,
-    position_lerp: Option<Lerp>,
-    
-    // For this game in particular:
-    pub id: Option<usize>,
-    //pub coord: Coord,
-    //pub contains_id: Option<usize>, // a square containing a piece, for example
+    position_lerp: Option<Lerp>,   
 }
 
 impl Sprite {
@@ -51,15 +46,13 @@ impl Sprite {
             flip_x: false, flip_y: false,
             pivot: None};
         Self {
+            id: None,
             kind, texture, position,
             color: WHITE,
             highlighted: false,
             highlight_color: LIGHTGRAY,
             draw_params,
             position_lerp: None,
-            id: None,
-            //coord: Coord(0,0),
-            //contains_id: None,
         }
     }
 

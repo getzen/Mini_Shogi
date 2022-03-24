@@ -14,7 +14,6 @@ use crate::message_sender::{Message, MessageSender};
 use crate::piece::PieceKind;
 use crate::piece::PieceKind::*;
 use crate::sprite::*;
-use crate::sprite::SpriteKind;
 use crate::sprite::SpriteKind::*;
 use crate::text::Text;
 
@@ -70,25 +69,21 @@ impl ViewGame {
     }
 
     pub async fn prepare(&mut self) {
-        // board
+        // Board
         let mut texture = Sprite::load_texture("square.png").await;
         for c in 0..self.columns {
             for r in 0..self.rows {
                 let position = self.center_position_for(&Coord(c,r));
                 let square = Sprite::new(Square, texture, position);
-                //square.coord = Coord(c,r);
-                //square.id = self.sprites.len();
                 self.squares.insert(Coord(c,r), square);
             }
         }
         // Reserve, player 0
         texture = Sprite::load_texture("reserve.png").await;
         let mut reserve = Sprite::new(Reserve, texture, RESERVE_0_CENTER);
-        //reserve.id = self.sprites.len();
         self.reserves[0].insert(Coord(0,0), reserve);
         // Reserve, player 1
         reserve = Sprite::new(Reserve, texture, RESERVE_1_CENTER);
-        //reserve.id = self.sprites.len();
         self.reserves[1].insert(Coord(0,0), reserve);
     }
 
@@ -106,10 +101,6 @@ impl ViewGame {
             piece.set_rotation(std::f32::consts::PI);
         }
         piece.id = Some(id);
-        //piece.coord = *coord;
-        //let id = self.sprites.len();
-        //piece.id = id;
-        //self.square_for(coord).contains_id = Some(id);
         self.pieces.insert(id, piece);
     }
 
@@ -127,54 +118,6 @@ impl ViewGame {
         let y = pos.1 + SQUARE_SIZE / 2.0;
         (x, y)
     }
-
-    // fn sprites_for(&mut self, kind: SpriteKind) -> Vec<&mut Sprite> {
-    //     self.sprites.iter_mut()
-    //     .filter(|s| s.kind == kind)
-    //     .collect()
-    // }
-
-    // fn sprite_ids_for(&self, kind: SpriteKind) -> Vec<usize> {
-    //     self.sprites.iter()
-    //     .enumerate()
-    //     .filter(|s| s.1.kind == kind)
-    //     .map(|s| s.0)
-    //     .collect()
-    //     // Old school:
-    //     // let mut ids = Vec::new();
-    //     // for (index, sprite) in self.sprites.iter().enumerate() {
-    //     //     if sprite.kind == kind {
-    //     //         ids.push(index);
-    //     //     }
-    //     // }
-    //     // ids
-    // }
-
-    // fn square_for(&mut self, coord: &Coord) -> &mut Sprite {
-    //     self.sprites.iter_mut()
-    //     .find(|s| s.kind == Square && s.coord == *coord)
-    //     .unwrap()
-    // }
-
-    
-    // // fn square_id_for(&self, coord: &Coord) -> usize {
-    // //     let sprite = self.sprites.iter()
-    // //     .find(|s| s.kind == Square && s.coord == *coord);
-    // //     sprite.unwrap().id
-    // // }
-
-    // fn piece_for(&mut self, coord: &Coord) -> &mut Sprite {
-    //     self.sprites.iter_mut()
-    //     .find(|s| s.kind == Piece && s.coord == *coord)
-    //     .unwrap()
-    // }
-
-    
-    // fn piece_id_for(&self, coord: &Coord) -> usize {
-    //     let sprite = self.sprites.iter().find(
-    //         |s| s.kind == Piece && s.coord == *coord);
-    //     sprite.unwrap().id
-    // }
 
     pub fn move_piece(&mut self, id: usize, to: &Coord) {
         if let Some(piece) = self.pieces.get(&id) {
@@ -203,26 +146,28 @@ impl ViewGame {
         let mouse_pos = mouse_position();
         let left_button = is_mouse_button_released(MouseButton::Left);
 
+        // Squares
         for (coord, square) in self.squares {
             if left_button && square.contains(mouse_pos) {
                 self.message_sender.send(Message::SquareSelected(coord));
             }
         }
 
+        // Reserves
         for i in 0..2 {
             for (coord, reserve) in self.reserves[i] {
                 if left_button && reserve.contains(mouse_pos) {
-                    self.message_sender.send(Message::ReserveSelected(i, coord));
+                    self.message_sender.send(Message::ReserveSelected((i, coord)));
                 }
             }
         }
        
+        // Pieces
         for (id, piece) in self.pieces {
             if left_button && piece.contains(mouse_pos) {
                 self.message_sender.send(Message::PieceSelected(id));
             }
         }
-
     }
 
     pub fn update(&mut self, time_delta: Duration) {
@@ -234,14 +179,17 @@ impl ViewGame {
     pub fn draw_board(&mut self) {
         clear_background(Color::from_rgba(
             BACKGROUND_COLOR.0, BACKGROUND_COLOR.1, BACKGROUND_COLOR.2, 255));
+        // Squares
         for (_, square) in &mut self.squares {
             square.draw();
         }
+        // Reserves
         for i in 0..2 {
             for (_, reserve) in &mut self.reserves[i] {
                 reserve.draw();
             }
         }
+        // Pieces
         for (_, piece) in &mut self.pieces {
             piece.draw();
         }
@@ -272,7 +220,6 @@ impl ViewGame {
     pub fn selected_piece_id(&self) -> Option<usize> {
         if let Some(selected) = self.selected_piece {
             return self.pieces[&selected].id;
-            //return Some(self.sprites[selected].coord);
         }
         None
     }

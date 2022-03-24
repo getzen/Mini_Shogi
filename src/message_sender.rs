@@ -48,8 +48,9 @@ use crate::game::Coord;
 use crate::ai::AIProgress;
 pub enum Message {
     IntroEnded,
-    ReserveSelected(Coord),
     SquareSelected(Coord),
+    ReserveSelected((usize, Coord)),
+    PieceSelected(usize),
     AIUpdate(AIProgress),
     SearchCompleted(AIProgress),
     ShouldExit,

@@ -79,11 +79,10 @@ impl Controller {
         self.view_game.prepare().await;
 
         // Add the game's pieces to the view.
-        for (index, piece_id) in self.game.grid.iter().enumerate() {
-            if *piece_id == NONE { continue; }
-            let piece = self.game.pieces[*piece_id];
-            let coord = Game::index_to_coord(index);
-            self.view_game.add_piece(&coord, piece.kind, piece.player).await;
+        for piece in &self.game.pieces {
+            if let Some(coord) = piece.coord {
+                self.view_game.add_piece(&coord, piece.id, piece.kind, piece.player).await;
+            }   
         }
     }
 
@@ -129,12 +128,17 @@ impl Controller {
         let received = self.rx.try_recv();
         if received.is_ok() {
             match received.unwrap() {
-                Message::IntroEnded => { self.next_player(); },
+                Message::IntroEnded => {
+                    self.next_player();
+                },
                 Message::SquareSelected(coord) => {
                     self.square_selected(&coord);
                 },
-                Message::ReserveSelected(coord) => {
-                    self.reserve_selected(&coord);
+                Message::ReserveSelected((player, coord)) => {
+                    //self.reserve_selected(&coord);
+                },
+                Message::PieceSelected(id) => {
+                    //self.reserve_selected(&coord);
                 },
                 Message::AIUpdate(progress) => {
                     if self.state == AIThinking {
@@ -175,7 +179,7 @@ impl Controller {
                 if self.game.is_player_at(1 - self.game.current_player, coord) {
                     // Capture
                     println!("capture");
-                    self.perform_capture(&from, coord);
+                    self.perform_move_with_capture(&from, coord);
                 }
                 else {
                     // Move
@@ -228,38 +232,32 @@ impl Controller {
         }
     }
 
-    fn perform_move(&mut self, from: &Coord, to: &Coord) {
-        // view
-        self.view_game.move_piece(from, to);
-        // game
+    fn perform_move(&mut self, id: usize, to: &Coord) {
+        // View
+        self.view_game.move_piece(id, to);
+        // Game
         for action in self.game.actions_available() {
-            if let Some(action_from) = action.from {
-                if action_from == *from && action.to == *to {
-                    self.game.perform_action(&action, true);
-                    self.action_history.push(action.clone());
-                    break;
-                }
+            if action.piece_id == id && action.to == *to {
+                self.game.perform_action(&action, true);
+                self.action_history.push(action.clone());
+                break;
             }
         }
     }
 
-    fn perform_capture(&mut self, from: &Coord, to: &Coord) {
+    fn perform_move_with_capture(&mut self, move_id: usize, capture_id: usize, to: &Coord) {
         // view
-        self.view_game.capture_piece(&to, self.game.current_player);
-        self.view_game.move_piece(from, to);
+        self.view_game.capture_piece(capture_id, self.game.current_player);
+        self.view_game.move_piece(move_id, to);
 
         // game
-        for action in self.game.actions_available() {
-            if let Some(action_from) = action.from {
-                if action_from == *from && action.to == *to {
-                    self.game.perform_action(&action, true);
-                    self.action_history.push(action.clone());
-                    break;
-                }
+        for action in &self.game.actions_available() {
+            if action.piece_id == move_id && action.to == *to {
+                self.game.perform_action(&action, true);
+                self.action_history.push(action.clone());
+                break;
             }
         }
-                    //self.game.perform_action(&action, true);
-                    //self.action_history.push(action.clone());
     }
 
     // // An empty square was selected.
