@@ -133,9 +133,9 @@ impl Controller {
                 Message::SquareSelected(coord) => {
                     self.square_selected(&coord);
                 },
-                // Message::PieceSelected(coord) => {
-                //     self.square_selected(&coord);
-                // },
+                Message::ReserveSelected(coord) => {
+                    self.reserve_selected(&coord);
+                },
                 Message::AIUpdate(progress) => {
                     if self.state == AIThinking {
                         self.pv_text = self.format_ai_progress(&progress);
@@ -154,6 +154,10 @@ impl Controller {
                 Message::ShouldExit => self.state = Exit,
             }
         }
+    }
+
+    fn reserve_selected(&mut self, piece_id: usize) {
+        
     }
 
     // A square with a piece was selected.
