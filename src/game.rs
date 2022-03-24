@@ -3,6 +3,8 @@
 
 //use slotmap::{DefaultKey, SlotMap};
 
+use std::collections::HashSet;
+
 use crate::Action;
 use crate::action::ActionKind::*;
 use crate::GameState::*;
@@ -244,12 +246,38 @@ impl Game {
             }
         }
         // Get pieces in player's reserve.
-        for id in self.reserves[self.current_player] {
+        // Parachuting rules:
+        // 1. A pawns can never be parachuted into the last row since it could not move.
+        // 2. Two pawns belonging to the same player can never be positioned in the same column.
+        // However, having a pawn and a upgraded pawn in the same column is allowed.
+        // 3. It is forbidden to put a parachuting pawn in front of the opponent king if it
+        // creates “checkmate”.
+        player_pieces.clear();
+        for id in self.reserves[self.current_player]  {
             if id == NONE { continue; }
             let piece = self.pieces[id];
-            if piece.player == self.current_player {
-                player_pieces.push(piece);
+            player_pieces.push(piece);
+        }
+        for piece in &player_pieces {
+            // Identical pieces are not filtered out even though actions would be the same.
+            // Possibly create a HashSet to store piece kinds and 'continue' when match found.
+
+            // Parachute coords checks for rules 1, 2, 3
+            let mut to_coords = Vec::new();
+            if piece.kind == Pawn {
+                to_coords = self.parachute_coords(pawn = true);
+            } else {
+                to_coords = self.parachute_coords(pawn = false);
             }
+
+            // need fns for attacked coords, piece move coords, is_checkmate
+            
+
+
+            let action = Action::new(
+                FromReserve, piece.id, Some(pc_coord), to_coord, None);
+            actions.push(action);
+
         }
         actions
     }
