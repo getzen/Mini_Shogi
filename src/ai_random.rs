@@ -1,9 +1,8 @@
 // AI Random
 
 use crate::ai::{AIProgress, Think};
-use crate::message_sender::Message;
 use crate::Game;
-use crate::message_sender::MessageSender;
+use crate::message_sender::{Message, MessageSender};
 
 pub struct AIRandom {
     game: Game,

@@ -83,7 +83,7 @@ impl Controller {
             if *piece_id == NONE { continue; }
             let piece = self.game.pieces[*piece_id];
             let coord = Game::index_to_coord(index);
-            self.view_game.add_piece_to(&coord, piece.kind, piece.player).await;
+            self.view_game.add_piece(&coord, piece.kind, piece.player).await;
         }
     }
 
@@ -157,7 +157,7 @@ impl Controller {
     }
 
     fn reserve_selected(&mut self, piece_id: usize) {
-        
+
     }
 
     // A square with a piece was selected.
@@ -166,7 +166,7 @@ impl Controller {
         if self.state != HumanTurn { return; }
 
         // If piece selected is some.
-        if let Some(from) = self.view_game.selected_piece_coord() {
+        if let Some(from) = self.view_game.selected_piece_id() {
             println!("piece is selected");
             // If square is move-to.
             if self.view_game.is_move_to_coord(coord) {

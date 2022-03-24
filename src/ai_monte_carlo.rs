@@ -5,8 +5,7 @@
 
 use crate::{Game, GameState};
 use crate::ai::{AIProgress, Think};
-use crate::message_sender::Message;
-use crate::message_sender::MessageSender;
+use crate::message_sender::{Message, MessageSender};
 
 pub struct AIMonteCarlo {
     game: Game,

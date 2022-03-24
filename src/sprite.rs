@@ -37,9 +37,9 @@ pub struct Sprite {
     position_lerp: Option<Lerp>,
     
     // For this game in particular:
-    pub id: usize,
-    pub coord: Coord,
-    pub contains_id: Option<usize>, // a square containing a piece, for example
+    pub id: Option<usize>,
+    //pub coord: Coord,
+    //pub contains_id: Option<usize>, // a square containing a piece, for example
 }
 
 impl Sprite {
@@ -57,9 +57,9 @@ impl Sprite {
             highlight_color: LIGHTGRAY,
             draw_params,
             position_lerp: None,
-            id: 0,
-            coord: Coord(0,0),
-            contains_id: None,
+            id: None,
+            //coord: Coord(0,0),
+            //contains_id: None,
         }
     }
 
