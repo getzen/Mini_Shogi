@@ -54,7 +54,7 @@ impl ViewGame {
             message_sender: MessageSender::new(tx, None),
             columns, rows,
             squares: HashMap::new(),
-            reserves: Vec::new(),
+            reserves: vec!(HashMap::new(), HashMap::new()),
             pieces: HashMap::new(),
             selected_piece: None,
             move_to_coords: Vec::new(),
@@ -120,18 +120,23 @@ impl ViewGame {
     }
 
     pub fn move_piece(&mut self, id: usize, to: &Coord) {
-        if let Some(piece) = self.pieces.get(&id) {
-            let to_position = self.center_position_for(to);
+        let to_position = self.center_position_for(to);
+        if let Some(piece) = self.pieces.get_mut(&id) {
             piece.animate_move(to_position, Duration::from_secs_f32(0.75));
         }
     }
 
     pub fn capture_piece(&mut self, id: usize, capturing_player: usize) {
-        if let Some(piece) = self.pieces.get(&id) {
+        if let Some(piece) = self.pieces.get_mut(&id) {
             let mut to_position = RESERVE_0_CENTER;
             if capturing_player == 1 {
                 to_position = RESERVE_1_CENTER;
             }
+            let mut theta: f32 = 0.0;
+            if capturing_player == 1 {
+                theta = std::f32::consts::PI
+            }
+            piece.set_rotation(theta);
             piece.animate_move(to_position, Duration::from_secs_f32(0.75));
         }
     }
@@ -146,26 +151,34 @@ impl ViewGame {
         let mouse_pos = mouse_position();
         let left_button = is_mouse_button_released(MouseButton::Left);
 
-        // Squares
-        for (coord, square) in self.squares {
-            if left_button && square.contains(mouse_pos) {
-                self.message_sender.send(Message::SquareSelected(coord));
+        let mut clicked_handled = false;
+
+        // Detect piece hits first
+        for (id, piece) in &self.pieces {
+            if left_button && piece.contains(mouse_pos) {
+                self.message_sender.send(Message::PieceSelected(*id));
+                clicked_handled = true;
             }
         }
 
-        // Reserves
-        for i in 0..2 {
-            for (coord, reserve) in self.reserves[i] {
-                if left_button && reserve.contains(mouse_pos) {
-                    self.message_sender.send(Message::ReserveSelected((i, coord)));
+        if !clicked_handled {
+            // Squares
+            for (coord, square) in &self.squares {
+                if left_button && square.contains(mouse_pos) {
+                    self.message_sender.send(Message::SquareSelected(*coord));
+                    clicked_handled = true;
                 }
             }
         }
-       
-        // Pieces
-        for (id, piece) in self.pieces {
-            if left_button && piece.contains(mouse_pos) {
-                self.message_sender.send(Message::PieceSelected(id));
+        
+        if !clicked_handled {
+            // Reserves
+            for i in 0..2 {
+                for (coord, reserve) in &self.reserves[i] {
+                    if left_button && reserve.contains(mouse_pos) {
+                        self.message_sender.send(Message::ReserveSelected((i, *coord)));
+                    }
+                }
             }
         }
     }
@@ -231,7 +244,7 @@ impl ViewGame {
             }
             self.unselect_piece();
         }
-        if let Some(piece) = self.pieces.get(&id) {
+        if let Some(piece) = self.pieces.get_mut(&id) {
             piece.highlighted = true;
             self.selected_piece = Some(id);
         }
@@ -239,7 +252,7 @@ impl ViewGame {
 
     pub fn unselect_piece(&mut self) {
         if let Some(id) = self.selected_piece {
-            if let Some(piece) = self.pieces.get(&id) {
+            if let Some(piece) = self.pieces.get_mut(&id) {
                 piece.highlighted = false;
             }
             self.selected_piece = None;
@@ -247,7 +260,7 @@ impl ViewGame {
     }
 
     pub fn set_move_to_coords(&mut self, coords:Vec<Coord>) {
-        for (coord, square) in &self.squares {
+        for (coord, square) in &mut self.squares {
             square.highlighted = coords.contains(coord);
         }
         self.move_to_coords = coords;
@@ -263,7 +276,7 @@ impl ViewGame {
 
         // Highlight the new.
         for coord in &coords {
-            if let Some(square) = self.squares.get(coord) {
+            if let Some(square) = self.squares.get_mut(coord) {
                 square.highlighted = true;
             }
         }
@@ -271,7 +284,7 @@ impl ViewGame {
 
     /// Does what is says on the tin.
     pub fn unhighlight_all_squares(&mut self) {
-        for (_, square) in &self.squares {
+        for (_, square) in &mut self.squares {
             square.highlighted = false;
         }
     }

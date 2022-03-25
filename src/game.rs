@@ -3,13 +3,10 @@
 
 //use slotmap::{DefaultKey, SlotMap};
 
-use std::collections::HashSet;
-
 use crate::Action;
 use crate::action::ActionKind::*;
 use crate::GameState::*;
 use crate::Piece;
-use crate::piece::PieceKind;
 use crate::piece::PieceKind::*;
 
 pub const COLS: usize = 3;
@@ -158,6 +155,14 @@ impl Game {
         }
     }
 
+    pub fn player_for(&self, piece_id: usize) -> usize {
+        self.pieces[piece_id].player
+    }
+
+    pub fn coord_for(&self, piece_id: usize) -> Option<Coord> {
+        self.pieces[piece_id].coord
+    }
+
     pub fn is_player_at(&self, player: usize, coord: &Coord) -> bool {
         let option_item = self.pieces
         .iter()
@@ -297,6 +302,7 @@ impl Game {
             for to_coord in to_coords {
                 let action = Action::new(
                     FromReserve, piece.id, piece.coord, to_coord, None);
+                println!("reserve move coord: {:?}", to_coord);
                 actions.push(action);
             }
         }

@@ -24,7 +24,6 @@ pub enum SpriteKind {
     Piece,
 }
 
-
 pub struct Sprite {
     pub id: Option<usize>, // usually a hash value
     pub kind: SpriteKind,
