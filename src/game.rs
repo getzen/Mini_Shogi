@@ -137,7 +137,6 @@ impl Game {
     }
 
     pub fn remove_reserve_piece(&mut self, piece_id: usize, player: usize) {
-        let piece = NONE;
         for (index, id) in self.reserves[player].iter().enumerate() {
             if *id == piece_id {
                 self.reserves[player][index] = NONE;
@@ -163,24 +162,24 @@ impl Game {
         self.pieces[piece_id].coord
     }
 
-    pub fn is_player_at(&self, player: usize, coord: &Coord) -> bool {
-        let option_item = self.pieces
-        .iter()
-        .find(|p| p.coord == Some(*coord) && p.player == player);
-        option_item.is_some()
-    }
+    // pub fn is_player_at(&self, player: usize, coord: &Coord) -> bool {
+    //     let option_item = self.pieces
+    //     .iter()
+    //     .find(|p| p.coord == Some(*coord) && p.player == player);
+    //     option_item.is_some()
+    // }
 
     // **** empty_indices instead, and avoid Coord2 conversion? ***
     /// Returns vector of coords that have no pieces.
-    pub fn empty_coords(&self) -> Vec<Coord> {
-        let mut empties = Vec::new();
-        for i in self.grid {
-            if i == NONE {
-                empties.push(Game::index_to_coord(i));
-            }
-        }
-        empties
-    }
+    // pub fn empty_coords(&self) -> Vec<Coord> {
+    //     let mut empties = Vec::new();
+    //     for i in self.grid {
+    //         if i == NONE {
+    //             empties.push(Game::index_to_coord(i));
+    //         }
+    //     }
+    //     empties
+    // }
 
     // Parachuting rules:
     // 1. A pawns can never be parachuted into the last row since it could not move.
@@ -190,9 +189,8 @@ impl Game {
     // creates “checkmate”.
     pub fn parachute_coords(&self, for_pawn: bool) -> Vec<Coord> {
         let mut empties = Vec::new();
-        for i in 0..self.grid.len() {
-            let piece_id = self.grid[i];
-            if piece_id != NONE { continue };
+        for (i, piece_id) in self.grid.iter().enumerate() {
+            if *piece_id != NONE { continue };
             if for_pawn {
                 // Rule 1. Need to skip the last row per the rules.
                 if self.current_player == 0 && i >= GRID_COUNT - COLS {
@@ -212,9 +210,35 @@ impl Game {
         empties
     }
 
+    /// Return the coordinates the given piece may move to.
+    /// This is not for parachuting pieces.
+    fn move_coords(&mut self, piece_id: usize) -> Vec<Coord> {
+        let mut move_coords = Vec::new();
+        let piece = &self.pieces[piece_id];
+        let vectors = piece.move_vectors();
+        let coord = piece.coord.unwrap();
+        for (x, y) in vectors {
+            let move_x = coord.0 as i8 + x;
+            let move_y = coord.1 as i8 + y;
+            // Is this move out of bounds?
+            if move_x < 0 || move_x as usize  >= COLS || move_y < 0 || move_y as usize >= ROWS {
+                continue;
+            }
+            let to_coord = Coord(move_x as usize, move_y as usize);
+            let onto_id = self.get_piece(&to_coord);
+            let onto_piece = self.pieces[onto_id];
+            // Does this land on own piece?
+            if onto_piece.player == self.current_player { 
+                continue;
+            }
+            move_coords.push(to_coord);
+        }
+        move_coords
+    }
+
     /// Determines if the given player has won.
     fn is_win(&mut self, player: usize) -> bool {
-        // If opponent king is capture: true.
+        // If checkmate
 
         // If player king on back row and not in "check": true.
 
@@ -294,7 +318,7 @@ impl Game {
             // Possibly create a HashSet to store piece kinds and 'continue' when match found.
 
             // Parachute coords checks for rules 1, 2, 3
-            let mut to_coords = Vec::new();
+            let to_coords: Vec<Coord>;
             if piece.kind == Pawn {
                 to_coords = self.parachute_coords(true);
             } else {
@@ -327,7 +351,7 @@ impl Game {
                 self.set_piece(action.piece_id, &action.to);
             }
             FromReserve => {
-                let piece_id = self.remove_reserve_piece(action.piece_id, self.current_player);
+                let _ = self.remove_reserve_piece(action.piece_id, self.current_player);
                 self.set_piece(action.piece_id, &action.to);
             },
             ToReserve => {
