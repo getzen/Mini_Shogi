@@ -190,13 +190,15 @@ impl Game {
     // creates “checkmate”.
     pub fn parachute_coords(&self, for_pawn: bool) -> Vec<Coord> {
         let mut empties = Vec::new();
-        for i in self.grid {
-            if i != NONE { continue };
+        for i in 0..self.grid.len() {
+            let piece_id = self.grid[i];
+            if piece_id != NONE { continue };
             if for_pawn {
                 // Rule 1. Need to skip the last row per the rules.
                 if self.current_player == 0 && i >= GRID_COUNT - COLS {
                     continue;
-                } else if i < COLS { // player 1
+                }
+                if self.current_player == 1 && i < COLS {
                     continue;
                 }
             }
@@ -298,7 +300,7 @@ impl Game {
             } else {
                 to_coords = self.parachute_coords(false);
             }
-
+            println!("found {} parachute coords", to_coords.len());
             for to_coord in to_coords {
                 let action = Action::new(
                     FromReserve, piece.id, piece.coord, to_coord, None);
