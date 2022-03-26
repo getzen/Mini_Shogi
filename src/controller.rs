@@ -9,6 +9,7 @@ use macroquad::prelude::get_frame_time;
 use num_format::{Locale, ToFormattedString};
 
 use crate::Action;
+use crate::ActionKind::*;
 use crate::ai::AI;
 use crate::ai::AIProgress;
 use crate::message_sender::{Message, MessageSender};
@@ -73,7 +74,7 @@ impl Controller {
 
     pub async fn prepare(&mut self) {
         self.player_kinds.push(PlayerKind::Human);
-        self.player_kinds.push(PlayerKind::Human);
+        self.player_kinds.push(PlayerKind::AIRandom);
         self.game.prepare();
         self.view_intro.prepare();
         self.view_game.prepare().await;
@@ -148,11 +149,24 @@ impl Controller {
                 Message::SearchCompleted(progress) => {
                     let action = progress.pv.first().unwrap();
                     
-                    //self.view_game.add_piece_to(&action.coord, action.piece_kind, self.game.current_player).await;
-                    self.game.perform_action(action, true);
-                    self.action_history.push(action.clone());
+                    match action.kind {
+                        MoveNoCapture => {
+                            self.perform_move(action.piece_id, &action.to);
+                        },
+                        MoveWithCapture => {
+                            self.perform_move_with_capture(
+                                action.piece_id, 
+                                action.captured_id.unwrap(), 
+                                &action.to);
+                        },
+                        FromReserve => {
+                            self.perform_move(action.piece_id, &action.to);
+                        },
+                        ToReserve => {println!("AI ToReserve action?");}
+                    }
+                    //self.game.perform_action(action, true);
+                    //self.action_history.push(action.clone());
                     self.pv_text = self.format_ai_progress(&progress);
-
                     self.state = NextPlayer;
                 },
                 Message::ShouldExit => self.state = Exit,
