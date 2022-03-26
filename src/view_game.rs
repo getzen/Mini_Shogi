@@ -174,9 +174,9 @@ impl ViewGame {
         if !clicked_handled {
             // Reserves
             for i in 0..2 {
-                for (coord, reserve) in &self.reserves[i] {
+                for (_coord, reserve) in &self.reserves[i] {
                     if left_button && reserve.contains(mouse_pos) {
-                        self.message_sender.send(Message::ReserveSelected((i, *coord)));
+                        self.message_sender.send(Message::ReserveSelected(i));
                     }
                 }
             }
@@ -268,18 +268,6 @@ impl ViewGame {
 
     pub fn is_move_to_coord(&self, coord: &Coord) -> bool {
         self.move_to_coords.contains(coord)
-    }
-
-    /// Highlights the given square coords and turns it off for all others.
-    pub fn highlight_squares(&mut self, coords: Vec<Coord>) {
-        self.unhighlight_all_squares();
-
-        // Highlight the new.
-        for coord in &coords {
-            if let Some(square) = self.squares.get_mut(coord) {
-                square.highlighted = true;
-            }
-        }
     }
 
     /// Does what is says on the tin.

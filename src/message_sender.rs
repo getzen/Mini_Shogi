@@ -50,7 +50,7 @@ pub enum Message {
     IntroEnded,
     PieceSelected(usize),
     SquareSelected(Coord),
-    ReserveSelected((usize, Coord)),
+    ReserveSelected(usize),
     AIUpdate(AIProgress),
     SearchCompleted(AIProgress),
     ShouldExit,

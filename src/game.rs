@@ -127,6 +127,17 @@ impl Game {
         self.grid[Game::coord_to_index(coord)] = piece_id;
     }
 
+    /// Gets the id of the player's king.
+    fn king_id_(&self, player: usize) -> Option<usize> {
+        let piece = self.pieces
+        .iter().find(|p| p.player == player && p.kind == King);
+        if piece.is_some() {
+            return Some(piece.unwrap().id)
+        }
+        // Not found. King was captured.
+        None
+    }
+
     /// Removes and returns the piece at the given coord.
     pub fn remove_piece(&mut self, coord: &Coord) -> usize {
         let i = Game::coord_to_index(coord);
@@ -162,25 +173,6 @@ impl Game {
         self.pieces[piece_id].coord
     }
 
-    // pub fn is_player_at(&self, player: usize, coord: &Coord) -> bool {
-    //     let option_item = self.pieces
-    //     .iter()
-    //     .find(|p| p.coord == Some(*coord) && p.player == player);
-    //     option_item.is_some()
-    // }
-
-    // **** empty_indices instead, and avoid Coord2 conversion? ***
-    /// Returns vector of coords that have no pieces.
-    // pub fn empty_coords(&self) -> Vec<Coord> {
-    //     let mut empties = Vec::new();
-    //     for i in self.grid {
-    //         if i == NONE {
-    //             empties.push(Game::index_to_coord(i));
-    //         }
-    //     }
-    //     empties
-    // }
-
     // Parachuting rules:
     // 1. A pawns can never be parachuted into the last row since it could not move.
     // 2. Two pawns belonging to the same player can never be positioned in the same column.
@@ -210,13 +202,19 @@ impl Game {
         empties
     }
 
-    /// Return the coordinates the given piece may move to.
-    /// This is not for parachuting pieces.
-    fn move_coords(&mut self, piece_id: usize) -> Vec<Coord> {
+    /// Returns a tuple containing a vec of the move coords for the
+    /// given piece and a vec of the capture coords. This is not for
+    /// parachuting pieces. If capture_own is true, then the attack
+    /// coords will include attacked coords with own pieces on them.
+    /// This is needed for checkmate determination.
+    fn move_and_attack_coords(&mut self, piece_id: usize, capture_own: bool) -> (Vec<Coord>, Vec<Coord>) {
         let mut move_coords = Vec::new();
+        let mut attack_coords = Vec::new();
         let piece = &self.pieces[piece_id];
+        let player = piece.player;
         let vectors = piece.move_vectors();
         let coord = piece.coord.unwrap();
+
         for (x, y) in vectors {
             let move_x = coord.0 as i8 + x;
             let move_y = coord.1 as i8 + y;
@@ -226,21 +224,71 @@ impl Game {
             }
             let to_coord = Coord(move_x as usize, move_y as usize);
             let onto_id = self.get_piece(&to_coord);
-            let onto_piece = self.pieces[onto_id];
-            // Does this land on own piece?
-            if onto_piece.player == self.current_player { 
+            // Is the square empty?
+            if onto_id == NONE {
+                move_coords.push(to_coord);
                 continue;
             }
-            move_coords.push(to_coord);
+            let onto_player = self.pieces[onto_id].player;
+            // Does this land on own piece?
+            if !capture_own && onto_player == player { 
+                continue;
+            }
+            attack_coords.push(to_coord);
         }
-        move_coords
+        (move_coords, attack_coords)
+    }
+
+    /// Simple verion. If opponent's piece is captured, it's a win.
+    fn is_win(&mut self, player: usize) -> bool {
+        let king_id = self.king_id_(1 - player);
+        if king_id.is_some() {return false;}
+        true
     }
 
     /// Determines if the given player has won.
-    fn is_win(&mut self, player: usize) -> bool {
-        // If checkmate
+    fn is_win_real(&mut self, player: usize) -> bool {
 
-        // If player king on back row and not in "check": true.
+        let king_id = self.king_id_(1 - player).unwrap();
+        let king_coord = self.pieces[king_id].coord.unwrap();
+
+        // Get the player's pieces. *** OPTIMIZE ***
+        let mut player_ids = Vec::new();
+        for id in self.grid {
+            if id == NONE { continue; }
+            if self.pieces[id].player == self.current_player {
+                player_ids.push(id);
+            }
+        }
+
+        // Get the moves/captures for each player piece.
+        for id in player_ids {
+            let from_coord = self.pieces[id].coord;
+            let (move_coords, attack_coords) = self.move_and_attack_coords(id, true);
+
+             // If this piece doesn't attack king, continue.
+            if !attack_coords.contains(&king_coord) {
+                continue;
+            }
+
+            // King is under attack. Can he escape or capture?
+            let (king_move_coords, king_capture_coords) = self.move_and_attack_coords(king_id, false);
+            // Check escape first.
+            let mut can_escape = false;
+            for escape_coord in king_move_coords {
+                if !move_coords.contains(&escape_coord) && !attack_coords.contains(&escape_coord) {
+                    // He can escape.
+                    can_escape = true;
+                    println!("king can escape to {:?}", escape_coord);
+                    return false;
+                }
+                // Must be checkmate, unless other opponent piece can capture. 
+            }
+            println!("checkmate?");
+
+        }
+
+        // Novice game: if player king on back row and not in "check": true.
 
         // If 3-move repeat: true
 
@@ -265,70 +313,62 @@ impl Game {
 
     pub fn actions_available(&mut self) -> Vec<Action> {
         let mut actions = Vec::new();
-        // Get player's pieces. Optimization opportunity here.
-        let mut player_pieces = Vec::new();
+        // Get player's grid pieces. Optimization opportunity here.
+        let mut grid_ids = Vec::new();
         for id in self.grid {
             if id == NONE { continue; }
-            let piece = self.pieces[id];
-            if piece.player == self.current_player {
-                player_pieces.push(piece);
+            if self.pieces[id].player == self.current_player {
+                grid_ids.push(id);
             }
         }
-        for piece in &player_pieces {
-            let vectors = piece.move_vectors();
-            let pc_coord = piece.coord.unwrap();
-            for (x, y) in vectors {
-                let move_x = pc_coord.0 as i8 + x;
-                let move_y = pc_coord.1 as i8 + y;
-
-                // Is this move out of bounds?
-                if move_x < 0 || move_x as usize  >= COLS || move_y < 0 || move_y as usize >= ROWS {
-                    continue;
-                }
-                // Does it move onto another piece?
-                let to_coord = Coord(move_x as usize, move_y as usize);
-                let onto_id = self.get_piece(&to_coord);
-                if onto_id == NONE { // no capture
-                    let action = Action::new(
-                        MoveNoCapture, piece.id, Some(pc_coord), to_coord, None);
-                    actions.push(action);
-                    continue;
-                }
-                let onto_piece = self.pieces[onto_id];
-                if onto_piece.player == self.current_player { // landing on own piece
-                    continue;
-                }
-                // Must be landing on opponent's piece. Capture.
+        // Get the moves for each grid piece.
+        for id in grid_ids {
+            let from_coord = self.pieces[id].coord;
+            let (move_coords, capture_coords) = self.move_and_attack_coords(id, false);
+            for move_coord in &move_coords {
                 let action = Action::new(
-                    MoveWithCapture, piece.id, Some(pc_coord), to_coord, Some(onto_id));
-                    actions.push(action);
+                    MoveNoCapture, 
+                    id, 
+                    from_coord, 
+                    *move_coord, 
+                    None);
+                actions.push(action);
             }
+            for capture_coord in &capture_coords {
+                let capture_id = self.get_piece(capture_coord);
+                let action = Action::new(
+                    MoveWithCapture, id,
+                    from_coord, 
+                    *capture_coord, 
+                    Some(capture_id));
+                    actions.push(action);
+            }   
         }
         
         // Parachute actions.
         // Get pieces in player's reserve.
-        player_pieces.clear();
+        let mut reserve_ids = Vec::new();
         for id in self.reserves[self.current_player]  {
             if id == NONE { continue; }
-            let piece = self.pieces[id];
-            player_pieces.push(piece);
+            reserve_ids.push(id);
         }
-        for piece in &player_pieces {
+
+        for id in reserve_ids {
             // Identical pieces are not filtered out even though actions would be the same.
             // Possibly create a HashSet to store piece kinds and 'continue' when match found.
 
+            let from_coord = self.pieces[id].coord;
+
             // Parachute coords checks for rules 1, 2, 3
             let to_coords: Vec<Coord>;
-            if piece.kind == Pawn {
+            if self.pieces[id].kind == Pawn {
                 to_coords = self.parachute_coords(true);
             } else {
                 to_coords = self.parachute_coords(false);
             }
-            println!("found {} parachute coords", to_coords.len());
             for to_coord in to_coords {
                 let action = Action::new(
-                    FromReserve, piece.id, piece.coord, to_coord, None);
-                println!("reserve move coord: {:?}", to_coord);
+                    FromReserve, id, from_coord, to_coord, None);
                 actions.push(action);
             }
         }

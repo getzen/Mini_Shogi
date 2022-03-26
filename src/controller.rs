@@ -137,8 +137,8 @@ impl Controller {
                 Message::SquareSelected(coord) => {
                     self.square_selected(&coord);
                 },
-                Message::ReserveSelected((player, coord)) => {
-                    self.reserve_selected(player, &coord);
+                Message::ReserveSelected(player) => {
+                    self.reserve_selected(player);
                 },
                 Message::AIUpdate(progress) => {
                     if self.state == AIThinking {
@@ -182,6 +182,7 @@ impl Controller {
                     // Capture
                     if let Some(move_id) = self.view_game.selected_piece_id() {
                         self.perform_move_with_capture(move_id, piece_id, &coord);
+                        self.state = NextPlayer;
                     }
                 }
                 //else {
@@ -201,6 +202,7 @@ impl Controller {
             // Move
             if let Some(move_id) = self.view_game.selected_piece_id() {
                 self.perform_move(move_id, &coord);
+                self.state = NextPlayer;
             }
         }
         //else {
@@ -211,7 +213,7 @@ impl Controller {
     }
 
     // A reserve square was selected.
-    fn reserve_selected(&mut self, player: usize, coord: &Coord) {
+    fn reserve_selected(&mut self, player: usize) {
         if self.state != HumanTurn { return; }
         if player != self.game.current_player { return; }
         println!("empty reserve square");
@@ -244,58 +246,6 @@ impl Controller {
             }
         }
     }
-
-    // // An empty square was selected.
-    // fn square_selected(&mut self, square_coord: &Coord) {
-    //     // Ignore if not human turn.
-    //     if self.state != HumanTurn { return; }
-    //     // Return if no piece is selected.
-    //     let piece_coord = self.view_game.selected_piece_coord();
-    //     if piece_coord.is_none() {
-    //         println!("no piece_coord!");
-    //         return; 
-    //     }
-
-    //     // Find the matching action.
-    //     for action in &self.game.actions_available() {
-    //         let to = action.to;
-    //         if to != *square_coord {
-    //             println!("no 'to' coord!");
-    //             continue;
-    //         }
-
-    //         match action.kind {
-    //             MoveNoCapture => {
-    //                 println!("move no capture");
-    //                 if action.from.is_none() { continue; }
-    //                 let from = action.from.unwrap();
-    //                 if from != *square_coord { continue; }
-    //                 self.view_game.move_piece(&from, &to)
-    //             }
-    //             MoveWithCapture => {
-    //                 println!("move with capture!");
-    //                 if action.from.is_none() { continue; }
-    //                 let from = action.from.unwrap();
-    //                 if from != *square_coord { continue; }
-    //                 self.view_game.move_piece(&from, &to);
-    //             }
-    //             _ => {
-    //                 println!("Other action!");
-    //             }
-    //         }
-
-    //         // Highlight the 'from' and 'to' squares to show the move.
-    //         let from = action.from.unwrap();
-    //         self.view_game.highlight_squares(vec![from, to]);
-    //         //self.view_game.toggle_piece_highlighting(&from);
-
-    //         println!("finding action");
-
-    //         self.game.perform_action(&action, true);
-    //         self.action_history.push(action.clone());
-
-    //     }
-    // }
 
     fn format_ai_progress(&self, progress: &AIProgress) -> String {
         let nodes_string = progress.nodes.to_formatted_string(&Locale::en);
@@ -356,18 +306,5 @@ impl Controller {
         std::thread::spawn(move || {
             AI::think(ai_kind, game_clone, message_sender);
         });
-    }
-
-    async fn coord_selected_OLD(&mut self, coord: Coord) {
-        if self.state == HumanTurn {
-            let actions = self.game.actions_available();
-            let mut some_action: Vec<&Action> = actions.iter().filter(|a| a.to == coord).collect();
-            let action = some_action.swap_remove(0);
-
-            //self.view_game.add_piece_to(&coord, action.to, self.game.current_player).await;
-
-            self.game.perform_action(action, true);
-            self.action_history.push(action.clone());
-        }
     }
 }
