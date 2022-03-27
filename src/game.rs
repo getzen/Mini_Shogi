@@ -110,9 +110,9 @@ impl Game {
     }
 
     // Return to the previous player.
-    pub fn previous_player(&mut self) {
-        self.current_player = 1 - self.current_player;
-    }
+    // pub fn previous_player(&mut self) {
+    //     self.current_player = 1 - self.current_player;
+    // }
 
     /// Returns a reference to the piece at the given coord.
     pub fn get_piece(&mut self, coord: &Coord) -> usize {
@@ -237,53 +237,53 @@ impl Game {
     }
 
     /// Determines if the given player has won.
-    fn is_checkmate(&mut self, player: usize) -> bool {
+    // fn is_checkmate(&mut self, player: usize) -> bool {
 
-        let king_id = self.king_id_(1 - player).unwrap();
-        let king_coord = self.pieces[king_id].coord.unwrap();
+        // let king_id = self.king_id_(1 - player).unwrap();
+        // let king_coord = self.pieces[king_id].coord.unwrap();
 
-        // Get the player's pieces. *** OPTIMIZE ***
-        let mut player_ids = Vec::new();
-        for id in self.grid {
-            if id == NONE { continue; }
-            if self.pieces[id].player == self.current_player {
-                player_ids.push(id);
-            }
-        }
+        // // Get the player's pieces. *** OPTIMIZE ***
+        // let mut player_ids = Vec::new();
+        // for id in self.grid {
+        //     if id == NONE { continue; }
+        //     if self.pieces[id].player == self.current_player {
+        //         player_ids.push(id);
+        //     }
+        // }
 
-        // Get the moves/captures for each player piece.
-        for id in player_ids {
-            let from_coord = self.pieces[id].coord;
-            let (move_coords, attack_coords) = self.move_and_attack_coords(id, true);
+        // // Get the moves/captures for each player piece.
+        // for id in player_ids {
+        //     let from_coord = self.pieces[id].coord;
+        //     let (move_coords, attack_coords) = self.move_and_attack_coords(id, true);
 
-             // If this piece doesn't attack king, continue.
-            if !attack_coords.contains(&king_coord) {
-                continue;
-            }
+        //      // If this piece doesn't attack king, continue.
+        //     if !attack_coords.contains(&king_coord) {
+        //         continue;
+        //     }
 
-            // King is under attack. Can he escape or capture?
-            let (king_move_coords, king_capture_coords) = self.move_and_attack_coords(king_id, false);
-            // Check escape first.
-            let mut can_escape = false;
-            for escape_coord in king_move_coords {
-                if !move_coords.contains(&escape_coord) && !attack_coords.contains(&escape_coord) {
-                    // He can escape.
-                    can_escape = true;
-                    println!("king can escape to {:?}", escape_coord);
-                    return false;
-                }
-                // Must be checkmate, unless other opponent piece can capture. 
-            }
-            println!("checkmate?");
+        //     // King is under attack. Can he escape or capture?
+        //     let (king_move_coords, king_capture_coords) = self.move_and_attack_coords(king_id, false);
+        //     // Check escape first.
+        //     let mut can_escape = false;
+        //     for escape_coord in king_move_coords {
+        //         if !move_coords.contains(&escape_coord) && !attack_coords.contains(&escape_coord) {
+        //             // He can escape.
+        //             can_escape = true;
+        //             println!("king can escape to {:?}", escape_coord);
+        //             return false;
+        //         }
+        //         // Must be checkmate, unless other opponent piece can capture. 
+        //     }
+        //     println!("checkmate?");
 
-        }
+        // }
 
-        // Novice game: if player king on back row and not in "check": true.
+        // // Novice game: if player king on back row and not in "check": true.
 
-        // If 3-move repeat: true
-
-        false
-    }
+        // // If 3-move repeat: true
+// 
+        // false
+    // }
 
     /// Updates and returns the 'status' field.
     pub fn update_state(&mut self) -> &GameState {
@@ -363,13 +363,13 @@ impl Game {
                 let action = Action::new(
                     FromReserve, *id, None, to_coord, None, Some(index));
                 actions.push(action);
-                println!("piece_id: {}, pushing {:?}", id, to_coord);
             }
         }
         actions
     }
 
     pub fn perform_action(&mut self, action: &Action, advance_player: bool) {
+        println!("action kind :{:?}", action.kind);
         match action.kind {
             MoveNoCapture => {
                 self.remove_piece(&action.from.unwrap());

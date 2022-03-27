@@ -74,7 +74,7 @@ impl Controller {
 
     pub async fn prepare(&mut self) {
         self.player_kinds.push(PlayerKind::Human);
-        self.player_kinds.push(PlayerKind::Human);
+        self.player_kinds.push(PlayerKind::AIMinimax);
         self.game.prepare();
         self.view_intro.prepare();
         self.view_game.prepare().await;
@@ -178,14 +178,11 @@ impl Controller {
         if self.game.player_for(piece_id) == self.game.current_player {
             // Select it.
             self.view_game.select_piece(piece_id);
-            println!("piece selected");
             // Highlight move-to squares.
             let mut coords = Vec::new();
             for action in self.game.actions_available() {
                 if action.piece_id == piece_id {
                     coords.push(action.to);
-                } else {
-                    println!("looking for: {}, found:{}", piece_id, action.piece_id);
                 }
             }
             self.view_game.set_move_to_coords(coords);

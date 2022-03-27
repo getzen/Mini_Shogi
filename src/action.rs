@@ -35,13 +35,11 @@ impl Action {
     pub fn undo(&self) -> Action {
         match self.kind {
             ActionKind::MoveNoCapture => {
-                let to_coord = self.to;
                 Action {
                     from: Some(self.to), to: self.from.unwrap(), ..*self
                 }
             }
             ActionKind::MoveWithCapture => {
-                let to_coord = self.to;
                 Action {
                     from: Some(self.to), to: self.from.unwrap(), ..*self
                 }
