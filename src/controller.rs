@@ -74,7 +74,7 @@ impl Controller {
 
     pub async fn prepare(&mut self) {
         self.player_kinds.push(PlayerKind::Human);
-        self.player_kinds.push(PlayerKind::AIMonteCarlo);
+        self.player_kinds.push(PlayerKind::Human);
         self.game.prepare();
         self.view_intro.prepare();
         self.view_game.prepare().await;
@@ -178,11 +178,14 @@ impl Controller {
         if self.game.player_for(piece_id) == self.game.current_player {
             // Select it.
             self.view_game.select_piece(piece_id);
+            println!("piece selected");
             // Highlight move-to squares.
             let mut coords = Vec::new();
             for action in self.game.actions_available() {
                 if action.piece_id == piece_id {
                     coords.push(action.to);
+                } else {
+                    println!("looking for: {}, found:{}", piece_id, action.piece_id);
                 }
             }
             self.view_game.set_move_to_coords(coords);
@@ -231,6 +234,8 @@ impl Controller {
         println!("empty reserve square");
     }
 
+    
+
     fn perform_move(&mut self, id: usize, to: &Coord) {
         // View
         self.view_game.move_piece(id, to);
@@ -245,18 +250,20 @@ impl Controller {
     }
 
     fn perform_move_with_capture(&mut self, move_id: usize, capture_id: usize, to: &Coord) {
-        // View
-        self.view_game.capture_piece(capture_id, self.game.current_player);
-        self.view_game.move_piece(move_id, to);
-
-        // Game
         for action in &self.game.actions_available() {
             if action.piece_id == move_id && action.to == *to {
+                // View
+                self.view_game.capture_piece(
+                    capture_id, 
+                    self.game.current_player, 
+                    action.reserve_index.unwrap());
+                self.view_game.move_piece(move_id, to);
+                // Game
                 self.game.perform_action(&action, true);
                 self.action_history.push(action.clone());
                 break;
             }
-        }
+        } 
     }
 
     fn format_ai_progress(&self, progress: &AIProgress) -> String {

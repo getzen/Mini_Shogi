@@ -339,7 +339,8 @@ impl Game {
                     from_coord, 
                     *capture_coord, 
                     Some(capture_id),
-                self.available_reserve_index(self.current_player));
+                    self.available_reserve_index(self.current_player)
+                );
                     actions.push(action);
             }   
         }
@@ -350,8 +351,6 @@ impl Game {
             
             // Identical pieces are not filtered out even though actions would be the same.
             // Possibly create a HashSet to store piece kinds and 'continue' when match found.
-
-            //let from_coord = self.pieces[id].coord;
 
             // Parachute coords checks for rules 1, 2, 3
             let to_coords: Vec<Coord>;
@@ -364,6 +363,7 @@ impl Game {
                 let action = Action::new(
                     FromReserve, *id, None, to_coord, None, Some(index));
                 actions.push(action);
+                println!("piece_id: {}, pushing {:?}", id, to_coord);
             }
         }
         actions
@@ -379,13 +379,13 @@ impl Game {
                 // Move captured piece to player reserve.
                 let captured_id = self.remove_piece(&action.to);
                 self.pieces[captured_id].player = self.current_player;
-                self.add_reserve_piece(self.current_player, action.reserve_index.unwrap(), action.piece_id);
+                self.add_reserve_piece(self.current_player, action.reserve_index.unwrap(), action.captured_id.unwrap());
                 // Move player piece.
                 self.remove_piece(&action.from.unwrap());
                 self.set_piece(action.piece_id, &action.to);
             }
             FromReserve => {
-                let _ = self.remove_reserve_piece(action.piece_id, self.current_player);
+                let _ = self.remove_reserve_piece(self.current_player, action.reserve_index.unwrap());
                 self.set_piece(action.piece_id, &action.to);
             },
             ToReserve => {
