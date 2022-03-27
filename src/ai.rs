@@ -20,16 +20,6 @@ pub trait Think {
     fn think(&mut self) -> AIProgress;
 }
 
-// pub trait TransmitMessage {
-//     /// Transmits the given message. Typically received by Controller.
-//     fn transmit_message(tx: &Sender<Message>, message: Message) {
-//         let result = tx.send(message);
-//         if result.is_err() {
-//             println!("Transmit::transmit_message error.");
-//         }
-//     }
-// }
-
 #[derive(Debug, Clone)]
 pub struct AIProgress {
     pub is_complete: bool,
@@ -68,7 +58,7 @@ impl AI {
             },
             AIMonteCarlo => {
                 sender_clone.min_time_between = Some(Duration::from_millis(100));
-                let mut ai = AIMonteCarlo::new(game, 1000, sender_clone);
+                let mut ai = AIMonteCarlo::new(game, 2000, sender_clone);
                 ai.think()
             },
             // AIMonteCarloTree => {

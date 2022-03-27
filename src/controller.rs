@@ -74,7 +74,7 @@ impl Controller {
 
     pub async fn prepare(&mut self) {
         self.player_kinds.push(PlayerKind::Human);
-        self.player_kinds.push(PlayerKind::AIRandom);
+        self.player_kinds.push(PlayerKind::AIMonteCarlo);
         self.game.prepare();
         self.view_intro.prepare();
         self.view_game.prepare().await;
@@ -164,8 +164,6 @@ impl Controller {
                         },
                         ToReserve => {println!("AI ToReserve action?");}
                     }
-                    //self.game.perform_action(action, true);
-                    //self.action_history.push(action.clone());
                     self.pv_text = self.format_ai_progress(&progress);
                     self.state = NextPlayer;
                 },
