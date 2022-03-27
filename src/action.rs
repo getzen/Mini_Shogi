@@ -19,14 +19,16 @@ pub struct Action {
     pub from: Option<Coord>,
     pub to: Coord,
     pub captured_id: Option<usize>,
+    pub reserve_index: Option<usize>,
 }
 
 impl Action {
     pub fn new(action_kind: ActionKind, 
         piece_id: usize, from: Option<Coord>, to: Coord, 
-        captured_id: Option<usize>) -> Self {
+        captured_id: Option<usize>, reserve_index: Option<usize>) -> Self {
         Self {
-            kind: action_kind, piece_id, from, to, captured_id,
+            kind: action_kind,
+            piece_id, from, to, captured_id, reserve_index,
         }
     }
 
@@ -38,7 +40,7 @@ impl Action {
                     from: Some(self.to), to: self.from.unwrap(), ..*self
                 }
             }
-            ActionKind::MoveWithCapture => { ///////// fix this implementation
+            ActionKind::MoveWithCapture => {
                 let to_coord = self.to;
                 Action {
                     from: Some(self.to), to: self.from.unwrap(), ..*self

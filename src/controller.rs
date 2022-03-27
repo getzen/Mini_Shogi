@@ -245,11 +245,11 @@ impl Controller {
     }
 
     fn perform_move_with_capture(&mut self, move_id: usize, capture_id: usize, to: &Coord) {
-        // view
+        // View
         self.view_game.capture_piece(capture_id, self.game.current_player);
         self.view_game.move_piece(move_id, to);
 
-        // game
+        // Game
         for action in &self.game.actions_available() {
             if action.piece_id == move_id && action.to == *to {
                 self.game.perform_action(&action, true);

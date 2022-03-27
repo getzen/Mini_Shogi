@@ -78,8 +78,22 @@ impl ViewGame {
                 self.squares.insert(Coord(c,r), square);
             }
         }
-        // Reserve, player 0
+
+        // Reserves
         texture = Sprite::load_texture("reserve.png").await;
+        for i in 0..3 {
+            // Reserve, player 0
+            let mut pos_x = RESERVE_0_CENTER.0;
+            let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + SQUARE_GAP); 
+            let mut reserve = Sprite::new(Reserve, texture, (pos_x, pos_y));
+            self.reserves[0].insert(Coord(0,i), reserve);
+            // Reserve, player 1
+            pos_x = RESERVE_1_CENTER.0;
+            pos_y = RESERVE_1_CENTER.1 + i as f32 * (SQUARE_SIZE + SQUARE_GAP);
+            reserve = Sprite::new(Reserve, texture, (pos_x, pos_y));
+            self.reserves[1].insert(Coord(0,i), reserve);
+        }
+        
         let mut reserve = Sprite::new(Reserve, texture, RESERVE_0_CENTER);
         self.reserves[0].insert(Coord(0,0), reserve);
         // Reserve, player 1
@@ -126,18 +140,21 @@ impl ViewGame {
         }
     }
 
-    pub fn capture_piece(&mut self, id: usize, capturing_player: usize) {
+    pub fn capture_piece(&mut self, id: usize, capturing_player: usize, reserve_index: usize) {
         if let Some(piece) = self.pieces.get_mut(&id) {
-            let mut to_position = RESERVE_0_CENTER;
-            if capturing_player == 1 {
-                to_position = RESERVE_1_CENTER;
-            }
-            let mut theta: f32 = 0.0;
-            if capturing_player == 1 {
-                theta = std::f32::consts::PI
-            }
-            piece.set_rotation(theta);
-            piece.animate_move(to_position, Duration::from_secs_f32(0.75));
+            let coord = Coord(0, reserve_index);
+
+            // Get reserve position.
+            let reserve_val = self.reserves[capturing_player].get(&coord);
+            if let Some(reserve) = reserve_val {
+                let to_position = reserve.position;
+                let mut theta: f32 = 0.0;
+                if capturing_player == 1 {
+                    theta = std::f32::consts::PI
+                }
+                piece.set_rotation(theta);
+                piece.animate_move(to_position, Duration::from_secs_f32(0.75));
+            }   
         }
     }
 
@@ -153,7 +170,7 @@ impl ViewGame {
 
         let mut clicked_handled = false;
 
-        // Detect piece hits first
+        // Detect piece hits first.
         for (id, piece) in &self.pieces {
             if left_button && piece.contains(mouse_pos) {
                 self.message_sender.send(Message::PieceSelected(*id));

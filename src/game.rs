@@ -109,13 +109,11 @@ impl Game {
         self.current_player = 1 - self.current_player;
     }
 
-    #[allow(dead_code)]
     // Return to the previous player.
     pub fn previous_player(&mut self) {
         self.current_player = 1 - self.current_player;
     }
 
-    #[allow(dead_code)]
     /// Returns a reference to the piece at the given coord.
     pub fn get_piece(&mut self, coord: &Coord) -> usize {
         self.grid[Game::coord_to_index(coord)]
@@ -130,11 +128,12 @@ impl Game {
     /// Gets the id of the player's king.
     fn king_id_(&self, player: usize) -> Option<usize> {
         let piece = self.pieces
-        .iter().find(|p| p.player == player && p.kind == King);
+        .iter()
+        .find(|p| p.player == player && p.kind == King);
         if piece.is_some() {
             return Some(piece.unwrap().id)
         }
-        // Not found. King was captured.
+        // Not found. King must be captured.
         None
     }
 
@@ -147,22 +146,13 @@ impl Game {
         piece_id
     }
 
-    pub fn remove_reserve_piece(&mut self, piece_id: usize, player: usize) {
-        for (index, id) in self.reserves[player].iter().enumerate() {
-            if *id == piece_id {
-                self.reserves[player][index] = NONE;
-                break;
-            }
-        }
+    pub fn remove_reserve_piece(&mut self, player: usize, index: usize) {
+        self.reserves[player][index] = NONE;
     }
 
-    pub fn add_reserve_piece(&mut self, piece_id: usize, player: usize) {
-        for (index, id) in self.reserves[player].iter().enumerate() {
-            if *id == NONE {
-                self.reserves[player][index] = piece_id;
-                break;
-            }
-        }
+    /// Adds the given piece to the player's reserve at the given index position.
+    pub fn add_reserve_piece(&mut self, player: usize, index: usize, piece_id: usize) {
+        self.reserves[player][index] = piece_id;
     }
 
     pub fn player_for(&self, piece_id: usize) -> usize {
@@ -247,7 +237,7 @@ impl Game {
     }
 
     /// Determines if the given player has won.
-    fn is_win_real(&mut self, player: usize) -> bool {
+    fn is_checkmate(&mut self, player: usize) -> bool {
 
         let king_id = self.king_id_(1 - player).unwrap();
         let king_coord = self.pieces[king_id].coord.unwrap();
@@ -311,6 +301,13 @@ impl Game {
         &self.state
     }
 
+    fn available_reserve_index(&self, player: usize) -> Option<usize> {
+        for (index, id) in self.reserves[player].iter().enumerate() {
+            if *id == NONE { return Some(index) }
+        }
+        None
+    }
+
     pub fn actions_available(&mut self) -> Vec<Action> {
         let mut actions = Vec::new();
         // Get player's grid pieces. Optimization opportunity here.
@@ -331,7 +328,8 @@ impl Game {
                     id, 
                     from_coord, 
                     *move_coord, 
-                    None);
+                    None,
+                None);
                 actions.push(action);
             }
             for capture_coord in &capture_coords {
@@ -340,35 +338,31 @@ impl Game {
                     MoveWithCapture, id,
                     from_coord, 
                     *capture_coord, 
-                    Some(capture_id));
+                    Some(capture_id),
+                self.available_reserve_index(self.current_player));
                     actions.push(action);
             }   
         }
         
         // Parachute actions.
-        // Get pieces in player's reserve.
-        let mut reserve_ids = Vec::new();
-        for id in self.reserves[self.current_player]  {
-            if id == NONE { continue; }
-            reserve_ids.push(id);
-        }
-
-        for id in reserve_ids {
+        for (index, id) in self.reserves[self.current_player].iter().enumerate()  {
+            if *id == NONE { continue; }
+            
             // Identical pieces are not filtered out even though actions would be the same.
             // Possibly create a HashSet to store piece kinds and 'continue' when match found.
 
-            let from_coord = self.pieces[id].coord;
+            //let from_coord = self.pieces[id].coord;
 
             // Parachute coords checks for rules 1, 2, 3
             let to_coords: Vec<Coord>;
-            if self.pieces[id].kind == Pawn {
+            if self.pieces[*id].kind == Pawn {
                 to_coords = self.parachute_coords(true);
             } else {
                 to_coords = self.parachute_coords(false);
             }
             for to_coord in to_coords {
                 let action = Action::new(
-                    FromReserve, id, from_coord, to_coord, None);
+                    FromReserve, *id, None, to_coord, None, Some(index));
                 actions.push(action);
             }
         }
@@ -385,7 +379,7 @@ impl Game {
                 // Move captured piece to player reserve.
                 let captured_id = self.remove_piece(&action.to);
                 self.pieces[captured_id].player = self.current_player;
-                self.add_reserve_piece(captured_id, self.current_player);
+                self.add_reserve_piece(self.current_player, action.reserve_index.unwrap(), action.piece_id);
                 // Move player piece.
                 self.remove_piece(&action.from.unwrap());
                 self.set_piece(action.piece_id, &action.to);
@@ -396,7 +390,7 @@ impl Game {
             },
             ToReserve => {
                 let piece_id = self.remove_piece(&action.from.unwrap());
-                self.add_reserve_piece(piece_id, self.current_player);
+                self.add_reserve_piece(self.current_player, action.reserve_index.unwrap(), piece_id);
             },
         }
         if advance_player {
