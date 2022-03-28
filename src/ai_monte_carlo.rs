@@ -41,7 +41,7 @@ impl AIMonteCarlo {
             let mut node_score = 0.0;
             
             for _ in 0..rounds {
-                let child = node.clone(); // is cloning necessary?
+                let mut child = node.clone(); // is cloning necessary?
 
                 // Play out the game with randon actions.                
                 while child.update_state() == &GameState::Ongoing {

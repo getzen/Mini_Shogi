@@ -2,7 +2,6 @@
 
 use std::time::Instant;
 
-use crate::Action;
 use crate::ai::{AIProgress, Think};
 use crate::Game;
 use crate::GameState;
@@ -24,9 +23,9 @@ impl Think for AIMinimax {
         self.now = std::time::Instant::now();
 
         // Optimization: consider switching to fixed-size array with index tracker.
-        let mut pv = Vec::<Action>::new();
+        let mut pv = Vec::new();
 
-        let score = self.alpha_beta(self.depth, true, f64::MIN, f64::MAX, &mut pv);
+        let score = self.alpha_beta(self.game, self.depth, true, f64::MIN, f64::MAX, &mut pv);
         self.progress.duration = self.now.elapsed();
 
         // Use the final version of the pv assembled by alpha_beta.
@@ -34,9 +33,9 @@ impl Think for AIMinimax {
         self.progress.score = score;
 
         print!("score:{}", score);
-        for p in &self.progress.pv {
-            print!(" ({},{})", p.to.0, p.to.1);
-        }
+        // for p in &self.progress.pv {
+        //     print!(" ({},{})", p.to.0, p.to.1);
+        // }
         println!();
         self.progress.clone()
     }
@@ -54,30 +53,27 @@ impl AIMinimax {
         }
     }
 
-    fn alpha_beta(&mut self, depth: usize, maximizing: bool, mut alpha: f64, mut beta: f64, pv: &mut Vec<Action>) -> f64 {
-        if *self.game.update_state() != GameState::Ongoing || depth == 0 {
+    fn alpha_beta(&mut self, mut node: Game, depth: usize, maximizing: bool, mut alpha: f64, mut beta: f64, pv: &mut Vec<Game>) -> f64 {
+        if *node.update_state() != GameState::Ongoing || depth == 0 {
             pv.clear();
-            return self.evaluate(self.depth - depth);
+            return self.evaluate(&node, self.depth - depth);
         }
         let mut best_score: f64;
-        let mut child_pv = Vec::<Action>::new();
-        let actions_available = self.game.actions_available();
+        let mut child_pv = Vec::new();
+        let child_nodes = node.child_nodes(node.current_player);
 
         // Maximizing
         if maximizing {
             best_score = f64::MIN;
-            for action in &actions_available {
-                self.game.perform_action(action, true);
-                let child_score = self.alpha_beta(depth-1, false, alpha, beta, &mut child_pv);
-                self.game.perform_action(&action.undo(), true);
-
+            for node in &child_nodes {
+                let child_score = self.alpha_beta(*node, depth-1, false, alpha, beta, &mut child_pv);
                 self.progress.nodes += 1;
 
                 if child_score > best_score {
                     best_score = child_score;
 
                     pv.clear();
-                    pv.push(action.clone());
+                    pv.push(node.clone());
                     pv.append(&mut child_pv);
 
                     self.progress.pv = pv.clone();
@@ -93,10 +89,8 @@ impl AIMinimax {
         // Minimizing
         else {
             best_score = f64::MAX;
-            for action in &actions_available {
-                self.game.perform_action(action, true);
-                let child_score = self.alpha_beta(depth-1, true, alpha, beta, &mut child_pv);
-                self.game.perform_action(&action.undo(), true);
+            for node in &child_nodes {
+                let child_score = self.alpha_beta(*node, depth-1, true, alpha, beta, &mut child_pv);
 
                 self.progress.nodes += 1;
 
@@ -104,7 +98,7 @@ impl AIMinimax {
                     best_score = child_score;
 
                     pv.clear();
-                    pv.push(action.clone());
+                    pv.push(node.clone());
                     pv.append(&mut child_pv);
 
                     self.progress.pv = pv.clone();
@@ -123,9 +117,9 @@ impl AIMinimax {
     /// Scores the game from the point of view of search_player.
     /// Depth is used here to make the eval favor winning sooner (low depth) or
     /// losing later (high depth).
-    fn evaluate(&self, depth: usize) -> f64 {
+    fn evaluate(&self, node: &Game, depth: usize) -> f64 {
         const WIN_LOSS_VAL: f64 = 100.0;
-        match self.game.state {
+        match node.state {
             GameState::Draw => 0.0,
             GameState::WinPlayer0 => {
                 if self.search_player == 0 {
