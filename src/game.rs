@@ -70,8 +70,12 @@ impl Game {
         &self.pieces[id]
     }
 
-    fn player_for(&self, id: usize) -> usize {
+    pub fn player_for(&self, id: usize) -> usize {
         self.pieces[id].player
+    }
+
+    pub fn location_index_for(&self, id: usize) -> usize {
+        self.pieces[id].location_index
     }
 
     fn pieces_ids_for(&self, player: usize) -> Vec<usize> {

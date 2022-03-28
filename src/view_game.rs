@@ -33,11 +33,11 @@ pub struct ViewGame {
     message_sender: MessageSender, // sends event messages to controller
     columns: usize,
     rows: usize,
-    squares: HashMap<Coord, Sprite>,
+    squares: HashMap<usize, Sprite>,
     reserves: Vec<HashMap<usize, Sprite>>,
     pieces: HashMap<usize, Sprite>, // usize is id matching model's Piece id
     pub selected_piece: Option<usize>,
-    pub move_to_coords: Vec<Coord>,
+    pub move_indices: Vec<usize>, // all the spots the currently selected piece can move to
     status_text: Text,
     ai_progress_text: Text,
 }
@@ -59,7 +59,7 @@ impl ViewGame {
             reserves: vec!(HashMap::new(), HashMap::new()),
             pieces: HashMap::new(),
             selected_piece: None,
-            move_to_coords: Vec::new(),
+            move_indices: Vec::new(),
             status_text: Text::new(
                 "Welcome!".to_owned(), 
                 TEXT_STATUS_CENTER,
@@ -78,7 +78,7 @@ impl ViewGame {
                 let index = Game::coord_to_index(&Coord(c,r));
                 let position = self.center_position_for(index);
                 let square = Sprite::new(Square, texture, position);
-                self.squares.insert(Coord(c,r), square);
+                self.squares.insert(index, square);
             }
         }
 
@@ -98,7 +98,7 @@ impl ViewGame {
         }
     }
 
-    pub async fn add_piece(&mut self, piece: Piece) {
+    pub async fn add_piece(&mut self, piece: &Piece) {
         let texture = match piece.kind {
             King => Sprite::load_texture("king.png").await,
             Rook => Sprite::load_texture("rook.png").await,
@@ -288,15 +288,26 @@ impl ViewGame {
         }
     }
 
-    pub fn set_move_to_coords(&mut self, coords:Vec<Coord>) {
-        for (coord, square) in &mut self.squares {
-            square.highlighted = coords.contains(coord);
+    // pub fn set_move_to_coords(&mut self, coords:Vec<Coord>) {
+    //     for (coord, square) in &mut self.squares {
+    //         square.highlighted = coords.contains(coord);
+    //     }
+    //     self.move_to_coords = coords;
+    // }
+
+    pub fn set_move_indicies(&mut self, indicies:Vec<usize>) {
+        for (index, square) in &mut self.squares {
+            square.highlighted = indicies.contains(index);
         }
-        self.move_to_coords = coords;
+        self.move_indices = indicies;
     }
 
-    pub fn is_move_to_coord(&self, coord: &Coord) -> bool {
-        self.move_to_coords.contains(coord)
+    // pub fn is_move_to_coord(&self, coord: &Coord) -> bool {
+    //     self.move_to_indices.contains(coord)
+    // }
+
+    pub fn is_move_index(&self, index: usize) -> bool {
+        self.move_indices.contains(&index)
     }
 
     /// Does what is says on the tin.

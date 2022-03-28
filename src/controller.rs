@@ -79,10 +79,11 @@ impl Controller {
 
         // Add the game's pieces to the view.
         for piece in &self.game.pieces {
-            if let Some(location_id) = piece.location_index {
-                let coord = Game::index_to_coord(location_id);
-                self.view_game.add_piece(&coord, piece.id, piece.kind, piece.player).await;
-            }   
+            self.view_game.add_piece(piece);
+            // if let Some(location_id) = piece.location_index {
+            //     let coord = Game::index_to_coord(location_id);
+            //     self.view_game.add_piece(&coord, piece.id, piece.kind, piece.player).await;
+            // }   
         }
     }
 
@@ -131,11 +132,11 @@ impl Controller {
                 Message::IntroEnded => {
                     self.next_player();
                 },
-                Message::PieceSelected(piece_id) => {
-                    self.piece_selected(piece_id);
+                Message::PieceSelected(id) => {
+                    self.piece_selected(id);
                 },
-                Message::SquareSelected(coord) => {
-                    self.square_selected(&coord);
+                Message::SquareSelected(index) => {
+                    self.square_selected(index);
                 },
                 Message::ReserveSelected(player) => {
                     self.reserve_selected(player);
@@ -171,56 +172,51 @@ impl Controller {
         }
     }
 
-    fn piece_selected(&mut self, piece_id: usize) {
+    fn piece_selected(&mut self, id: usize) {
         if self.state != HumanTurn { return; }
         // Own piece?
-        if self.game.player_for(piece_id) == self.game.current_player {
+        if self.game.player_for(id) == self.game.current_player {
             // Select it.
-            self.view_game.select_piece(piece_id);
+            self.view_game.select_piece(id);
             // Highlight move-to squares.
-            let mut coords = Vec::new();
-            for action in self.game.actions_available() {
-                if action.piece_id == piece_id {
-                    coords.push(action.to);
-                }
-            }
-            self.view_game.set_move_to_coords(coords);
+            let move_indices = self.game.move_indices_for_piece(id);
+            self.view_game.set_move_indicies(move_indices);
+
+            // let mut coords = Vec::new();
+            // for action in self.game.actions_available() {
+            //     if action.piece_id == piece_id {
+            //         coords.push(action.to);
+            //     }
+            // }
+            // self.view_game.set_move_to_coords(coords);
         } 
         else {
             // Opponent's piece. Is it on a move-to square?
-            if let Some(coord) = self.game.coord_for(piece_id) {
-                if self.view_game.is_move_to_coord(&coord) {
-                    // Capture
-                    if let Some(move_id) = self.view_game.selected_piece_id() {
-                        self.perform_move_with_capture(move_id, piece_id, &coord);
-                        self.state = NextPlayer;
-                    }
-                }
-                //else {
-                    // Unselect everything
-                    self.view_game.unselect_piece();
-                    self.view_game.unhighlight_all_squares();
-                //}
+            let location_index = self.game.location_index_for(id);
+            if self.view_game.is_move_index(location_index) {
+                // Capture
+                // perform node...
+                self.state = NextPlayer;
+            } else {
+                // Unselect everything
+                self.view_game.unselect_piece();
+                self.view_game.unhighlight_all_squares();
             }
         }
     }
   
     // A square with a piece was selected.
-    fn square_selected(&mut self, coord: &Coord) {
+    fn square_selected(&mut self, index: usize) {
         if self.state != HumanTurn { return; }
 
-        if self.view_game.is_move_to_coord(&coord) {
+        if self.view_game.is_move_index(index) {
             // Move
-            if let Some(move_id) = self.view_game.selected_piece_id() {
-                self.perform_move(move_id, &coord);
-                self.state = NextPlayer;
-            }
+            //self.perform_move(move_id, &coord);
+            self.state = NextPlayer;
         }
-        //else {
-            // Unselect everything
-            self.view_game.unselect_piece();
-            self.view_game.unhighlight_all_squares();
-        //}
+        // Regardless, unselect everything.
+        self.view_game.unselect_piece();
+        self.view_game.unhighlight_all_squares();
     }
 
     // A reserve square was selected.

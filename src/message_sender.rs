@@ -44,13 +44,12 @@ impl MessageSender {
 }
 
 // Messages for this particular app.
-use crate::game::Coord;
 use crate::ai::AIProgress;
 pub enum Message {
     IntroEnded,
-    PieceSelected(usize),
-    SquareSelected(Coord),
-    ReserveSelected(usize),
+    PieceSelected(usize), // the piece id
+    SquareSelected(usize), // the location index
+    ReserveSelected(usize), // the player
     AIUpdate(AIProgress),
     SearchCompleted(AIProgress),
     ShouldExit,
