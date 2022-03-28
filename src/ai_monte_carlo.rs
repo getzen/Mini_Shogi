@@ -31,25 +31,23 @@ impl AIMonteCarlo {
         let mut progress= AIProgress::new();
         let player = self.game.current_player;
 
-        let actions_available = self.game.actions_available();
+        let child_nodes = self.game.child_nodes(player);
         // Create the move to beat. With that score, any move will do.
-        let mut best_action = actions_available.first().unwrap().clone();
+        let mut best_node = child_nodes.first().unwrap().clone();
         let mut best_score = f64::MIN;
         
         // Examine and score each move.
-        for action in actions_available {
-            let mut action_score = 0.0;
+        for node in child_nodes {
+            let mut node_score = 0.0;
             
             for _ in 0..rounds {
-                let mut clone = self.game.clone();
-                clone.perform_action(&action, true);
+                let child = node.clone(); // is cloning necessary?
 
                 // Play out the game with randon actions.                
-                while clone.update_state() == &GameState::Ongoing {
-                    let mut available = clone.actions_available();
-                    let rand_index = fastrand::usize(0..available.len());
-                    let rand_action = available.swap_remove(rand_index);
-                    clone.perform_action(&rand_action, true);
+                while child.update_state() == &GameState::Ongoing {
+                    let mut sub_children = child.child_nodes(child.current_player);
+                    let rand_index = fastrand::usize(0..sub_children.len());
+                    child = sub_children.swap_remove(rand_index);
                     progress.nodes += 1;
                 }
 
@@ -59,22 +57,22 @@ impl AIMonteCarlo {
                 const WIN_VAL: f64 = 1.0;
                 const LOSS_VAL: f64 = -7.0;
                 
-                match clone.state {
+                match child.state {
                     GameState::Draw => {
                         continue;
                     },
                     GameState::WinPlayer0 => {
                         if player == 0 {
-                            action_score += WIN_VAL;
+                            node_score += WIN_VAL;
                         } else {
-                            action_score += LOSS_VAL;
+                            node_score += LOSS_VAL;
                         }
                     },
                     GameState::WinPlayer1 => {
                         if player == 1 {
-                            action_score += WIN_VAL;
+                            node_score += WIN_VAL;
                         } else {
-                            action_score += LOSS_VAL;
+                            node_score += LOSS_VAL;
                         }
                     },
                     GameState::Ongoing => {
@@ -85,17 +83,17 @@ impl AIMonteCarlo {
             }
 
             // Find the move with the highest score.
-            if action_score > best_score {
-                best_score = action_score;
-                best_action = action;
+            if node_score > best_score {
+                best_score = node_score;
+                best_node = node;
                 progress.score = best_score;
             }
-            progress.pv = vec![best_action.clone()];
+            progress.pv = vec![best_node.clone()];
             progress.duration = now.elapsed();
             
         }
         progress.score = best_score;
-        progress.pv = vec![best_action];
+        progress.pv = vec![best_node];
         progress.duration = now.elapsed();
         progress
     }
