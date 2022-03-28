@@ -79,7 +79,7 @@ impl Controller {
 
         // Add the game's pieces to the view.
         for piece in &self.game.pieces {
-            self.view_game.add_piece(piece);
+            self.view_game.add_piece(piece).await;
             // if let Some(location_id) = piece.location_index {
             //     let coord = Game::index_to_coord(location_id);
             //     self.view_game.add_piece(&coord, piece.id, piece.kind, piece.player).await;
@@ -166,21 +166,12 @@ impl Controller {
             // Highlight move-to squares.
             let move_indices = self.game.move_indices_for_piece(id);
             self.view_game.set_move_indicies(move_indices);
-
-            // let mut coords = Vec::new();
-            // for action in self.game.actions_available() {
-            //     if action.piece_id == piece_id {
-            //         coords.push(action.to);
-            //     }
-            // }
-            // self.view_game.set_move_to_coords(coords);
-        } 
-        else {
+        } else {
             // Opponent's piece. Is it on a move-to square?
             let location_index = self.game.location_index_for(id);
             if self.view_game.is_move_index(location_index) {
                 // Capture
-                // perform node...
+                self.perform_move(id, location_index);
                 self.state = NextPlayer;
             } else {
                 // Unselect everything
@@ -196,8 +187,10 @@ impl Controller {
 
         if self.view_game.is_move_index(index) {
             // Move
-            //self.perform_move(move_id, &coord);
-            self.state = NextPlayer;
+            if let Some(piece_id) = self.view_game.selected_piece_id() {
+                self.perform_move(piece_id, index);
+                self.state = NextPlayer;
+            }
         }
         // Regardless, unselect everything.
         self.view_game.unselect_piece();

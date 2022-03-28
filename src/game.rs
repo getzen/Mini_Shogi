@@ -89,7 +89,7 @@ impl Game {
     }
 
     /// Returns all child nodes (possible Game states) for the given player.
-    pub fn child_nodes(&mut self, player: usize) -> Vec<Game> {
+    pub fn child_nodes(&self, player: usize) -> Vec<Game> {
         let mut nodes = Vec::new();
         for id in &self.pieces_ids_for(player) {
             nodes.append(&mut self.child_nodes_for_piece(*id));
@@ -98,7 +98,7 @@ impl Game {
     }
 
     /// Returns all the child nodes (possible Game states) for the given piece_id.
-    pub fn child_nodes_for_piece(&mut self, id: usize) -> Vec<Game> {
+    pub fn child_nodes_for_piece(&self, id: usize) -> Vec<Game> {
         let mut nodes = Vec::new();
         let move_indices = self.move_indices_for_piece(id);
         for to_index in move_indices {
@@ -111,7 +111,7 @@ impl Game {
 
     /// Returns all the position indices the given piece may move to, excluding
     /// positions occupied by the player's own pieces.
-    pub fn move_indices_for_piece(&mut self, id: usize) -> Vec<usize> {
+    pub fn move_indices_for_piece(&self, id: usize) -> Vec<usize> {
         let mut move_indices = Vec::new();
         let piece = self.piece_for(id);
 
@@ -154,8 +154,8 @@ impl Game {
     }
 
     /// Returns a vector of empty spots in the grid.
-    fn empty_grid_indices(&mut self) -> Vec<usize> {
-        let empties = Vec::new();
+    fn empty_grid_indices(&self) -> Vec<usize> {
+        let mut empties = Vec::new();
         for (index, val) in self.grid.iter().enumerate() {
             if *val == NONE {
                 empties.push(index);
@@ -165,32 +165,33 @@ impl Game {
     }
 
     fn make_move(&mut self, piece_id: usize, to_index: usize) {
-        let piece = self.piece_for(piece_id);
+        let player = self.player_for(piece_id);
+        let captured_id = self.grid[to_index];
 
         // Capture?
-        let captured_id = self.grid[to_index];
-        if captured_id != NONE {        
-            self.pieces[captured_id].location = Reserve;
-            if let Some(available_index) = self.available_reserve_index(piece.player) {
+        if captured_id != NONE {     
+            self.pieces[captured_id].location = Reserve; 
+            if let Some(available_index) = self.available_reserve_index(player) {
                 self.pieces[captured_id].location_index = available_index;
             }
         }
 
         // Move
         // First, remove from old location.
-        match piece.location {
+        let location_index = self.pieces[piece_id].location_index;
+        match self.pieces[piece_id].location {
             Board => {
-                self.grid[piece.location_index] = NONE;
+                self.grid[location_index] = NONE;
             },
             Reserve => {
-                self.reserves[piece.player][piece.location_index] = NONE;
+                self.reserves[player][location_index] = NONE;
             },
             _ => panic!(""),
         }
         // Then, move to new.
-        self.grid[to_index] = piece.id;
-        piece.location = Board;
-        piece.location_index = to_index;
+        self.grid[to_index] = piece_id;
+        self.pieces[piece_id].location = Board;
+        self.pieces[piece_id].location_index = to_index;
 
         self.next_player();
     }
