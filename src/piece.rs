@@ -1,6 +1,7 @@
 // Piece
 
-use crate::game::Coord;
+use crate::GameLocation;
+use crate::GameLocation::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PieceKind {
@@ -15,14 +16,16 @@ pub struct Piece {
     pub id: usize,
     pub kind: PieceKind,
     pub player: usize,
-    pub coord: Option<Coord>,
+    pub location: GameLocation, 
+    pub location_index: usize, // grid or reserve location
 }
 
 impl Piece {
     pub fn new(id: usize, kind: PieceKind, player: usize) -> Self {
         Self {
             id, kind, player,
-            coord: None,
+            location: OutOfGame,
+            location_index: None,
         }
     }
 

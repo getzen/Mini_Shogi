@@ -13,7 +13,7 @@ mod ai_random;
 mod controller;
 use crate::controller::Controller;
 mod game;
-use game::{Game, GameState};
+use game::{Game, GameState, GameLocation};
 mod lerp;
 mod message_sender;
 mod piece;

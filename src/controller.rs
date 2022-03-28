@@ -81,7 +81,8 @@ impl Controller {
 
         // Add the game's pieces to the view.
         for piece in &self.game.pieces {
-            if let Some(coord) = piece.coord {
+            if let Some(location_id) = piece.location_index {
+                let coord = Game::index_to_coord(location_id);
                 self.view_game.add_piece(&coord, piece.id, piece.kind, piece.player).await;
             }   
         }
@@ -230,8 +231,6 @@ impl Controller {
         if player != self.game.current_player { return; }
         println!("empty reserve square");
     }
-
-    
 
     fn perform_move(&mut self, id: usize, to: &Coord) {
         // View
