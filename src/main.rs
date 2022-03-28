@@ -2,9 +2,6 @@
 
 use macroquad::prelude::*;
 
-mod action;
-use action::Action;
-use action::ActionKind;
 mod ai;
 mod ai_minimax;
 mod ai_monte_carlo;

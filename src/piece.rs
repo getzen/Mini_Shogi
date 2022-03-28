@@ -25,7 +25,7 @@ impl Piece {
         Self {
             id, kind, player,
             location: OutOfGame,
-            location_index: None,
+            location_index: usize::MAX,
         }
     }
 
