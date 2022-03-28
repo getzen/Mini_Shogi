@@ -72,18 +72,14 @@ impl Controller {
 
     pub async fn prepare(&mut self) {
         self.player_kinds.push(PlayerKind::Human);
-        self.player_kinds.push(PlayerKind::AIMinimax);
+        self.player_kinds.push(PlayerKind::Human);
         self.game.prepare();
         self.view_intro.prepare();
         self.view_game.prepare().await;
 
         // Add the game's pieces to the view.
         for piece in &self.game.pieces {
-            self.view_game.add_piece(piece).await;
-            // if let Some(location_id) = piece.location_index {
-            //     let coord = Game::index_to_coord(location_id);
-            //     self.view_game.add_piece(&coord, piece.id, piece.kind, piece.player).await;
-            // }   
+            self.view_game.add_piece(piece).await; 
         }
     }
 
@@ -160,7 +156,7 @@ impl Controller {
     fn piece_selected(&mut self, id: usize) {
         if self.state != HumanTurn { return; }
         // Own piece?
-        if self.game.player_for(id) == self.game.current_player {
+        if self.game.player_for_piece_id(id) == self.game.current_player {
             // Select it.
             self.view_game.select_piece(id);
             // Highlight move-to squares.
@@ -232,23 +228,6 @@ impl Controller {
         self.game = node;
     }
 
-    // fn perform_move_with_capture(&mut self, move_id: usize, capture_id: usize, to: &Coord) {
-    //     for action in &self.game.actions_available() {
-    //         if action.piece_id == move_id && action.to == *to {
-    //             // View
-    //             self.view_game.capture_piece(
-    //                 capture_id, 
-    //                 self.game.current_player, 
-    //                 action.reserve_index.unwrap());
-    //             self.view_game.move_piece(move_id, to);
-    //             // Game
-    //             self.game.perform_action(&action, true);
-    //             self.history.push(action.clone());
-    //             break;
-    //         }
-    //     } 
-    // }
-
     fn format_ai_progress(&self, progress: &AIProgress) -> String {
         let nodes_string = progress.nodes.to_formatted_string(&Locale::en);
         let mut text = format!("nodes: {}", nodes_string);
@@ -275,6 +254,7 @@ impl Controller {
     }
 
     fn next_player(&mut self) {
+        self.game.debug();
         match self.game.update_state() {
             GameState::Draw => {
                 self.state = Draw;

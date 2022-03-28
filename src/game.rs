@@ -11,8 +11,8 @@ pub const ROWS: usize = 4;
 const GRID_COUNT: usize = 12;
 const PIECES_PER_PLAYER: usize = 4;
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub struct Coord(pub usize, pub usize);
+// #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+// pub struct Coord(pub usize, pub usize);
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum GameState {
@@ -56,22 +56,28 @@ impl Game {
         }
     }
 
-    /// Convert coord to an array index.
-    pub fn coord_to_index(coord: &Coord) -> usize {
-        coord.1 * COLS + coord.0
+    pub fn column_row_to_index(x: usize, y: usize) -> usize {
+        y * COLS + x
     }
 
-    /// Convert array index to coord.
-    pub fn index_to_coord(index: usize) -> Coord {
-        Coord(index % COLS, index / COLS)
+    pub fn index_to_column_row(index: usize) -> (usize, usize) {
+        (index % COLS, index / COLS) 
     }
 
     pub fn piece_for(&self, id: usize) -> &Piece {
         &self.pieces[id]
     }
 
-    pub fn player_for(&self, id: usize) -> usize {
+    pub fn player_for_piece_id(&self, id: usize) -> usize {
         self.pieces[id].player
+    }
+
+    fn player_for_location_index(&self, index: usize) -> Option<usize> {
+        let id = self.grid[index];
+        if id != NONE {
+            return Some(self.player_for_piece_id(id));
+        }
+        None
     }
 
     pub fn location_index_for(&self, id: usize) -> usize {
@@ -118,18 +124,20 @@ impl Game {
         match piece.location {
             Board => {
                 let vectors = piece.move_vectors();
-                let coord = Game::index_to_coord(piece.location_index);
+                let (x0, y0) = Game::index_to_column_row(piece.location_index);
                 for (x, y) in vectors {
-                    let move_x = coord.0 as i8 + x;
-                    let move_y = coord.1 as i8 + y;
+                    let move_x = x0 as i8 + x;
+                    let move_y = y0 as i8 + y;
                     // Is this move out of bounds?
                     if move_x < 0 || move_x as usize  >= COLS || move_y < 0 || move_y as usize >= ROWS {
                         continue;
                     }
-                    let to_index = Game::coord_to_index(&coord);
+                    let to_index = Game::column_row_to_index(move_x as usize, move_y as usize);
                     // Does this land on own piece?
-                    if piece.player == self.player_for(to_index) { 
-                        continue;
+                    if let Some(onto_player) = self.player_for_location_index(to_index) { 
+                        if piece.player == onto_player {
+                            continue;
+                        }
                     }
                     move_indices.push(to_index);
                 }
@@ -165,14 +173,16 @@ impl Game {
     }
 
     fn make_move(&mut self, piece_id: usize, to_index: usize) {
-        let player = self.player_for(piece_id);
+        let player = self.player_for_piece_id(piece_id);
         let captured_id = self.grid[to_index];
 
         // Capture?
-        if captured_id != NONE {     
-            self.pieces[captured_id].location = Reserve; 
+        if captured_id != NONE {
+            self.pieces[captured_id].player = player;
+            self.pieces[captured_id].location = Reserve;
             if let Some(available_index) = self.available_reserve_index(player) {
                 self.pieces[captured_id].location_index = available_index;
+                self.reserves[player][available_index] = captured_id;
             }
         }
 
@@ -276,5 +286,23 @@ impl Game {
         //     self.state = GameState::Draw;
         // }
         &self.state
+    }
+
+    pub fn debug(&self) {
+        println!("--- debug ---");
+        for (index, id) in self.grid.iter().enumerate() {
+            if *id == NONE { continue;}
+            println!("index: {}, id: {}", index, id);
+        }
+        println!("reserve 0");
+        for (index, id) in self.reserves[0].iter().enumerate() {
+            if *id == NONE { continue;}
+            println!("index: {}, id: {}", index, id);
+        }
+        println!("reserve 1");
+        for (index, id) in self.reserves[1].iter().enumerate() {
+            if *id == NONE { continue;}
+            println!("index: {}, id: {}", index, id);
+        }
     }
 }

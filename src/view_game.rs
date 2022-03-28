@@ -8,7 +8,6 @@ use std::time::Duration;
 use macroquad::prelude::*;
 
 use crate::Game;
-use crate::game::Coord;
 use crate::game::NONE;
 use crate::controller::AppState;
 use crate::controller::AppState::*;
@@ -75,7 +74,7 @@ impl ViewGame {
         let mut texture = Sprite::load_texture("square.png").await;
         for c in 0..self.columns {
             for r in 0..self.rows {
-                let index = Game::coord_to_index(&Coord(c,r));
+                let index = Game::column_row_to_index(c, r);
                 let position = self.center_position_for(index);
                 let square = Sprite::new(Square, texture, position);
                 self.squares.insert(index, square);
@@ -116,10 +115,10 @@ impl ViewGame {
     }
 
     fn corner_position_for(&self, index: usize) -> (f32, f32) {
-        let coord = Game::index_to_coord(index);
+        let (x0, y0) = Game::index_to_column_row(index);
         // We want row 0 at the bottom of the board, not the top, so flip the row.
-        let flip_r = self.rows - coord.1 - 1;
-        let x = BOARD_CORNER.0 + SQUARE_GAP + (SQUARE_SIZE + SQUARE_GAP) * coord.0 as f32;
+        let flip_r = self.rows - y0 - 1;
+        let x = BOARD_CORNER.0 + SQUARE_GAP + (SQUARE_SIZE + SQUARE_GAP) * x0 as f32;
         let y = BOARD_CORNER.1 + SQUARE_GAP + (SQUARE_SIZE + SQUARE_GAP) * flip_r as f32;
         (x, y)
     }
@@ -156,17 +155,19 @@ impl ViewGame {
     }
 
     pub fn update_with_game(&mut self, game: &Game) {
-        for id in game.grid {
-            if id == NONE { continue }
-            self.move_piece_on_grid(id, game.pieces[id].location_index);
+        for (index, id) in game.grid.iter().enumerate() {
+            if *id == NONE { continue }
+            self.move_piece_on_grid(*id, index);
         }
-        for id in game.reserves[0] {
-            if id == NONE { continue }
-            self.move_piece_to_reserve(0, id, game.pieces[id].location_index);
+        // Reserve 0
+        for (index, id) in game.reserves[0].iter().enumerate() {
+            if *id == NONE { continue }
+            self.move_piece_to_reserve(0, *id, index);
         }
-        for id in game.grid {
-            if id == NONE { continue }
-            self.move_piece_to_reserve(1, id, game.pieces[id].location_index);
+        // Reserve 1
+        for (index, id) in game.reserves[1].iter().enumerate() {
+            if *id == NONE { continue }
+            self.move_piece_to_reserve(1, *id, index);
         }
     }
 
@@ -288,23 +289,12 @@ impl ViewGame {
         }
     }
 
-    // pub fn set_move_to_coords(&mut self, coords:Vec<Coord>) {
-    //     for (coord, square) in &mut self.squares {
-    //         square.highlighted = coords.contains(coord);
-    //     }
-    //     self.move_to_coords = coords;
-    // }
-
     pub fn set_move_indicies(&mut self, indicies:Vec<usize>) {
         for (index, square) in &mut self.squares {
             square.highlighted = indicies.contains(index);
         }
         self.move_indices = indicies;
     }
-
-    // pub fn is_move_to_coord(&self, coord: &Coord) -> bool {
-    //     self.move_to_indices.contains(coord)
-    // }
 
     pub fn is_move_index(&self, index: usize) -> bool {
         self.move_indices.contains(&index)
