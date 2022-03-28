@@ -7,11 +7,13 @@ use std::time::Duration;
 
 use macroquad::prelude::*;
 
+use crate::Game;
 use crate::game::Coord;
+use crate::game::NONE;
 use crate::controller::AppState;
 use crate::controller::AppState::*;
 use crate::message_sender::{Message, MessageSender};
-use crate::piece::PieceKind;
+use crate::Piece;
 use crate::piece::PieceKind::*;
 use crate::sprite::*;
 use crate::sprite::SpriteKind::*;
@@ -32,7 +34,7 @@ pub struct ViewGame {
     columns: usize,
     rows: usize,
     squares: HashMap<Coord, Sprite>,
-    reserves: Vec<HashMap<Coord, Sprite>>,
+    reserves: Vec<HashMap<usize, Sprite>>,
     pieces: HashMap<usize, Sprite>, // usize is id matching model's Piece id
     pub selected_piece: Option<usize>,
     pub move_to_coords: Vec<Coord>,
@@ -73,7 +75,8 @@ impl ViewGame {
         let mut texture = Sprite::load_texture("square.png").await;
         for c in 0..self.columns {
             for r in 0..self.rows {
-                let position = self.center_position_for(&Coord(c,r));
+                let index = Game::coord_to_index(&Coord(c,r));
+                let position = self.center_position_for(index);
                 let square = Sprite::new(Square, texture, position);
                 self.squares.insert(Coord(c,r), square);
             }
@@ -86,39 +89,34 @@ impl ViewGame {
             let mut pos_x = RESERVE_0_CENTER.0;
             let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + SQUARE_GAP); 
             let mut reserve = Sprite::new(Reserve, texture, (pos_x, pos_y));
-            self.reserves[0].insert(Coord(0,i), reserve);
+            self.reserves[0].insert(i, reserve);
             // Reserve, player 1
             pos_x = RESERVE_1_CENTER.0;
             pos_y = RESERVE_1_CENTER.1 + i as f32 * (SQUARE_SIZE + SQUARE_GAP);
             reserve = Sprite::new(Reserve, texture, (pos_x, pos_y));
-            self.reserves[1].insert(Coord(0,i), reserve);
+            self.reserves[1].insert(i, reserve);
         }
-        
-        let mut reserve = Sprite::new(Reserve, texture, RESERVE_0_CENTER);
-        self.reserves[0].insert(Coord(0,0), reserve);
-        // Reserve, player 1
-        reserve = Sprite::new(Reserve, texture, RESERVE_1_CENTER);
-        self.reserves[1].insert(Coord(0,0), reserve);
     }
 
-    pub async fn add_piece(&mut self, coord: &Coord, id: usize, kind: PieceKind, player: usize) {
-        let texture = match kind {
+    pub async fn add_piece(&mut self, piece: Piece) {
+        let texture = match piece.kind {
             King => Sprite::load_texture("king.png").await,
             Rook => Sprite::load_texture("rook.png").await,
             Bishop => Sprite::load_texture("bishop.png").await,
             Pawn => Sprite::load_texture("pawn.png").await,
         };    
-        let position = self.center_position_for(coord);
-        let mut piece = Sprite::new(Piece, texture, position);
-        piece.set_size(Some(PIECE_SIZE));
-        if player == 1 {
-            piece.set_rotation(std::f32::consts::PI);
+        let position = self.center_position_for(piece.location_index);
+        let mut sprite = Sprite::new(Piece, texture, position);
+        sprite.set_size(Some(PIECE_SIZE));
+        if piece.player == 1 {
+            sprite.set_rotation(std::f32::consts::PI);
         }
-        piece.id = Some(id);
-        self.pieces.insert(id, piece);
+        sprite.id = Some(piece.id);
+        self.pieces.insert(piece.id, sprite);
     }
 
-    fn corner_position_for(&self, coord: &Coord) -> (f32, f32) {
+    fn corner_position_for(&self, index: usize) -> (f32, f32) {
+        let coord = Game::index_to_coord(index);
         // We want row 0 at the bottom of the board, not the top, so flip the row.
         let flip_r = self.rows - coord.1 - 1;
         let x = BOARD_CORNER.0 + SQUARE_GAP + (SQUARE_SIZE + SQUARE_GAP) * coord.0 as f32;
@@ -126,35 +124,49 @@ impl ViewGame {
         (x, y)
     }
 
-    fn center_position_for(&self, coord: &Coord) -> (f32, f32) {
-        let pos = self.corner_position_for(coord);
+    fn center_position_for(&self, index: usize) -> (f32, f32) {
+        let pos = self.corner_position_for(index);
         let x = pos.0 + SQUARE_SIZE / 2.0;
         let y = pos.1 + SQUARE_SIZE / 2.0;
         (x, y)
     }
 
-    pub fn move_piece(&mut self, id: usize, to: &Coord) {
-        let to_position = self.center_position_for(to);
+    pub fn move_piece_on_grid(&mut self, id: usize, to_index: usize) {
+        let to_position = self.center_position_for(to_index);
         if let Some(piece) = self.pieces.get_mut(&id) {
             piece.animate_move(to_position, Duration::from_secs_f32(0.75));
         }
     }
 
-    pub fn capture_piece(&mut self, id: usize, capturing_player: usize, reserve_index: usize) {
+    pub fn move_piece_to_reserve(&mut self, player: usize, id: usize, reserve_index: usize) {
         if let Some(piece) = self.pieces.get_mut(&id) {
-            let coord = Coord(0, reserve_index);
 
             // Get reserve position.
-            let reserve_val = self.reserves[capturing_player].get(&coord);
+            let reserve_val = self.reserves[player].get(&reserve_index);
             if let Some(reserve) = reserve_val {
                 let to_position = reserve.position;
                 let mut theta: f32 = 0.0;
-                if capturing_player == 1 {
+                if player == 1 {
                     theta = std::f32::consts::PI
                 }
                 piece.set_rotation(theta);
                 piece.animate_move(to_position, Duration::from_secs_f32(0.75));
             }   
+        }
+    }
+
+    pub fn update_with_game(&mut self, game: Game) {
+        for id in game.grid {
+            if id == NONE { continue }
+            self.move_piece_on_grid(id, game.pieces[id].location_index);
+        }
+        for id in game.reserves[0] {
+            if id == NONE { continue }
+            self.move_piece_to_reserve(0, id, game.pieces[id].location_index);
+        }
+        for id in game.grid {
+            if id == NONE { continue }
+            self.move_piece_to_reserve(1, id, game.pieces[id].location_index);
         }
     }
 

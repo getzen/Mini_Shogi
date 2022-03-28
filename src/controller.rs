@@ -8,8 +8,6 @@ use std::time::Duration;
 use macroquad::prelude::get_frame_time;
 use num_format::{Locale, ToFormattedString};
 
-use crate::Action;
-use crate::ActionKind::*;
 use crate::ai::AI;
 use crate::ai::AIProgress;
 use crate::message_sender::{Message, MessageSender};
@@ -49,7 +47,7 @@ pub struct Controller {
     view_intro: ViewIntro,
     view_game: ViewGame,
     pub state: AppState,
-    action_history: Vec<Action>, // for display and player-controlled reversing, not used by AI
+    node_history: Vec<Game>,
     rx: Receiver<Message>,
     tx: Sender<Message>,
     pv_text: String,
@@ -66,7 +64,7 @@ impl Controller {
             view_intro: ViewIntro::new(tx.clone()).await,
             view_game: ViewGame::new(tx.clone(), COLS, ROWS, ).await,
             state: Intro,
-            action_history: Vec::new(),
+            node_history: Vec::new(),
             rx, tx,
             pv_text: String::from(""),
         }
@@ -239,7 +237,7 @@ impl Controller {
         for action in self.game.actions_available() {
             if action.piece_id == id && action.to == *to {
                 self.game.perform_action(&action, true);
-                self.action_history.push(action.clone());
+                self.history.push(action.clone());
                 break;
             }
         }
@@ -256,7 +254,7 @@ impl Controller {
                 self.view_game.move_piece(move_id, to);
                 // Game
                 self.game.perform_action(&action, true);
-                self.action_history.push(action.clone());
+                self.history.push(action.clone());
                 break;
             }
         } 

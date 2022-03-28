@@ -37,7 +37,7 @@ pub struct Game {
     // This owns all the pieces. grid and reserves just hold the indices.
     pub pieces: [Piece; PIECES_PER_PLAYER * 2],
     pub grid: [usize; GRID_COUNT],
-    reserves: [[usize; PIECES_PER_PLAYER]; 2],
+    pub reserves: [[usize; PIECES_PER_PLAYER]; 2],
 
     pub current_player: usize,
     pub state: GameState,
