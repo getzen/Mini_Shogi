@@ -155,7 +155,7 @@ impl ViewGame {
         }
     }
 
-    pub fn update_with_game(&mut self, game: Game) {
+    pub fn update_with_game(&mut self, game: &Game) {
         for id in game.grid {
             if id == NONE { continue }
             self.move_piece_on_grid(id, game.pieces[id].location_index);

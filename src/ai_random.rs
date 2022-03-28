@@ -19,7 +19,7 @@ impl AIRandom {
 
 impl Think for AIRandom {
     fn think(&mut self) -> AIProgress {
-        let mut available = self.game.actions_available();
+        let mut available = self.game.child_nodes(self.game.current_player);
         if available.is_empty() {
             panic!("AIRandom.think: no actions available!");
         }

@@ -3,7 +3,6 @@
 
 use std::time::Duration;
 
-use crate::Action;
 use crate::ai_random::AIRandom;
 use crate::ai_minimax::AIMinimax;
 use crate::ai_monte_carlo::AIMonteCarlo;
@@ -24,7 +23,7 @@ pub trait Think {
 pub struct AIProgress {
     pub is_complete: bool,
     pub nodes: usize,
-    pub pv: Vec<Action>,
+    pub pv: Vec<Game>,
     pub duration: Duration,
     pub score: f64,
 }
@@ -34,7 +33,7 @@ impl AIProgress {
         Self {
             is_complete: false,
             nodes: 0,
-            pv: Vec::<Action>::new(),
+            pv: Vec::new(),
             duration: Duration::new(0, 0),
             score: 0.0,
         }

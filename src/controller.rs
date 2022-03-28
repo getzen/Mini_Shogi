@@ -147,23 +147,8 @@ impl Controller {
                     }
                 }
                 Message::SearchCompleted(progress) => {
-                    let action = progress.pv.first().unwrap();
-                    
-                    match action.kind {
-                        MoveNoCapture => {
-                            self.perform_move(action.piece_id, &action.to);
-                        },
-                        MoveWithCapture => {
-                            self.perform_move_with_capture(
-                                action.piece_id, 
-                                action.captured_id.unwrap(), 
-                                &action.to);
-                        },
-                        FromReserve => {
-                            self.perform_move(action.piece_id, &action.to);
-                        },
-                        ToReserve => {println!("AI ToReserve action?");}
-                    }
+                    let node = progress.pv.first().unwrap();
+                    self.use_node(*node);
                     self.pv_text = self.format_ai_progress(&progress);
                     self.state = NextPlayer;
                 },
@@ -226,35 +211,50 @@ impl Controller {
         println!("empty reserve square");
     }
 
-    fn perform_move(&mut self, id: usize, to: &Coord) {
-        // View
-        self.view_game.move_piece(id, to);
-        // Game
-        for action in self.game.actions_available() {
-            if action.piece_id == id && action.to == *to {
-                self.game.perform_action(&action, true);
-                self.history.push(action.clone());
-                break;
+    /// Find the child node matching the piece id
+    fn find_node(&mut self, id: usize, location_index: usize) -> Option<Game> {
+        let nodes = self.game.child_nodes(self.game.current_player);
+        for node in nodes {
+            let piece = node.piece_for(id);
+            if piece.location_index == location_index {
+                return Some(node);
             }
+        }
+        None
+    }
+
+    fn perform_move(&mut self, id: usize, location_index: usize) {
+        let node_option = self.find_node(id, location_index);
+        match node_option {
+            Some(node) => {
+                self.use_node(node); 
+            },
+            None => panic!("Cannot find node in perform_move!")
         }
     }
 
-    fn perform_move_with_capture(&mut self, move_id: usize, capture_id: usize, to: &Coord) {
-        for action in &self.game.actions_available() {
-            if action.piece_id == move_id && action.to == *to {
-                // View
-                self.view_game.capture_piece(
-                    capture_id, 
-                    self.game.current_player, 
-                    action.reserve_index.unwrap());
-                self.view_game.move_piece(move_id, to);
-                // Game
-                self.game.perform_action(&action, true);
-                self.history.push(action.clone());
-                break;
-            }
-        } 
+    fn use_node(&mut self, node: Game) {
+        self.view_game.update_with_game(&node);
+        self.node_history.push(node.clone());
+        self.game = node;
     }
+
+    // fn perform_move_with_capture(&mut self, move_id: usize, capture_id: usize, to: &Coord) {
+    //     for action in &self.game.actions_available() {
+    //         if action.piece_id == move_id && action.to == *to {
+    //             // View
+    //             self.view_game.capture_piece(
+    //                 capture_id, 
+    //                 self.game.current_player, 
+    //                 action.reserve_index.unwrap());
+    //             self.view_game.move_piece(move_id, to);
+    //             // Game
+    //             self.game.perform_action(&action, true);
+    //             self.history.push(action.clone());
+    //             break;
+    //         }
+    //     } 
+    // }
 
     fn format_ai_progress(&self, progress: &AIProgress) -> String {
         let nodes_string = progress.nodes.to_formatted_string(&Locale::en);
@@ -271,13 +271,13 @@ impl Controller {
         let score_string = (progress.score as isize).to_formatted_string(&Locale::en);
         text.push_str(&format!(". score: {}", score_string));
         text.push_str(". pv: ");
-        for i in 0..progress.pv.len() {
-            let coord = &progress.pv[i].to;
-            text.push_str(&format!("{},{}", coord.0, coord.1));
-            if i < progress.pv.len() - 1 {
-                text.push_str(", ");
-            }
-        }
+        // for i in 0..progress.pv.len() {
+        //     let coord = &progress.pv[i].to;
+        //     text.push_str(&format!("{},{}", coord.0, coord.1));
+        //     if i < progress.pv.len() - 1 {
+        //         text.push_str(", ");
+        //     }
+        // }
         text
     }
 

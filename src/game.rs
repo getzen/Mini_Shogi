@@ -32,7 +32,7 @@ pub enum GameLocation {
 pub const NONE: usize = usize::MAX;
 const STARTING_POSITION: &str = "BKR-P--p-rkb";
 
-#[derive(Clone, Copy, Hash)]
+#[derive(Clone, Copy, Debug, Hash)]
 pub struct Game {
     // This owns all the pieces. grid and reserves just hold the indices.
     pub pieces: [Piece; PIECES_PER_PLAYER * 2],
@@ -66,7 +66,7 @@ impl Game {
         Coord(index % COLS, index / COLS)
     }
 
-    fn piece_for(&self, id: usize) -> &Piece {
+    pub fn piece_for(&self, id: usize) -> &Piece {
         &self.pieces[id]
     }
 
