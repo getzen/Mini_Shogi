@@ -257,7 +257,13 @@ impl Controller {
         text.push_str(". pv: ");
         for i in 0..progress.pv.len() {
             let the_move = progress.pv[i];
-            text.push_str(&format!("id:{}, idx:{}, cap:{}", the_move.0, the_move.1, the_move.2));
+            let piece = self.game.piece_for(the_move.0);
+            let piece_str = piece.string_rep();
+            let cap_str = match the_move.2 {
+                true => "x",
+                false => "",
+            };
+            text.push_str(&format!("{}{}{}", piece_str, cap_str, the_move.1));
             if i < progress.pv.len() - 1 {
                 text.push_str(", ");
             }
