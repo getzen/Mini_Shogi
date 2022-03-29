@@ -2,6 +2,7 @@
 
 use crate::GameLocation;
 use crate::GameLocation::*;
+use crate::piece::PieceKind::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PieceKind {
@@ -9,6 +10,7 @@ pub enum PieceKind {
     Rook,
     Bishop,
     Pawn,
+    Samurai,
 }
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
@@ -31,29 +33,52 @@ impl Piece {
 
     pub fn move_vectors(&self) -> Vec<(i8, i8)> {
         match self.kind {
-            PieceKind::King => vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (-1,-1), (1,-1)],
+            King => vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (-1,-1), (1,-1)],
 
-            PieceKind::Rook => vec![(1,0), (0,1), (-1,0), (0,-1)],
+            Rook => vec![(1,0), (0,1), (-1,0), (0,-1)],
 
-            PieceKind::Bishop => vec![(1,1), (-1,1), (-1,-1), (1,-1)],
+            Bishop => vec![(1,1), (-1,1), (-1,-1), (1,-1)],
 
-            PieceKind::Pawn => {
+            Pawn => {
                 if self.player == 0 {
                     vec![(0,1)]
                 } else {
                     vec![(0,-1)]
                 }
             },
+
+            Samurai => vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1),],
+        }
+    }
+
+    pub fn promotion_kind(&self) -> Option<PieceKind> {
+        match self.kind {
+            King => None,
+            Rook => None,
+            Bishop => None,
+            Pawn => Some(Samurai),
+            Samurai => None,
+        }
+    }
+
+    pub fn demotion_kind(&self) -> Option<PieceKind> {
+        match self.kind {
+            King => None,
+            Rook => None,
+            Bishop => None,
+            Pawn => None,
+            Samurai => Some(Pawn),
         }
     }
 
     #[allow(dead_code)]
     pub fn string_rep(&self) -> &str {
         match self.kind {
-            PieceKind::King => "K",
-            PieceKind::Rook => "R",
-            PieceKind::Bishop => "B",
-            PieceKind::Pawn => "P",
+            King => "K",
+            Rook => "R",
+            Bishop => "B",
+            Pawn => "P",
+            Samurai => "S",
         }
     }
 }

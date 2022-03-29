@@ -103,6 +103,7 @@ impl ViewGame {
             Rook => Sprite::load_texture("rook.png").await,
             Bishop => Sprite::load_texture("bishop.png").await,
             Pawn => Sprite::load_texture("pawn.png").await,
+            Samurai => Sprite::load_texture("samurai.png").await,
         };    
         let position = self.center_position_for(piece.location_index);
         let mut sprite = Sprite::new(Piece, texture, position);
