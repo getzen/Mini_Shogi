@@ -1,6 +1,7 @@
 // Controller
 // Handles the app flow and is the intermediary between the view and model.
 
+use std::mem::{size_of_val, size_of};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::time::Duration;
@@ -72,7 +73,7 @@ impl Controller {
 
     pub async fn prepare(&mut self) {
         self.player_kinds.push(PlayerKind::Human);
-        self.player_kinds.push(PlayerKind::Human);
+        self.player_kinds.push(PlayerKind::AIMinimax);
         self.game.prepare();
         self.view_intro.prepare();
         self.view_game.prepare().await;
@@ -81,6 +82,10 @@ impl Controller {
         for piece in &self.game.pieces {
             self.view_game.add_piece(piece).await; 
         }
+
+        // let mem_type = size_of::<Game>();
+        // let mem = size_of_val(&self.game);
+        // println!("Game type: {}, game: {}", mem_type, mem);
     }
 
     /// The main control loop.
@@ -138,13 +143,13 @@ impl Controller {
                     self.reserve_selected(player);
                 },
                 Message::AIUpdate(progress) => {
-                    if self.state == AIThinking {
+                    //if self.state == AIThinking {
                         self.pv_text = self.format_ai_progress(&progress);
-                    }
+                    //}
                 }
                 Message::SearchCompleted(progress) => {
-                    let node = progress.pv.first().unwrap();
-                    self.use_node(*node);
+                    let node = progress.best_node.unwrap();
+                    self.use_node(node);
                     self.pv_text = self.format_ai_progress(&progress);
                     self.state = NextPlayer;
                 },
@@ -167,13 +172,20 @@ impl Controller {
             let location_index = self.game.location_index_for(id);
             if self.view_game.is_move_index(location_index) {
                 // Capture
-                self.perform_move(id, location_index);
+                if let Some(piece_id) = self.view_game.selected_piece_id() {
+                    self.perform_move(piece_id, location_index);
+                }
+                
                 self.state = NextPlayer;
-            } else {
-                // Unselect everything
-                self.view_game.unselect_piece();
-                self.view_game.unhighlight_all_squares();
-            }
+            } 
+            // Unselect everything
+            self.view_game.unselect_piece();
+            self.view_game.unhighlight_all_squares();
+            // else {
+            //     // Unselect everything
+            //     self.view_game.unselect_piece();
+            //     self.view_game.unhighlight_all_squares();
+            // }
         }
     }
   
@@ -243,18 +255,18 @@ impl Controller {
         let score_string = (progress.score as isize).to_formatted_string(&Locale::en);
         text.push_str(&format!(". score: {}", score_string));
         text.push_str(". pv: ");
-        // for i in 0..progress.pv.len() {
-        //     let coord = &progress.pv[i].to;
-        //     text.push_str(&format!("{},{}", coord.0, coord.1));
-        //     if i < progress.pv.len() - 1 {
-        //         text.push_str(", ");
-        //     }
-        // }
+        for i in 0..progress.pv.len() {
+            let the_move = progress.pv[i];
+            text.push_str(&format!("id:{}, idx:{}, cap:{}", the_move.0, the_move.1, the_move.2));
+            if i < progress.pv.len() - 1 {
+                text.push_str(", ");
+            }
+        }
         text
     }
 
     fn next_player(&mut self) {
-        self.game.debug();
+        //self.game.debug();
         match self.game.update_state() {
             GameState::Draw => {
                 self.state = Draw;

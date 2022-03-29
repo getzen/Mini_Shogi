@@ -30,6 +30,11 @@ pub enum GameLocation {
 }
 
 pub const NONE: usize = usize::MAX;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+ // piece.id, location_index, is_capture. See Game.last_move
+pub struct Move (pub usize, pub usize, pub bool);
+
 const STARTING_POSITION: &str = "BKR-P--p-rkb";
 
 #[derive(Clone, Copy, Debug, Hash)]
@@ -38,9 +43,10 @@ pub struct Game {
     pub pieces: [Piece; PIECES_PER_PLAYER * 2],
     pub grid: [usize; GRID_COUNT],
     pub reserves: [[usize; PIECES_PER_PLAYER]; 2],
-
     pub current_player: usize,
     pub state: GameState,
+
+    pub last_move: Option<Move>, // piece.id, location_index, captured?
 }
 
 impl Game {
@@ -53,6 +59,8 @@ impl Game {
             reserves: [[NONE; PIECES_PER_PLAYER]; 2],
             current_player: 0,
             state: Ongoing,
+
+            last_move: None,
         }
     }
 
@@ -177,12 +185,14 @@ impl Game {
         let captured_id = self.grid[to_index];
 
         // Capture?
+        let mut capture = false;
         if captured_id != NONE {
             self.pieces[captured_id].player = player;
             self.pieces[captured_id].location = Reserve;
             if let Some(available_index) = self.available_reserve_index(player) {
                 self.pieces[captured_id].location_index = available_index;
                 self.reserves[player][available_index] = captured_id;
+                capture = true;
             }
         }
 
@@ -202,6 +212,8 @@ impl Game {
         self.grid[to_index] = piece_id;
         self.pieces[piece_id].location = Board;
         self.pieces[piece_id].location_index = to_index;
+
+        self.last_move = Some(Move(piece_id, to_index, capture));
 
         self.next_player();
     }

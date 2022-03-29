@@ -19,15 +19,16 @@ impl AIRandom {
 
 impl Think for AIRandom {
     fn think(&mut self) -> AIProgress {
-        let mut available = self.game.child_nodes(self.game.current_player);
-        if available.is_empty() {
+        let mut child_nodes = self.game.child_nodes(self.game.current_player);
+        if child_nodes.is_empty() {
             panic!("AIRandom.think: no actions available!");
         }
-        let action = available.swap_remove(fastrand::usize(0..available.len()));
+        let node = child_nodes.swap_remove(fastrand::usize(0..child_nodes.len()));
         
         let mut progress= AIProgress::new();
-        progress.nodes = available.len() + 1;
-        progress.pv.push(action);
+        progress.nodes = child_nodes.len() + 1;
+        progress.pv = vec![node.last_move.unwrap()];
+        progress.best_node = Some(node);
         progress.is_complete = true;
         let return_progress = progress.clone();
         self.message_sender.send(Message::AIUpdate(progress));

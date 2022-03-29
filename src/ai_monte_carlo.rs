@@ -88,12 +88,13 @@ impl AIMonteCarlo {
                 best_node = node;
                 progress.score = best_score;
             }
-            progress.pv = vec![best_node.clone()];
+            progress.pv = vec![node.last_move.unwrap()];
             progress.duration = now.elapsed();
             
         }
         progress.score = best_score;
-        progress.pv = vec![best_node];
+        //progress.pv = vec![best_node];
+        progress.best_node = Some(best_node);
         progress.duration = now.elapsed();
         progress
     }

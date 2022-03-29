@@ -5,6 +5,7 @@ use std::time::Instant;
 use crate::ai::{AIProgress, Think};
 use crate::Game;
 use crate::GameState;
+use crate::game::Move;
 use crate::message_sender::{Message, MessageSender};
 
 pub struct AIMinimax {
@@ -31,12 +32,6 @@ impl Think for AIMinimax {
         // Use the final version of the pv assembled by alpha_beta.
         self.progress.pv = pv;
         self.progress.score = score;
-
-        print!("score:{}", score);
-        // for p in &self.progress.pv {
-        //     print!(" ({},{})", p.to.0, p.to.1);
-        // }
-        println!();
         self.progress.clone()
     }
 }
@@ -53,7 +48,7 @@ impl AIMinimax {
         }
     }
 
-    fn alpha_beta(&mut self, mut node: Game, depth: usize, maximizing: bool, mut alpha: f64, mut beta: f64, pv: &mut Vec<Game>) -> f64 {
+    fn alpha_beta(&mut self, mut node: Game, depth: usize, maximizing: bool, mut alpha: f64, mut beta: f64, pv: &mut Vec<Move>) -> f64 {
         if *node.update_state() != GameState::Ongoing || depth == 0 {
             pv.clear();
             return self.evaluate(&node, self.depth - depth);
@@ -73,10 +68,11 @@ impl AIMinimax {
                     best_score = child_score;
 
                     pv.clear();
-                    pv.push(node.clone());
+                    pv.push(node.last_move.unwrap());
                     pv.append(&mut child_pv);
 
                     self.progress.pv = pv.clone();
+                    self.progress.best_node = Some(*node);
                     self.progress.duration = self.now.elapsed();
                     self.message_sender.send(Message::AIUpdate(self.progress.clone()));
                 }
@@ -91,19 +87,19 @@ impl AIMinimax {
             best_score = f64::MAX;
             for node in &child_nodes {
                 let child_score = self.alpha_beta(*node, depth-1, true, alpha, beta, &mut child_pv);
-
                 self.progress.nodes += 1;
 
                 if child_score < best_score {
                     best_score = child_score;
 
                     pv.clear();
-                    pv.push(node.clone());
+                    pv.push(node.last_move.unwrap());
                     pv.append(&mut child_pv);
 
-                    self.progress.pv = pv.clone();
-                    self.progress.duration = self.now.elapsed();
-                    self.message_sender.send(Message::AIUpdate(self.progress.clone()));
+                    // self.progress.pv = pv.clone();
+                    // self.progress.best_node = Some(*node);
+                    // self.progress.duration = self.now.elapsed();
+                    // self.message_sender.send(Message::AIUpdate(self.progress.clone()));
                 }
                 beta = beta.min(best_score);
                 if beta <= alpha {

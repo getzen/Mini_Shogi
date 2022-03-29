@@ -8,6 +8,7 @@ use crate::ai_minimax::AIMinimax;
 use crate::ai_monte_carlo::AIMonteCarlo;
 //use crate::ai_monte_carlo_tree::AIMonteCarloTree;
 
+use crate::game::Move;
 use crate::message_sender::Message;
 use crate::controller::PlayerKind;
 use crate::controller::PlayerKind::*;
@@ -23,9 +24,10 @@ pub trait Think {
 pub struct AIProgress {
     pub is_complete: bool,
     pub nodes: usize,
-    pub pv: Vec<Game>,
+    pub pv: Vec<Move>,
     pub duration: Duration,
     pub score: f64,
+    pub best_node: Option<Game>,
 }
 
 impl AIProgress {
@@ -36,6 +38,7 @@ impl AIProgress {
             pv: Vec::new(),
             duration: Duration::new(0, 0),
             score: 0.0,
+            best_node: None,
         }
     }
 }
@@ -52,7 +55,7 @@ impl AI {
             },
             AIMinimax => {
                 sender_clone.min_time_between = Some(Duration::from_millis(100));
-                let mut ai = AIMinimax::new(game, 1, sender_clone);
+                let mut ai = AIMinimax::new(game, 2, sender_clone);
                 ai.think()
             },
             AIMonteCarlo => {
