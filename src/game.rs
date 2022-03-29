@@ -42,7 +42,7 @@ pub struct Game {
     // This owns all the pieces. grid and reserves just hold the indices.
     pub pieces: [Piece; PIECES_PER_PLAYER * 2],
     pub grid: [usize; GRID_COUNT],
-    pub reserves: [[usize; PIECES_PER_PLAYER]; 2],
+    pub reserves: [[usize; PIECES_PER_PLAYER * 2 - 1]; 2],
     pub current_player: usize,
     pub state: GameState,
 
@@ -56,7 +56,7 @@ impl Game {
         Self {
             pieces: [default_piece; PIECES_PER_PLAYER * 2],
             grid: [NONE; GRID_COUNT],
-            reserves: [[NONE; PIECES_PER_PLAYER]; 2],
+            reserves: [[NONE; PIECES_PER_PLAYER * 2 - 1]; 2],
             current_player: 0,
             state: Ongoing,
 

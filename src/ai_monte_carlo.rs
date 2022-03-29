@@ -41,9 +41,9 @@ impl AIMonteCarlo {
             let mut node_score = 0.0;
             
             for _ in 0..rounds {
-                let mut child = node.clone(); // is cloning necessary?
+                let mut child = node.clone();
 
-                // Play out the game with randon actions.                
+                // Play out the game by choosing random child nodes.                
                 while child.update_state() == &GameState::Ongoing {
                     let mut sub_children = child.child_nodes(child.current_player);
                     let rand_index = fastrand::usize(0..sub_children.len());
@@ -79,21 +79,17 @@ impl AIMonteCarlo {
                         panic!("Game not completed!");
                     }
                 }
-                self.message_sender.send(Message::AIUpdate(progress.clone()));
             }
-
             // Find the move with the highest score.
             if node_score > best_score {
                 best_score = node_score;
                 best_node = node;
                 progress.score = best_score;
             }
-            progress.pv = vec![node.last_move.unwrap()];
+            progress.pv = vec![best_node.last_move.unwrap()];
             progress.duration = now.elapsed();
-            
+            self.message_sender.send(Message::AIUpdate(progress.clone()));       
         }
-        progress.score = best_score;
-        //progress.pv = vec![best_node];
         progress.best_node = Some(best_node);
         progress.duration = now.elapsed();
         progress

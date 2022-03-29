@@ -72,7 +72,7 @@ impl Controller {
 
     pub async fn prepare(&mut self) {
         self.player_kinds.push(PlayerKind::Human);
-        self.player_kinds.push(PlayerKind::AIMinimax);
+        self.player_kinds.push(PlayerKind::AIMonteCarlo);
         self.game.prepare();
         self.view_intro.prepare();
         self.view_game.prepare().await;
@@ -267,7 +267,6 @@ impl Controller {
     }
 
     fn next_player(&mut self) {
-        //self.game.debug();
         match self.game.update_state() {
             GameState::Draw => {
                 self.state = Draw;
