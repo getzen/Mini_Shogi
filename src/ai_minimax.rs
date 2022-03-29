@@ -53,61 +53,55 @@ impl AIMinimax {
             pv.clear();
             return self.evaluate(&node, self.depth - depth);
         }
-        let mut best_score: f64;
+        
         let mut child_pv = Vec::new();
         let child_nodes = node.child_nodes(node.current_player);
 
         // Maximizing
         if maximizing {
-            best_score = f64::MIN;
             for node in &child_nodes {
                 let child_score = self.alpha_beta(*node, depth-1, false, alpha, beta, &mut child_pv);
                 self.progress.nodes += 1;
 
-                if child_score > best_score {
-                    best_score = child_score;
-
+                if child_score > alpha {
+                    alpha = child_score;
                     pv.clear();
                     pv.push(node.last_move.unwrap());
                     pv.append(&mut child_pv);
 
                     self.progress.pv = pv.clone();
-                    self.progress.best_node = Some(*node);
+                    if depth == self.depth {
+                        self.progress.best_node = Some(*node);
+                    }
                     self.progress.duration = self.now.elapsed();
                     self.message_sender.send(Message::AIUpdate(self.progress.clone()));
                 }
-                alpha = alpha.max(best_score);
+                
                 if beta <= alpha {
                     break;
                 }
             }
+            return alpha;
         }
         // Minimizing
         else {
-            best_score = f64::MAX;
             for node in &child_nodes {
                 let child_score = self.alpha_beta(*node, depth-1, true, alpha, beta, &mut child_pv);
                 self.progress.nodes += 1;
 
-                if child_score < best_score {
-                    best_score = child_score;
-
+                if child_score < beta {
+                    beta = child_score;
                     pv.clear();
                     pv.push(node.last_move.unwrap());
                     pv.append(&mut child_pv);
-
-                    // self.progress.pv = pv.clone();
-                    // self.progress.best_node = Some(*node);
-                    // self.progress.duration = self.now.elapsed();
-                    // self.message_sender.send(Message::AIUpdate(self.progress.clone()));
                 }
-                beta = beta.min(best_score);
+                
                 if beta <= alpha {
                     break;
                 }
             }
+            return beta;
         }
-        best_score
     }
 
     /// Scores the game from the point of view of search_player.

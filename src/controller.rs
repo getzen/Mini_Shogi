@@ -1,7 +1,6 @@
 // Controller
 // Handles the app flow and is the intermediary between the view and model.
 
-use std::mem::{size_of_val, size_of};
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::time::Duration;
@@ -82,10 +81,6 @@ impl Controller {
         for piece in &self.game.pieces {
             self.view_game.add_piece(piece).await; 
         }
-
-        // let mem_type = size_of::<Game>();
-        // let mem = size_of_val(&self.game);
-        // println!("Game type: {}, game: {}", mem_type, mem);
     }
 
     /// The main control loop.
