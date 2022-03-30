@@ -74,10 +74,11 @@ impl Piece {
     pub fn string_rep(&self) -> &str {
         match self.kind {
             King => "K",
-            Rook => "R",
-            Bishop => "B",
+            Gold => "G",
+            Silver => "S",
+            SilverPro => "S+",
             Pawn => "P",
-            Samurai => "S",
+            PawnPro => "P+",
         }
     }
 }
