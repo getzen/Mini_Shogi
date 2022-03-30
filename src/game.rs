@@ -185,14 +185,19 @@ impl Game {
         let captured_id = self.grid[to_index];
 
         // Capture?
-        let mut capture = false;
+        let mut capture = false; // for last_move
         if captured_id != NONE {
+            capture = true;
             self.pieces[captured_id].player = player;
             self.pieces[captured_id].location = Reserve;
+            // Demote?
+            if let Some(demote_kind) = self.pieces[captured_id].demotion_kind() {
+                self.pieces[captured_id].kind = demote_kind;
+            }
+            // Find a spot for the capture piece
             if let Some(available_index) = self.available_reserve_index(player) {
                 self.pieces[captured_id].location_index = available_index;
                 self.reserves[player][available_index] = captured_id;
-                capture = true;
             }
         }
 
