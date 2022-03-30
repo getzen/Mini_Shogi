@@ -7,10 +7,11 @@ use crate::piece::PieceKind::*;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PieceKind {
     King,
-    Rook,
-    Bishop,
+    Gold,
+    Silver,
+    SilverPro,
     Pawn,
-    Samurai,
+    PawnPro,
 }
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
@@ -32,42 +33,40 @@ impl Piece {
     }
 
     pub fn move_vectors(&self) -> Vec<(i8, i8)> {
-        match self.kind {
-            King => vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (-1,-1), (1,-1)],
-
-            Rook => vec![(1,0), (0,1), (-1,0), (0,-1)],
-
-            Bishop => vec![(1,1), (-1,1), (-1,-1), (1,-1)],
-
-            Pawn => {
-                if self.player == 0 {
-                    vec![(0,1)]
-                } else {
-                    vec![(0,-1)]
-                }
-            },
-
-            Samurai => vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1),],
+       let mut vectors =  match self.kind {
+            King =>      vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (-1,-1), (1,-1)],
+            Gold =>      vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1)],
+            Silver =>    vec![(0,1), (1,1), (-1,1), (-1,-1), (1,-1)],
+            SilverPro => vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1)], // same as Gold
+            Pawn =>      vec![(0,1)],
+            PawnPro =>   vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1)], // same as Gold
+        };
+        // Flip the y axis for player 1. Could optimize by hard-coding these values.
+        if self.player == 1 {
+            vectors.iter().for_each(|v| v.1 = -v.1);
         }
+        vectors
     }
 
     pub fn promotion_kind(&self) -> Option<PieceKind> {
         match self.kind {
             King => None,
-            Rook => None,
-            Bishop => None,
-            Pawn => Some(Samurai),
-            Samurai => None,
+            Gold => None,
+            Silver => Some(SilverPro),
+            SilverPro => None,
+            Pawn => Some(PawnPro),
+            PawnPro => None,
         }
     }
 
     pub fn demotion_kind(&self) -> Option<PieceKind> {
         match self.kind {
             King => None,
-            Rook => None,
-            Bishop => None,
+            Gold => None,
+            Silver => None,
+            SilverPro => Some(Silver),
             Pawn => None,
-            Samurai => Some(Pawn),
+            PawnPro => Some(Pawn),
         }
     }
 
