@@ -243,9 +243,9 @@ impl Game {
 
     fn is_promotion_zone(&self, player: usize, location_index: usize) -> bool {
         if player == 0 {
-            return location_index >= GRID_COUNT - COLS;
+            return location_index >= GRID_COUNT - COLS * 2;
         }
-        location_index < COLS
+        location_index < COLS * 2
     }
 
     pub fn create_piece(kind: char, id: usize) -> Piece {

@@ -19,7 +19,7 @@ use crate::sprite::SpriteKind::*;
 use crate::text::Text;
 
 const BACKGROUND_COLOR: (u8, u8, u8) = (144, 144, 137);
-const BOARD_CORNER: (f32, f32) = (240.0, 95.0);
+const BOARD_CORNER: (f32, f32) = (165.0, 95.0);
 const SQUARE_SIZE: f32 = 90.0; // matches the square.png size
 const SQUARE_GAP: f32 = 5.0;
 const RESERVE_0_CENTER: (f32, f32) = (715., 615.);
@@ -73,7 +73,7 @@ impl ViewGame {
 
     pub async fn prepare(&mut self) {
         // Load textures.
-        let names = ["king.png", "rook.png", "bishop.png", "pawn.png", "samurai.png"];
+        let names = ["king.png", "gold.png", "silver.png", "silver_pro.png", "pawn.png", "pawn_pro.png"];
         for name in names {
             let texture = Sprite::load_texture(name).await;
             self.piece_textures.insert(name.to_owned(), texture);
@@ -89,6 +89,9 @@ impl ViewGame {
                 self.squares.insert(index, square);
             }
         }
+
+        // Promotion lines
+        
 
         // Reserves
         texture = Sprite::load_texture("reserve.png").await;
@@ -109,10 +112,11 @@ impl ViewGame {
     fn texture_for(&self, piece_kind: PieceKind) -> Texture2D {
         let key = match piece_kind {
             King => "king.png",
-            Rook => "rook.png",
-            Bishop => "bishop.png",
+            Gold => "gold.png",
+            Silver => "silver.png",
+            SilverPro => "silver_pro.png",
             Pawn => "pawn.png",
-            Samurai => "samurai.png",
+            PawnPro => "pawn_pro.png",
         };
         *self.piece_textures.get(&key.to_owned()).unwrap()
     }
