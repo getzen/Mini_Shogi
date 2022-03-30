@@ -88,7 +88,7 @@ impl Sprite {
         if let Some(lerp) = &mut self.position_lerp {
             let results = lerp.update(time_delta);
             self.position = (results.0, results.1);
-            if results.2 == true {
+            if results.2 {
                 self.position_lerp = None;
             }
         }

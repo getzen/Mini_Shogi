@@ -114,7 +114,7 @@ impl ViewGame {
             Pawn => "pawn.png",
             Samurai => "samurai.png",
         };
-        self.piece_textures.get(&key.to_owned()).unwrap().clone()
+        *self.piece_textures.get(&key.to_owned()).unwrap()
     }
 
     pub fn add_piece(&mut self, piece: &Piece) {
@@ -226,9 +226,9 @@ impl ViewGame {
 
         if !clicked_handled {
             // Squares
-            for (coord, square) in &self.squares {
+            for (index, square) in &self.squares {
                 if left_button && square.contains(mouse_pos) {
-                    self.message_sender.send(Message::SquareSelected(*coord));
+                    self.message_sender.send(Message::SquareSelected(*index));
                     clicked_handled = true;
                 }
             }
@@ -237,7 +237,7 @@ impl ViewGame {
         if !clicked_handled {
             // Reserves
             for i in 0..2 {
-                for (_coord, reserve) in &self.reserves[i] {
+                for (_index, reserve) in &self.reserves[i] {
                     if left_button && reserve.contains(mouse_pos) {
                         self.message_sender.send(Message::ReserveSelected(i));
                     }
@@ -247,7 +247,7 @@ impl ViewGame {
     }
 
     pub fn update(&mut self, time_delta: Duration) {
-        for (_, piece) in &mut self.pieces {
+        for piece in &mut self.pieces.values_mut() {
             piece.update(time_delta);
         }
     }
@@ -256,17 +256,17 @@ impl ViewGame {
         clear_background(Color::from_rgba(
             BACKGROUND_COLOR.0, BACKGROUND_COLOR.1, BACKGROUND_COLOR.2, 255));
         // Squares
-        for (_, square) in &mut self.squares {
+        for square in &mut self.squares.values_mut() {
             square.draw();
         }
         // Reserves
         for i in 0..2 {
-            for (_, reserve) in &mut self.reserves[i] {
+            for reserve in &mut self.reserves[i].values_mut() {
                 reserve.draw();
             }
         }
         // Pieces
-        for (_, piece) in &mut self.pieces {
+        for piece in &mut self.pieces.values_mut() {
             piece.draw();
         }
     }
@@ -335,7 +335,7 @@ impl ViewGame {
 
     /// Does what is says on the tin.
     pub fn unhighlight_all_squares(&mut self) {
-        for (_, square) in &mut self.squares {
+        for square in &mut self.squares.values_mut() {
             square.highlighted = false;
         }
     }

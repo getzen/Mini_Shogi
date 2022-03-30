@@ -116,7 +116,7 @@ impl Game {
         let mut nodes = Vec::new();
         let move_indices = self.move_indices_for_piece(id);
         for to_index in move_indices {
-            let mut node = self.clone();
+            let mut node = *self;
             node.make_move(id, to_index);
             nodes.push(node);
         }
@@ -269,8 +269,7 @@ impl Game {
 
     fn setup_position(&mut self, position: &str) {
         let mut piece_id = 0;
-        let mut index = 0;
-        for kind in position.chars() {
+        for (index, kind) in position.chars().enumerate() {
             if kind != '-' {
                 let mut piece = Game::create_piece(kind, piece_id);
                 piece.location = Board;
@@ -279,7 +278,6 @@ impl Game {
                 self.grid[index] = piece.id;
                 piece_id += 1;
             }
-            index += 1;
         }
     }
 
@@ -290,11 +288,11 @@ impl Game {
 
     /// Gets the id of the player's king.
     fn king_id_(&self, player: usize) -> Option<usize> {
-        let piece = self.pieces
+        let opt_piece = self.pieces
         .iter()
         .find(|p| p.player == player && p.kind == King);
-        if piece.is_some() {
-            return Some(piece.unwrap().id)
+        if let Some(piece) = opt_piece {
+            return Some(piece.id);
         }
         // Not found. King must be captured.
         None

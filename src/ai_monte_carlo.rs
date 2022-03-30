@@ -33,7 +33,7 @@ impl AIMonteCarlo {
 
         let child_nodes = self.game.child_nodes(player);
         // Create the move to beat. With that score, any move will do.
-        let mut best_node = child_nodes.first().unwrap().clone();
+        let mut best_node = *child_nodes.first().unwrap();
         let mut best_score = f64::MIN;
         
         // Examine and score each move.
@@ -41,7 +41,7 @@ impl AIMonteCarlo {
             let mut node_score = 0.0;
             
             for _ in 0..rounds {
-                let mut child = node.clone();
+                let mut child = node;
 
                 // Play out the game by choosing random child nodes.                
                 while child.update_state() == &GameState::Ongoing {

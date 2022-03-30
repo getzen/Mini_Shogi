@@ -231,7 +231,7 @@ impl Controller {
 
     fn use_node(&mut self, node: Game) {
         self.view_game.update_with_game(&node);
-        self.node_history.push(node.clone());
+        self.node_history.push(node);
         self.game = node;
     }
 
@@ -294,11 +294,11 @@ impl Controller {
 
         // These variables are captured by the thread.
         let ai_kind = self.player_kinds[self.game.current_player];
-        let game_clone = self.game.clone();
+        let game_copy = self.game;
         let message_sender = MessageSender::new(self.tx.clone(), None);
 
         std::thread::spawn(move || {
-            AI::think(ai_kind, game_clone, message_sender);
+            AI::think(ai_kind, game_copy, message_sender);
         });
     }
 }

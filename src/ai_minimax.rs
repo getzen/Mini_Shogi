@@ -81,7 +81,7 @@ impl AIMinimax {
                     break;
                 }
             }
-            return alpha;
+            alpha
         }
         // Minimizing
         else {
@@ -100,7 +100,7 @@ impl AIMinimax {
                     break;
                 }
             }
-            return beta;
+            beta
         }
     }
 
