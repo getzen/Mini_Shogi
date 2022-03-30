@@ -196,6 +196,8 @@ impl Game {
             }
         }
 
+        let mut check_for_promotion = true;
+
         // Move
         // First, remove from old location.
         let location_index = self.pieces[piece_id].location_index;
@@ -205,13 +207,22 @@ impl Game {
             },
             Reserve => {
                 self.reserves[player][location_index] = NONE;
+                check_for_promotion = false;
             },
             _ => panic!(""),
         }
+        
         // Then, move to new.
         self.grid[to_index] = piece_id;
         self.pieces[piece_id].location = Board;
         self.pieces[piece_id].location_index = to_index;
+
+        // Promote?
+        if check_for_promotion && self.is_promotion_zone(player, to_index) {
+            if let Some(promo_kind) = self.pieces[piece_id].promotion_kind() {
+                self.pieces[piece_id].kind = promo_kind;
+            }
+        }
 
         self.last_move = Some(Move(piece_id, to_index, capture));
 
@@ -223,6 +234,13 @@ impl Game {
             if *id == NONE { return Some(index) }
         }
         None
+    }
+
+    fn is_promotion_zone(&self, player: usize, location_index: usize) -> bool {
+        if player == 0 {
+            return location_index >= GRID_COUNT - COLS;
+        }
+        location_index < COLS
     }
 
     pub fn create_piece(kind: char, id: usize) -> Piece {
