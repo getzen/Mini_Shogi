@@ -115,6 +115,10 @@ impl ViewGame {
         self.pieces.insert(piece.id, sprite);
     }
 
+    pub fn remove_piece(&mut self, piece: &Piece) {
+        self.pieces.remove_entry(&piece.id);
+    }
+
     fn corner_position_for(&self, index: usize) -> (f32, f32) {
         let (x0, y0) = Game::index_to_column_row(index);
         // We want row 0 at the bottom of the board, not the top, so flip the row.
