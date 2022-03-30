@@ -43,7 +43,7 @@ impl Piece {
         };
         // Flip the y axis for player 1. Could optimize by hard-coding these values.
         if self.player == 1 {
-            vectors.iter().for_each(|v| v.1 = -v.1);
+            vectors.iter_mut().for_each(|v| v.1 = -v.1);
         }
         vectors
     }
