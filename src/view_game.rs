@@ -22,6 +22,8 @@ const BACKGROUND_COLOR: (u8, u8, u8) = (144, 144, 137);
 const BOARD_CORNER: (f32, f32) = (165.0, 95.0);
 const SQUARE_SIZE: f32 = 90.0; // matches the square.png size
 const SQUARE_GAP: f32 = 5.0;
+const PROMO_LINE_TOP: (f32, f32) = (405., 287.);
+const PROMO_LINE_BOTTOM: (f32, f32) = (405., 477.);
 const RESERVE_0_CENTER: (f32, f32) = (715., 615.);
 const RESERVE_1_CENTER: (f32, f32) = (95., 140.);
 const TEXT_STATUS_CENTER: (f32, f32) = (400., 60.0);
@@ -33,6 +35,7 @@ pub struct ViewGame {
     columns: usize,
     rows: usize,
     squares: HashMap<usize, Sprite>,
+    promotion_lines: Vec<Sprite>,
     reserves: Vec<HashMap<usize, Sprite>>,
     pieces: HashMap<usize, Sprite>, // usize is id matching model's Piece id
     pub selected_piece: Option<usize>,
@@ -56,6 +59,7 @@ impl ViewGame {
             message_sender: MessageSender::new(tx, None),
             columns, rows,
             squares: HashMap::new(),
+            promotion_lines: Vec::new(),
             reserves: vec!(HashMap::new(), HashMap::new()),
             pieces: HashMap::new(),
             selected_piece: None,
@@ -91,7 +95,11 @@ impl ViewGame {
         }
 
         // Promotion lines
-        
+        texture = Sprite::load_texture("line.png").await;
+        let line_top = Sprite::new(Default, texture, PROMO_LINE_TOP);
+        self.promotion_lines.push(line_top);
+        let line_bottom = Sprite::new(Default, texture, PROMO_LINE_BOTTOM);
+        self.promotion_lines.push(line_bottom);
 
         // Reserves
         texture = Sprite::load_texture("reserve.png").await;
@@ -262,6 +270,10 @@ impl ViewGame {
         // Squares
         for square in &mut self.squares.values_mut() {
             square.draw();
+        }
+        // Promotion lines
+        for line in &mut self.promotion_lines {
+            line.draw();
         }
         // Reserves
         for i in 0..2 {
