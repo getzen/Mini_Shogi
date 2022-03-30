@@ -8,6 +8,9 @@ TO-DO:
 
 - Add ability to restart game.
 
+- Add rule about parachuting pawn onto same column as another of player's pawns.
+- Add rule about no checkmate by parachuting pawn?
+
 - For reserve pieces, have one spot per piece kind. Keep AI from evaluating identical
 reserve pieces.
 
