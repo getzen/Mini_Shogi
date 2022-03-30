@@ -323,6 +323,7 @@ impl Game {
         &self.state
     }
 
+    #[allow(dead_code)]
     pub fn debug(&self) {
         println!("--- debug ---");
         for (index, id) in self.grid.iter().enumerate() {

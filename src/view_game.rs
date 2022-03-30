@@ -13,7 +13,7 @@ use crate::controller::AppState;
 use crate::controller::AppState::*;
 use crate::message_sender::{Message, MessageSender};
 use crate::Piece;
-use crate::piece::PieceKind::*;
+use crate::piece::PieceKind::{self, *};
 use crate::sprite::*;
 use crate::sprite::SpriteKind::*;
 use crate::text::Text;
@@ -39,6 +39,7 @@ pub struct ViewGame {
     pub move_indices: Vec<usize>, // all the spots the currently selected piece can move to
     status_text: Text,
     ai_progress_text: Text,
+    piece_textures: HashMap<String, Texture2D>,
 }
 
 impl ViewGame {
@@ -66,10 +67,18 @@ impl ViewGame {
                 Some("Menlo.ttc"),
             ).await,
             ai_progress_text,
+            piece_textures: HashMap::new(),
         }
     }
 
     pub async fn prepare(&mut self) {
+        // Load textures.
+        let names = ["king.png", "rook.png", "bishop.png", "pawn.png", "samurai.png"];
+        for name in names {
+            let texture = Sprite::load_texture(name).await;
+            self.piece_textures.insert(name.to_owned(), texture);
+        }
+
         // Board
         let mut texture = Sprite::load_texture("square.png").await;
         for c in 0..self.columns {
@@ -97,14 +106,19 @@ impl ViewGame {
         }
     }
 
-    pub async fn add_piece(&mut self, piece: &Piece) {
-        let texture = match piece.kind {
-            King => Sprite::load_texture("king.png").await,
-            Rook => Sprite::load_texture("rook.png").await,
-            Bishop => Sprite::load_texture("bishop.png").await,
-            Pawn => Sprite::load_texture("pawn.png").await,
-            Samurai => Sprite::load_texture("samurai.png").await,
-        };    
+    fn texture_for(&self, piece_kind: PieceKind) -> Texture2D {
+        let key = match piece_kind {
+            King => "king.png",
+            Rook => "rook.png",
+            Bishop => "bishop.png",
+            Pawn => "pawn.png",
+            Samurai => "samurai.png",
+        };
+        self.piece_textures.get(&key.to_owned()).unwrap().clone()
+    }
+
+    pub fn add_piece(&mut self, piece: &Piece) {
+        let texture = self.texture_for(piece.kind);
         let position = self.center_position_for(piece.location_index);
         let mut sprite = Sprite::new(Piece, texture, position);
         sprite.set_size(Some(PIECE_SIZE));
@@ -115,9 +129,9 @@ impl ViewGame {
         self.pieces.insert(piece.id, sprite);
     }
 
-    pub fn remove_piece(&mut self, piece: &Piece) {
-        self.pieces.remove_entry(&piece.id);
-    }
+    // pub fn remove_piece(&mut self, piece: &Piece) {
+    //     self.pieces.remove_entry(&piece.id);
+    // }
 
     fn corner_position_for(&self, index: usize) -> (f32, f32) {
         let (x0, y0) = Game::index_to_column_row(index);
@@ -160,19 +174,33 @@ impl ViewGame {
     }
 
     pub fn update_with_game(&mut self, game: &Game) {
+        // Board move
         for (index, id) in game.grid.iter().enumerate() {
             if *id == NONE { continue }
             self.move_piece_on_grid(*id, index);
+            let new_kind = game.piece_for(*id).kind;
+            self.update_piece_kind(*id, new_kind);
         }
         // Reserve 0
         for (index, id) in game.reserves[0].iter().enumerate() {
             if *id == NONE { continue }
             self.move_piece_to_reserve(0, *id, index);
+            let new_kind = game.piece_for(*id).kind;
+            self.update_piece_kind(*id, new_kind);
         }
         // Reserve 1
         for (index, id) in game.reserves[1].iter().enumerate() {
             if *id == NONE { continue }
             self.move_piece_to_reserve(1, *id, index);
+            let new_kind = game.piece_for(*id).kind;
+            self.update_piece_kind(*id, new_kind);
+        }
+    }
+
+    fn update_piece_kind(&mut self, id: usize, new_kind: PieceKind) {
+        let texture = self.texture_for(new_kind);
+        if let Some(sprite) = self.pieces.get_mut(&id) {
+            sprite.update_texture(texture);
         }
     }
 

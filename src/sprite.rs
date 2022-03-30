@@ -61,6 +61,12 @@ impl Sprite {
         load_texture(&path).await.unwrap()
     }
 
+    pub fn update_texture(&mut self, new_texture: Texture2D) {
+        if self.texture != new_texture {
+            self.texture = new_texture;
+        }
+    }
+
     #[allow(dead_code)]
     /// A convenience function to set the sprite's rotation.
     pub fn set_rotation(&mut self, theta: f32) {

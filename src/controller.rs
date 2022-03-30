@@ -72,14 +72,14 @@ impl Controller {
 
     pub async fn prepare(&mut self) {
         self.player_kinds.push(PlayerKind::Human);
-        self.player_kinds.push(PlayerKind::AIMonteCarlo);
+        self.player_kinds.push(PlayerKind::Human);
         self.game.prepare();
         self.view_intro.prepare();
         self.view_game.prepare().await;
 
         // Add the game's pieces to the view.
         for piece in &self.game.pieces {
-            self.view_game.add_piece(piece).await; 
+            self.view_game.add_piece(piece); 
         }
     }
 
