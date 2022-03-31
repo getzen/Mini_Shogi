@@ -213,6 +213,9 @@ impl ViewGame {
                 _ => 3,
             };
             for (count_index, id) in id_vec.iter().enumerate() {
+                if let Some(piece) = self.pieces.get_mut(&id) {
+                    piece.z_order = count_index; // position on top of previous pieces
+                }
                 self.move_piece_to_reserve(player, *id, reserve_index, count_index);
             }
         }
@@ -298,13 +301,21 @@ impl ViewGame {
         for line in &mut self.promotion_lines {
             line.draw();
         }
-        // Reserves
+        // Reserve boxes
         for i in 0..2 {
             for reserve in &mut self.reserves[i].values_mut() {
                 reserve.draw();
             }
         }
         // Pieces
+        // Sort by z_order since pieces may overlap.
+        // let mut sorted_pieces: Vec<&Sprite> = self.pieces.values_mut().collect();
+        // sorted_pieces.sort_by(|a, b| a.z_order.cmp(&b.z_order));
+
+        // for piece in sorted_pieces.into_iter() {
+        //     piece.draw();
+        // }
+
         for piece in &mut self.pieces.values_mut() {
             piece.draw();
         }
