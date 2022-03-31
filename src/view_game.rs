@@ -186,13 +186,15 @@ impl ViewGame {
         }
     }
 
+    /// Position the reserve pieces for the player, grouping by PieceKind.
     fn update_reserve_pieces(&mut self, game: &Game, player: usize) {
+        // First, get all the piece ids and group them into a vec and store them by kind.
         let mut reserve_hash = HashMap::<PieceKind, Vec<usize>>::new();
         
         for id in game.reserves[player] {
             if id == NONE { continue }
             let new_kind = game.piece_for(id).kind;
-            self.update_piece_kind(id, new_kind);
+            self.update_piece_kind(id, new_kind); // piece may be demoted
 
             if let Some(id_vec) = reserve_hash.get_mut(&new_kind) {
                 id_vec.push(id);
@@ -201,13 +203,18 @@ impl ViewGame {
             }
         }
 
-        let mut reserve_index = 0;
-        for (_kind, id_vec) in reserve_hash {
+        // Now, move the pieces into the appropriate spot.
+        for (kind, id_vec) in reserve_hash {
             // Could match PieceKind here to specific reserve index. Pawns = 0, etc
+            let reserve_index = match kind {
+                Gold => 2,
+                Silver => 1,
+                Pawn => 0,
+                _ => 3,
+            };
             for (count_index, id) in id_vec.iter().enumerate() {
                 self.move_piece_to_reserve(player, *id, reserve_index, count_index);
             }
-            reserve_index += 1;
         }
     }
 
@@ -223,21 +230,6 @@ impl ViewGame {
         for player in 0..2 {
             self.update_reserve_pieces(game, player);
         }
-
-        // // Reserve 0
-        // for (index, id) in game.reserves[0].iter().enumerate() {
-        //     if *id == NONE { continue }
-        //     self.move_piece_to_reserve(0, *id, index);
-        //     let new_kind = game.piece_for(*id).kind;
-        //     self.update_piece_kind(*id, new_kind);
-        // }
-        // // Reserve 1
-        // for (index, id) in game.reserves[1].iter().enumerate() {
-        //     if *id == NONE { continue }
-        //     self.move_piece_to_reserve(1, *id, index);
-        //     let new_kind = game.piece_for(*id).kind;
-        //     self.update_piece_kind(*id, new_kind);
-        // }
     }
 
     fn update_piece_kind(&mut self, id: usize, new_kind: PieceKind) {
