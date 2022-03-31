@@ -36,8 +36,8 @@ pub struct ViewGame {
     rows: usize,
     squares: HashMap<usize, Sprite>, // key: location index
     promotion_lines: Vec<Sprite>,
-    reserves: Vec<HashMap<usize, Sprite>>, //
-    pieces: HashMap<usize, Sprite>, // key: model's Piece.id
+    reserve_boxes: Vec<HashMap<usize, Sprite>>, // ***************why is this a hash map?
+    pieces: Vec<Sprite>, // a vec so it can be sorted by z_order
     pub selected_piece: Option<usize>,
     pub move_indices: Vec<usize>, // all the spots the currently selected piece can move to
     status_text: Text,
@@ -60,8 +60,8 @@ impl ViewGame {
             columns, rows,
             squares: HashMap::new(),
             promotion_lines: Vec::new(),
-            reserves: vec!(HashMap::new(), HashMap::new()),
-            pieces: HashMap::new(),
+            reserve_boxes: vec!(HashMap::new(), HashMap::new()),
+            pieces: Vec::new(),
             selected_piece: None,
             move_indices: Vec::new(),
             status_text: Text::new(
@@ -108,12 +108,12 @@ impl ViewGame {
             let mut pos_x = RESERVE_0_CENTER.0;
             let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + SQUARE_GAP); 
             let mut reserve = Sprite::new(Reserve, texture, (pos_x, pos_y));
-            self.reserves[0].insert(i, reserve);
+            self.reserve_boxes[0].insert(i, reserve);
             // Reserve, player 1
             pos_x = RESERVE_1_CENTER.0;
             pos_y = RESERVE_1_CENTER.1 + i as f32 * (SQUARE_SIZE + SQUARE_GAP);
             reserve = Sprite::new(Reserve, texture, (pos_x, pos_y));
-            self.reserves[1].insert(i, reserve);
+            self.reserve_boxes[1].insert(i, reserve);
         }
     }
 
@@ -129,6 +129,10 @@ impl ViewGame {
         *self.piece_textures.get(&key.to_owned()).unwrap()
     }
 
+    fn piece_for_id(&mut self, id: usize) -> Option<&mut Sprite> {
+        self.pieces.iter_mut().find(|p| p.id == Some(id))
+    }
+
     pub fn add_piece(&mut self, piece: &Piece) {
         let texture = self.texture_for(piece.kind);
         let position = self.center_position_for(piece.location_index);
@@ -140,10 +144,6 @@ impl ViewGame {
         sprite.id = Some(piece.id);
         self.pieces.insert(piece.id, sprite);
     }
-
-    // pub fn remove_piece(&mut self, piece: &Piece) {
-    //     self.pieces.remove_entry(&piece.id);
-    // }
 
     fn corner_position_for(&self, index: usize) -> (f32, f32) {
         let (x0, y0) = Game::index_to_column_row(index);
@@ -163,18 +163,15 @@ impl ViewGame {
 
     pub fn move_piece_on_grid(&mut self, id: usize, to_index: usize) {
         let to_position = self.center_position_for(to_index);
-        if let Some(piece) = self.pieces.get_mut(&id) {
+        if let Some(piece) = self.piece_for_id(id) {
             piece.animate_move(to_position, Duration::from_secs_f32(0.75));
         }
     }
 
     fn move_piece_to_reserve(&mut self, player: usize, id: usize, reserve_index: usize, count_index: usize) {
-        if let Some(piece) = self.pieces.get_mut(&id) {
-
-            // Get reserve position.
-            let reserve_val = self.reserves[player].get(&reserve_index);
-            if let Some(reserve) = reserve_val {
-                let mut to_position = reserve.position;
+        let reserve_pos = self.reserve_boxes[player].get(&reserve_index).unwrap().position;
+        if let Some(piece) = self.piece_for_id(id) {
+                let mut to_position = reserve_pos;
                 to_position.0 += 15.0 * count_index as f32;
                 let mut theta: f32 = 0.0;
                 if player == 1 {
@@ -182,7 +179,7 @@ impl ViewGame {
                 }
                 piece.set_rotation(theta);
                 piece.animate_move(to_position, Duration::from_secs_f32(0.75));
-            }   
+             
         }
     }
 
@@ -213,7 +210,7 @@ impl ViewGame {
                 _ => 3,
             };
             for (count_index, id) in id_vec.iter().enumerate() {
-                if let Some(piece) = self.pieces.get_mut(&id) {
+                if let Some(piece) = self.piece_for_id(*id) {
                     piece.z_order = count_index; // position on top of previous pieces
                 }
                 self.move_piece_to_reserve(player, *id, reserve_index, count_index);
@@ -237,7 +234,7 @@ impl ViewGame {
 
     fn update_piece_kind(&mut self, id: usize, new_kind: PieceKind) {
         let texture = self.texture_for(new_kind);
-        if let Some(sprite) = self.pieces.get_mut(&id) {
+        if let Some(sprite) = self.piece_for_id(id) {
             sprite.update_texture(texture);
         }
     }
@@ -255,9 +252,10 @@ impl ViewGame {
         let mut clicked_handled = false;
 
         // Detect piece hits first.
-        for (id, piece) in &self.pieces {
+        for piece in &self.pieces {
+        //for (id, piece) in &self.pieces {
             if left_button && piece.contains(mouse_pos) {
-                self.message_sender.send(Message::PieceSelected(*id));
+                self.message_sender.send(Message::PieceSelected(piece.id.unwrap()));
                 clicked_handled = true;
             }
         }
@@ -275,7 +273,7 @@ impl ViewGame {
         if !clicked_handled {
             // Reserves
             for i in 0..2 {
-                for (_index, reserve) in &self.reserves[i] {
+                for (_index, reserve) in &self.reserve_boxes[i] {
                     if left_button && reserve.contains(mouse_pos) {
                         self.message_sender.send(Message::ReserveSelected(i));
                     }
@@ -285,7 +283,7 @@ impl ViewGame {
     }
 
     pub fn update(&mut self, time_delta: Duration) {
-        for piece in &mut self.pieces.values_mut() {
+        for piece in &mut self.pieces {
             piece.update(time_delta);
         }
     }
@@ -302,21 +300,16 @@ impl ViewGame {
             line.draw();
         }
         // Reserve boxes
-        for i in 0..2 {
-            for reserve in &mut self.reserves[i].values_mut() {
-                reserve.draw();
-            }
-        }
+        // for i in 0..2 {
+        //     for reserve in &mut self.reserve_boxes[i].values_mut() {
+        //         reserve.draw();
+        //     }
+        // }
         // Pieces
         // Sort by z_order since pieces may overlap.
-        // let mut sorted_pieces: Vec<&Sprite> = self.pieces.values_mut().collect();
-        // sorted_pieces.sort_by(|a, b| a.z_order.cmp(&b.z_order));
+        self.pieces.sort_by(|a, b| a.z_order.cmp(&b.z_order));
 
-        // for piece in sorted_pieces.into_iter() {
-        //     piece.draw();
-        // }
-
-        for piece in &mut self.pieces.values_mut() {
+        for piece in &mut self.pieces {
             piece.draw();
         }
     }
@@ -344,10 +337,7 @@ impl ViewGame {
     }
 
     pub fn selected_piece_id(&self) -> Option<usize> {
-        if let Some(selected) = self.selected_piece {
-            return self.pieces[&selected].id;
-        }
-        None
+        self.selected_piece
     }
 
     pub fn select_piece(&mut self, id: usize) {
@@ -357,7 +347,7 @@ impl ViewGame {
             }
             self.unselect_piece();
         }
-        if let Some(piece) = self.pieces.get_mut(&id) {
+        if let Some(piece) = self.piece_for_id(id) {
             piece.highlighted = true;
             self.selected_piece = Some(id);
         }
@@ -365,7 +355,7 @@ impl ViewGame {
 
     pub fn unselect_piece(&mut self) {
         if let Some(id) = self.selected_piece {
-            if let Some(piece) = self.pieces.get_mut(&id) {
+            if let Some(piece) = self.piece_for_id(id) {
                 piece.highlighted = false;
             }
             self.selected_piece = None;
