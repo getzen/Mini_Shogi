@@ -33,7 +33,8 @@ pub struct Sprite {
     pub highlighted: bool,
     pub highlight_color: Color,
     pub draw_params: DrawTextureParams,
-    position_lerp: Option<Lerp>,   
+    pub z_order: usize, // view can use this to sort
+    position_lerp: Option<Lerp>,
 }
 
 impl Sprite {
@@ -51,6 +52,7 @@ impl Sprite {
             highlighted: false,
             highlight_color: LIGHTGRAY,
             draw_params,
+            z_order: 0,
             position_lerp: None,
         }
     }
