@@ -34,10 +34,10 @@ pub struct ViewGame {
     message_sender: MessageSender, // sends event messages to controller
     columns: usize,
     rows: usize,
-    squares: HashMap<usize, Sprite>,
+    squares: HashMap<usize, Sprite>, // key: location index
     promotion_lines: Vec<Sprite>,
-    reserves: Vec<HashMap<usize, Sprite>>,
-    pieces: HashMap<usize, Sprite>, // usize is id matching model's Piece id
+    reserves: Vec<HashMap<usize, Sprite>>, //
+    pieces: HashMap<usize, Sprite>, // key: model's Piece.id
     pub selected_piece: Option<usize>,
     pub move_indices: Vec<usize>, // all the spots the currently selected piece can move to
     status_text: Text,
@@ -168,7 +168,7 @@ impl ViewGame {
         }
     }
 
-    pub fn move_piece_to_reserve(&mut self, player: usize, id: usize, reserve_index: usize) {
+    fn move_piece_to_reserve(&mut self, player: usize, id: usize, reserve_index: usize) {
         if let Some(piece) = self.pieces.get_mut(&id) {
 
             // Get reserve position.
@@ -183,6 +183,36 @@ impl ViewGame {
                 piece.animate_move(to_position, Duration::from_secs_f32(0.75));
             }   
         }
+    }
+
+    fn update_reserve_pieces(&mut self, game: &Game, player: usize) {
+        let mut reserve_hash = HashMap::<PieceKind, Vec<usize>>::new();
+        
+        for id in game.reserves[player] {
+            if id == NONE { continue }
+            let new_kind = game.piece_for(id).kind;
+            self.update_piece_kind(id, new_kind);
+
+            if let Some(id_vec) = reserve_hash.get_mut(&new_kind) {
+                id_vec.push(id);
+            } else {
+                reserve_hash.insert(new_kind, vec![id]);
+            }
+        }
+
+        let mut reserve_index = 0;
+        for (_kind, id_vec) in reserve_hash {
+            // Could match PieceKind here to specific reserve index. Pawns = 0, etc
+            for (index, id) in id_vec.iter().enumerate() {
+                self.move_piece_to_reserve(player, id, reserve_index, count_index);
+            }
+            reserve_index += 1;
+        }
+            
+            
+            
+            
+        
     }
 
     pub fn update_with_game(&mut self, game: &Game) {
