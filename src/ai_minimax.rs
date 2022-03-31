@@ -7,6 +7,7 @@ use crate::Game;
 use crate::GameState;
 use crate::game::Move;
 use crate::message_sender::{Message, MessageSender};
+use crate::piece::PieceKind::*;
 
 pub struct AIMinimax {
     game: Game, // a clone of the original
@@ -108,7 +109,7 @@ impl AIMinimax {
     /// Depth is used here to make the eval favor winning sooner (low depth) or
     /// losing later (high depth).
     fn evaluate(&self, node: &Game, depth: usize) -> f64 {
-        const WIN_LOSS_VAL: f64 = 100.0;
+        const WIN_LOSS_VAL: f64 = 1000.0;
         match node.state {
             GameState::Draw => 0.0,
             GameState::WinPlayer0 => {
@@ -126,10 +127,33 @@ impl AIMinimax {
                 }
             },
             GameState::Ongoing => {
-                // Customize for each game.
-                0.0
+                self.evaluate_pieces(node)
             }
         }
+    }
+
+    fn evaluate_pieces(&self, node: &Game) -> f64 {
+        let mut p0 = 0.;
+        let mut p1 = 0.;
+        for piece in &node.pieces {
+            let val = match piece.kind {
+                King => 0.,
+                Gold => 9.,
+                Silver => 6.,
+                SilverPro => 7.,
+                Pawn => 1.,
+                PawnPro => 5.,
+            };
+            if piece.player == 0 {
+                p0 += val;
+            } else {
+                p1 += val;
+            }
+        }
+        if self.search_player == 0 {
+            return p0 - p1;
+        }
+        p1 - p0
     }
 
 }

@@ -105,7 +105,7 @@ impl ViewGame {
 
         // Reserves
         texture = Sprite::load_texture("reserve.png").await;
-        for i in 0..3 {
+        for i in 0..4 {
             // Reserve, player 0
             let mut pos_x = RESERVE_0_CENTER.0;
             let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET); 

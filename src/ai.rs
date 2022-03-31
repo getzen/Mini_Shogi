@@ -55,12 +55,12 @@ impl AI {
             },
             AIMinimax => {
                 sender_clone.min_time_between = Some(Duration::from_millis(100));
-                let mut ai = AIMinimax::new(game, 3, sender_clone);
+                let mut ai = AIMinimax::new(game, 5, sender_clone);
                 ai.think()
             },
             AIMonteCarlo => {
                 sender_clone.min_time_between = Some(Duration::from_millis(100));
-                let mut ai = AIMonteCarlo::new(game, 2000, sender_clone);
+                let mut ai = AIMonteCarlo::new(game, 10, sender_clone);
                 ai.think()
             },
             // AIMonteCarloTree => {
