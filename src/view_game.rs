@@ -26,6 +26,8 @@ const PROMO_LINE_TOP: (f32, f32) = (405., 287.);
 const PROMO_LINE_BOTTOM: (f32, f32) = (405., 477.);
 const RESERVE_0_CENTER: (f32, f32) = (715., 615.);
 const RESERVE_1_CENTER: (f32, f32) = (95., 140.);
+const RESERVE_BOX_OFFSET: f32 = 20.;
+const RESERVE_PIECE_OFFSET: f32 = 12.;
 const TEXT_STATUS_CENTER: (f32, f32) = (400., 60.0);
 const AI_PROGRESS_CORNER: (f32, f32) = (20., 770.);
 const PIECE_SIZE: (f32, f32) = (70., 75.);
@@ -106,12 +108,12 @@ impl ViewGame {
         for i in 0..3 {
             // Reserve, player 0
             let mut pos_x = RESERVE_0_CENTER.0;
-            let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + SQUARE_GAP); 
+            let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET); 
             let mut reserve = Sprite::new(Reserve, texture, (pos_x, pos_y));
             self.reserve_boxes[0].insert(i, reserve);
             // Reserve, player 1
             pos_x = RESERVE_1_CENTER.0;
-            pos_y = RESERVE_1_CENTER.1 + i as f32 * (SQUARE_SIZE + SQUARE_GAP);
+            pos_y = RESERVE_1_CENTER.1 + i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET);
             reserve = Sprite::new(Reserve, texture, (pos_x, pos_y));
             self.reserve_boxes[1].insert(i, reserve);
         }
@@ -172,7 +174,11 @@ impl ViewGame {
         let reserve_pos = self.reserve_boxes[player].get(&reserve_index).unwrap().position;
         if let Some(piece) = self.piece_for_id(id) {
                 let mut to_position = reserve_pos;
-                to_position.0 += 15.0 * count_index as f32;
+                if player == 0 {
+                    to_position.1 -= RESERVE_PIECE_OFFSET * count_index as f32;
+                } else {
+                    to_position.1 += RESERVE_PIECE_OFFSET * count_index as f32;
+                }
                 let mut theta: f32 = 0.0;
                 if player == 1 {
                     theta = std::f32::consts::PI
@@ -216,6 +222,8 @@ impl ViewGame {
                 self.move_piece_to_reserve(player, *id, reserve_index, count_index);
             }
         }
+        // Sort by z_order so the overlap is correct.
+        self.pieces.sort_by(|a, b| a.z_order.cmp(&b.z_order));
     }
 
     pub fn update_with_game(&mut self, game: &Game) {
@@ -299,16 +307,15 @@ impl ViewGame {
         for line in &mut self.promotion_lines {
             line.draw();
         }
-        // Reserve boxes
+
+        // Reserve boxes - uncomment for debugging
         // for i in 0..2 {
         //     for reserve in &mut self.reserve_boxes[i].values_mut() {
         //         reserve.draw();
         //     }
         // }
+        
         // Pieces
-        // Sort by z_order since pieces may overlap.
-        self.pieces.sort_by(|a, b| a.z_order.cmp(&b.z_order));
-
         for piece in &mut self.pieces {
             piece.draw();
         }
