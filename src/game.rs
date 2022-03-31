@@ -11,9 +11,6 @@ pub const ROWS: usize = 6;
 const GRID_COUNT: usize = 30;
 const PIECES_PER_PLAYER: usize = 8;
 
-// #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-// pub struct Coord(pub usize, pub usize);
-
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum GameState {
     Ongoing,
@@ -32,21 +29,20 @@ pub enum GameLocation {
 pub const NONE: usize = usize::MAX;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
- // piece.id, location_index, is_capture. See Game.last_move
+ //              piece.id, location_index, is_capture. See Game.last_move
 pub struct Move (pub usize, pub usize, pub bool);
 
 const STARTING_POSITION: &str = "SGKGS------PPP--ppp------sgkgs";
 
 #[derive(Clone, Copy, Debug, Hash)]
 pub struct Game {
-    // This owns all the pieces. grid and reserves just hold the indices.
+    // This owns all the pieces. grid and reserves just hold the ids.
     pub pieces: [Piece; PIECES_PER_PLAYER * 2],
     pub grid: [usize; GRID_COUNT],
     pub reserves: [[usize; PIECES_PER_PLAYER * 2 - 1]; 2],
     pub current_player: usize,
     pub state: GameState,
-
-    pub last_move: Option<Move>, // piece.id, location_index, captured?
+    pub last_move: Option<Move>,
 }
 
 impl Game {
