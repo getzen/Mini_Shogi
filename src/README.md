@@ -10,10 +10,11 @@ TO-DO:
 
 - Add ability to restart game.
 
-- Add rule about parachuting pawn onto same column as another of player's pawns.
 - Add rule about no checkmate by parachuting pawn?
 
 - For reserve pieces, keep AI from evaluating identical reserve pieces.
+
+- Reconsider MonteCarloTree implementation.
 
 - Consider a Minimax / MonteCarlo hybrid where the evaluation function of Minimax
 uses a random playout if depth is beyond a certain level and state is Ongoing. That would
