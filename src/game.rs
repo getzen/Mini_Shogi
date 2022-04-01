@@ -158,9 +158,11 @@ impl Game {
                     // Get verboten columns. Optimization opportunity.
                     let mut columns = HashSet::<usize>::new();
                     for p in &self.pieces {
-                        if p.player != piece.player { continue; }
-                        let (x, _) = Game::index_to_column_row(p.location_index);
-                        columns.insert(x);
+                        if p.player != piece.player || p.location != Board || p.kind != Pawn {
+                            continue;
+                        }
+                        let (c, _) = Game::index_to_column_row(p.location_index);
+                        columns.insert(c);
                     }
 
                     for empty in self.empty_grid_indices() {
@@ -172,8 +174,8 @@ impl Game {
                             continue;
                         }
                         // Check if empty is in the same column as another pawn.
-                        let (empty_x, _) = Game::index_to_column_row(piece.location_index);
-                        if columns.contains(&empty_x) { continue; }
+                        let (empty_c, _) = Game::index_to_column_row(empty);
+                        if columns.contains(&empty_c) { continue; }
                         move_indices.push(empty);
                     }
 
