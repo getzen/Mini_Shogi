@@ -1,6 +1,8 @@
 // Game
 // Primitives are used to keep Game instances on the stack and hashable.
 
+use std::collections::HashSet;
+
 use crate::GameState::*;
 use crate::GameLocation::*;
 use crate::Piece;
@@ -147,8 +149,21 @@ impl Game {
                 }
             },
             Reserve => {
-                for empty in self.empty_grid_indices() {
-                    if piece.kind == Pawn {
+                if piece.kind != Pawn {
+                    move_indices.append(&mut self.empty_grid_indices());
+                }
+                else { // Pawn
+                    // Per the rules, pawns cannot be placed on same column as another of
+                    // the player's pawns.
+                    // Get verboten columns. Optimization opportunity.
+                    let mut columns = HashSet::<usize>::new();
+                    for p in &self.pieces {
+                        if p.player != piece.player { continue; }
+                        let (x, _) = Game::index_to_column_row(p.location_index);
+                        columns.insert(x);
+                    }
+
+                    for empty in self.empty_grid_indices() {
                         // Need to skip the last row per the rules.
                         if piece.player == 0 && empty >= GRID_COUNT - COLS {
                             continue;
@@ -156,8 +171,12 @@ impl Game {
                         if piece.player == 1 && empty < COLS {
                             continue;
                         }
+                        // Check if empty is in the same column as another pawn.
+                        let (empty_x, _) = Game::index_to_column_row(piece.location_index);
+                        if columns.contains(&empty_x) { continue; }
+                        move_indices.push(empty);
                     }
-                    move_indices.push(empty);
+
                 }
             },
             _ => {},

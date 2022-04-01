@@ -7,6 +7,9 @@
 //  - rotation: f32, (radians clockwise)
 //  - flip_x, flip_y: bool,
 //  - pivot: Option<Vec2>
+//
+// An array of sprites can be sorted by z_order like so:
+// my_sprites.sort_by(|a, b| a.z_order.cmp(&b.z_order));
 
 use std::time::Duration;
 
