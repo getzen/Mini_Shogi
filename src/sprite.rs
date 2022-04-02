@@ -89,14 +89,17 @@ impl Sprite {
     }
 
     /// Perform animation updates and the like with the time_delta.
-    pub fn update(&mut self, time_delta: Duration) {
+    /// If update did something, return true, otherwise false.
+    pub fn update(&mut self, time_delta: Duration) -> bool {
         if let Some(lerp) = &mut self.position_lerp {
             let results = lerp.update(time_delta);
             self.position = (results.0, results.1);
-            if results.2 {
+            if !results.2 {
                 self.position_lerp = None;
             }
+            return true;
         }
+        false
     }
 
     /// Use the Lerp struct to move the sprite.

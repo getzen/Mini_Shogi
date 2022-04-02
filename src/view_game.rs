@@ -290,10 +290,15 @@ impl ViewGame {
         }
     }
 
-    pub fn update(&mut self, time_delta: Duration) {
+    pub fn update(&mut self, time_delta: Duration) -> bool {
+        let mut update_active = false;
         for piece in &mut self.pieces {
-            piece.update(time_delta);
+            let updated = piece.update(time_delta);
+            if updated {
+                update_active = true;
+            }
         }
+        update_active
     }
 
     pub fn draw_board(&mut self) {
@@ -329,7 +334,7 @@ impl ViewGame {
             Player0Won => "Player 1 wins!",
             Player1Won => "Player 2 wins!",
             Draw => "The game is a draw.",
-            _ => {"Undefined state."},
+            _ => {""},
         };
 
         self.status_text.text = text.to_owned();

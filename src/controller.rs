@@ -24,6 +24,7 @@ pub enum AppState {
     HumanTurn,
     AITurnBegin,
     AIThinking,
+    WaitingOnAnimation,
     NextPlayer,
     Player0Won,
     Player1Won,
@@ -104,7 +105,11 @@ impl Controller {
             }
 
             // Update view
-            self.view_game.update(Duration::from_secs_f32(get_frame_time()));
+            let time_delta = Duration::from_secs_f32(get_frame_time());
+            let active = self.view_game.update(time_delta);
+            if !active && self.state == WaitingOnAnimation {
+                self.state = NextPlayer;
+            }
 
             // Draw view
             match self.state {
@@ -146,7 +151,7 @@ impl Controller {
                     let node = progress.best_node.unwrap();
                     self.use_node(node);
                     self.pv_text = self.format_ai_progress(&progress);
-                    self.state = NextPlayer;
+                    self.state = WaitingOnAnimation;
                 },
                 Message::ShouldExit => self.state = Exit,
             }
@@ -171,16 +176,11 @@ impl Controller {
                     self.perform_move(piece_id, location_index);
                 }
                 
-                self.state = NextPlayer;
+                self.state = WaitingOnAnimation;
             } 
             // Unselect everything
             self.view_game.unselect_piece();
             self.view_game.unhighlight_all_squares();
-            // else {
-            //     // Unselect everything
-            //     self.view_game.unselect_piece();
-            //     self.view_game.unhighlight_all_squares();
-            // }
         }
     }
   
@@ -192,7 +192,7 @@ impl Controller {
             // Move
             if let Some(piece_id) = self.view_game.selected_piece_id() {
                 self.perform_move(piece_id, index);
-                self.state = NextPlayer;
+                self.state = WaitingOnAnimation;
             }
         }
         // Regardless, unselect everything.
