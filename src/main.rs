@@ -15,6 +15,7 @@ mod lerp;
 mod message_sender;
 mod piece;
 use piece::Piece;
+mod resource_loader;
 mod sprite;
 mod text;
 mod view_game;
@@ -22,7 +23,7 @@ mod view_intro;
 
 fn conf() -> Conf {
     Conf {
-        window_title: String::from("My Game"),
+        window_title: String::from("Yokai"),
         window_width: 800,
         window_height: 800,
         high_dpi: true,

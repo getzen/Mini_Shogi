@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 use std::time::Duration;
 
-use macroquad::audio::{Sound, load_sound, play_sound_once};
+use macroquad::audio::{Sound, play_sound_once};
 use macroquad::prelude::*;
 
 use crate::Game;
@@ -15,6 +15,7 @@ use crate::controller::AppState::*;
 use crate::message_sender::{Message, MessageSender};
 use crate::Piece;
 use crate::piece::PieceKind::{self, *};
+use crate::resource_loader::ResourceLoader;
 use crate::sprite::*;
 use crate::sprite::SpriteKind::*;
 use crate::text::Text;
@@ -34,7 +35,22 @@ const AI_PROGRESS_CORNER: (f32, f32) = (20., 770.);
 const PIECE_SIZE: (f32, f32) = (70., 75.);
 const MOVE_DURATION: f32 = 0.25;
 
-pub const ASSET_PATH: &str = "./assets/";
+//pub const ASSET_PATH: &str = "./assets/";
+const GAME_TEXTURES: [&'static str; 9] = [
+    "square.png",
+    "reserve.png",
+    "line.png", 
+    "king.png", 
+    "gold.png", 
+    "silver.png", 
+    "silver_pro.png", 
+    "pawn.png", 
+    "pawn_pro.png"
+    ];
+const GAME_SOUNDS: [&'static str; 2] = [
+    "piece_move.wav", 
+    "piece_capture.wav"
+    ];
 
 pub struct ViewGame {
     message_sender: MessageSender, // sends event messages to controller
@@ -42,14 +58,14 @@ pub struct ViewGame {
     rows: usize,
     squares: HashMap<usize, Sprite>, // key: location index
     promotion_lines: Vec<Sprite>,
-    reserve_boxes: Vec<HashMap<usize, Sprite>>, // ***************why is this a hash map?
+    reserve_boxes: Vec<HashMap<usize, Sprite>>, // *************** why is this a hash map?
     pieces: Vec<Sprite>, // a vec so it can be sorted by z_order
     pub selected_piece: Option<usize>,
     pub move_indices: Vec<usize>, // all the spots the currently selected piece can move to
     status_text: Text,
     ai_progress_text: Text,
-    piece_textures: HashMap<String, Texture2D>,
-    sounds: HashMap<String, Sound>,
+    piece_textures: HashMap<&'static str, Texture2D>,
+    sounds: HashMap<&'static str, Sound>,
 }
 
 impl ViewGame {
@@ -85,51 +101,54 @@ impl ViewGame {
 
     pub async fn prepare(&mut self) {
         // Load textures.
+        //self.piece_textures = ResourceLoader::load_textures().await;
         let tex_names = ["king.png", "gold.png", "silver.png", "silver_pro.png", "pawn.png", "pawn_pro.png"];
-        for name in tex_names {
-            let texture = Sprite::load_texture(name).await;
-            self.piece_textures.insert(name.to_string(), texture);
-        }
+        self.piece_textures = ResourceLoader::load_textures(&GAME_TEXTURES).await;
+        // for name in tex_names {
+        //     let texture = Sprite::load_texture(name).await;
+        //     self.piece_textures.insert(name.to_string(), texture);
+        // }
 
         // Load sounds.
-        let snd_names = ["piece_move.wav", "piece_capture.wav"];
-        for name in snd_names {
-            let mut path = ASSET_PATH.to_owned();
-            path.push_str(name);
-            let sound = load_sound(&path).await.unwrap();
-            self.sounds.insert(name.to_string(), sound);
-        }
+        self.sounds = ResourceLoader::load_sounds(&GAME_SOUNDS).await;
+        // let snd_names = ["piece_move.wav", "piece_capture.wav"];
+        // for name in snd_names {
+        //     let mut path = ASSET_PATH.to_owned();
+        //     path.push_str(name);
+        //     let sound = load_sound(&path).await.unwrap();
+        //     self.sounds.insert(name.to_string(), sound);
+        // }
 
         // Board
-        let mut texture = Sprite::load_texture("square.png").await;
+        let mut texture = self.piece_textures.get("square.png").unwrap();
         for c in 0..self.columns {
             for r in 0..self.rows {
                 let index = Game::column_row_to_index(c, r);
                 let position = self.center_position_for(index);
-                let square = Sprite::new(Square, texture, position);
+                let square = Sprite::new(Square, *texture, position);
                 self.squares.insert(index, square);
             }
         }
 
         // Promotion lines
-        texture = Sprite::load_texture("line.png").await;
-        let line_top = Sprite::new(Default, texture, PROMO_LINE_TOP);
+        texture = self.piece_textures.get("line.png").unwrap();
+        let line_top = Sprite::new(Default, *texture, PROMO_LINE_TOP);
         self.promotion_lines.push(line_top);
-        let line_bottom = Sprite::new(Default, texture, PROMO_LINE_BOTTOM);
+        let line_bottom = Sprite::new(Default, *texture, PROMO_LINE_BOTTOM);
         self.promotion_lines.push(line_bottom);
 
         // Reserves
-        texture = Sprite::load_texture("reserve.png").await;
+        texture = self.piece_textures.get("reserve.png").unwrap();
         for i in 0..4 {
             // Reserve, player 0
             let mut pos_x = RESERVE_0_CENTER.0;
             let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET); 
-            let mut reserve = Sprite::new(Reserve, texture, (pos_x, pos_y));
+            let mut reserve = Sprite::new(Reserve, *texture, (pos_x, pos_y));
             self.reserve_boxes[0].insert(i, reserve);
             // Reserve, player 1
             pos_x = RESERVE_1_CENTER.0;
             pos_y = RESERVE_1_CENTER.1 + i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET);
-            reserve = Sprite::new(Reserve, texture, (pos_x, pos_y));
+            reserve = Sprite::new(Reserve, *texture, (pos_x, pos_y));
             self.reserve_boxes[1].insert(i, reserve);
         }
     }
@@ -143,7 +162,7 @@ impl ViewGame {
             Pawn => "pawn.png",
             PawnPro => "pawn_pro.png",
         };
-        *self.piece_textures.get(&key.to_owned()).unwrap()
+        *self.piece_textures.get(key).unwrap()
     }
 
     fn piece_for_id(&mut self, id: usize) -> Option<&mut Sprite> {
@@ -183,7 +202,7 @@ impl ViewGame {
         if let Some(piece) = self.piece_for_id(id) {
             if to_position != piece.position {
                 piece.animate_move(to_position, Duration::from_secs_f32(MOVE_DURATION));
-                if let Some(sound) = self.sounds.get(&"piece_move.wav".to_string()) {
+                if let Some(sound) = self.sounds.get(&"piece_move.wav") {
                     play_sound_once(*sound);
                 }
             }
@@ -206,7 +225,7 @@ impl ViewGame {
                 piece.set_rotation(theta);
                 if to_position != piece.position {
                     piece.animate_move(to_position, Duration::from_secs_f32(MOVE_DURATION));
-                    if let Some(sound) = self.sounds.get(&"piece_capture.wav".to_string()) {
+                    if let Some(sound) = self.sounds.get(&"piece_capture.wav") {
                         play_sound_once(*sound);
                     }
                 }

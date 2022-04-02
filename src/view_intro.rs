@@ -6,12 +6,19 @@ use std::sync::mpsc::Sender;
 use macroquad::prelude::*;
 
 use crate::message_sender::{Message, MessageSender};
+use crate::resource_loader::ResourceLoader;
 use crate::sprite::*;
 
 
 const TITLE_CORNER: (f32, f32) = (0., 0.);
 const START_CORNER: (f32, f32) = (350., 480.);
 const EXIT_CORNER: (f32, f32) = (350., 620.);
+
+const INTRO_TEXTURES: [&'static str; 3] = [
+    "title.png",
+    "start.png",
+    "exit.png"
+];
 
 fn texture_position(texture: &Texture2D, corner: (f32, f32)) -> (f32, f32) {
     (corner.0 + texture.width() / 2.0, corner.1 + texture.height() / 2.0)
@@ -26,17 +33,18 @@ pub struct ViewIntro {
 
 impl ViewIntro {
     pub async fn new(tx: Sender<Message>) -> Self {
-        let title_tex = Sprite::load_texture("title.png").await;
+        let textures = ResourceLoader::load_textures(&INTRO_TEXTURES).await;
+        let title_tex = textures.get("title.png").unwrap();
         let title_pos = texture_position(&title_tex, TITLE_CORNER);
-        let start_tex = Sprite::load_texture("start.png").await;
+        let start_tex = textures.get("start.png").unwrap();
         let start_pos = texture_position(&start_tex, START_CORNER);
-        let exit_tex = Sprite::load_texture("exit.png").await;
+        let exit_tex = textures.get("exit.png").unwrap();
         let exit_pos = texture_position(&exit_tex, EXIT_CORNER);
         Self {
             message_sender: MessageSender::new(tx, None),
-            title: Sprite::new(SpriteKind::Default, title_tex, title_pos),
-            start_button: Sprite::new(SpriteKind::Default, start_tex, start_pos),
-            exit_button: Sprite::new(SpriteKind::Default, exit_tex, exit_pos),
+            title: Sprite::new(SpriteKind::Default, *title_tex, title_pos),
+            start_button: Sprite::new(SpriteKind::Default, *start_tex, start_pos),
+            exit_button: Sprite::new(SpriteKind::Default, *exit_tex, exit_pos),
         }
     }
 

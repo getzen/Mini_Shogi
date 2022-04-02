@@ -1,6 +1,6 @@
 TO-DO:
 
-- Add sounds: welcome, move made, promotion, win/loss
+- Add sounds: welcome, promotion, win/loss
 
 - Re-do intro view graphic.
 

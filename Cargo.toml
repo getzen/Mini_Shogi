@@ -2,6 +2,7 @@
 name = "yokai"
 version = "0.1.0"
 edition = "2021"
+description = "The game of Yokai."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,3 +11,11 @@ edition = "2021"
 macroquad = "0.3"
 fastrand = "1.7.0"
 num-format = "0.4.0" # converts integers to comma-separated strings
+
+[package.metadata.bundle]
+name = "Yokai"
+identifier = "com.electronzen.Yokai"
+version = "1.0.0"
+resources = ["assets/*"]
+copyright = "Copyright (c) Jane Doe 2016. All rights reserved."
+category = "Game"
