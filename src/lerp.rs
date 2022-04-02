@@ -24,8 +24,16 @@ impl Lerp {
         if percentage >= 1.0 {
             return (self.end.0, self.end.1, true);
         }
-        let x = self.start.0 + (self.end.0 - self.start.0) * percentage;
-        let y = self.start.1 + (self.end.1 - self.start.1) * percentage;
+        let x: f32;
+        let y: f32;
+        let linear = false;
+        if linear {
+            x = self.start.0 + (self.end.0 - self.start.0) * percentage;
+            y = self.start.1 + (self.end.1 - self.start.1) * percentage;
+        } else { // ease out
+            x = self.start.0 + (self.end.0 - self.start.0) * f32::sin(3.14159 * 0.5 * percentage);
+            y = self.start.1 + (self.end.1 - self.start.1) * f32::sin(3.14159 * 0.5 * percentage);
+        }
         (x, y, false)
     }
 

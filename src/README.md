@@ -16,6 +16,8 @@ TO-DO:
 
 - Reconsider MonteCarloTree implementation.
 
+- Add ease-in/ease-out to lerp animation.
+
 - Consider a Minimax / MonteCarlo hybrid where the evaluation function of Minimax
 uses a random playout if depth is beyond a certain level and state is Ongoing. That would
 avoid the need for a proper board evaluation function.
