@@ -204,9 +204,11 @@ impl ViewGame {
                     theta = std::f32::consts::PI
                 }
                 piece.set_rotation(theta);
-                piece.animate_move(to_position, Duration::from_secs_f32(MOVE_DURATION));
-                if let Some(sound) = self.sounds.get(&"piece_capture.wav".to_string()) {
-                    play_sound_once(*sound);
+                if to_position != piece.position {
+                    piece.animate_move(to_position, Duration::from_secs_f32(MOVE_DURATION));
+                    if let Some(sound) = self.sounds.get(&"piece_capture.wav".to_string()) {
+                        play_sound_once(*sound);
+                    }
                 }
         }
     }

@@ -55,7 +55,7 @@ impl AI {
             },
             AIMinimax => {
                 sender_clone.min_time_between = Some(Duration::from_millis(100));
-                let mut ai = AIMinimax::new(game, 5, sender_clone);
+                let mut ai = AIMinimax::new(game, 2, sender_clone);
                 ai.think()
             },
             AIMonteCarlo => {
