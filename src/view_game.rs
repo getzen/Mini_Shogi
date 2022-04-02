@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 use std::time::Duration;
 
+use macroquad::audio::{Sound, load_sound, play_sound_once};
 use macroquad::prelude::*;
 
 use crate::Game;
@@ -31,6 +32,9 @@ const RESERVE_PIECE_OFFSET: f32 = 12.;
 const TEXT_STATUS_CENTER: (f32, f32) = (400., 60.0);
 const AI_PROGRESS_CORNER: (f32, f32) = (20., 770.);
 const PIECE_SIZE: (f32, f32) = (70., 75.);
+const MOVE_DURATION: f32 = 0.25;
+
+pub const ASSET_PATH: &str = "./assets/";
 
 pub struct ViewGame {
     message_sender: MessageSender, // sends event messages to controller
@@ -45,6 +49,7 @@ pub struct ViewGame {
     status_text: Text,
     ai_progress_text: Text,
     piece_textures: HashMap<String, Texture2D>,
+    sounds: HashMap<String, Sound>,
 }
 
 impl ViewGame {
@@ -74,15 +79,25 @@ impl ViewGame {
             ).await,
             ai_progress_text,
             piece_textures: HashMap::new(),
+            sounds: HashMap::new(),
         }
     }
 
     pub async fn prepare(&mut self) {
         // Load textures.
-        let names = ["king.png", "gold.png", "silver.png", "silver_pro.png", "pawn.png", "pawn_pro.png"];
-        for name in names {
+        let tex_names = ["king.png", "gold.png", "silver.png", "silver_pro.png", "pawn.png", "pawn_pro.png"];
+        for name in tex_names {
             let texture = Sprite::load_texture(name).await;
-            self.piece_textures.insert(name.to_owned(), texture);
+            self.piece_textures.insert(name.to_string(), texture);
+        }
+
+        // Load sounds.
+        let snd_names = ["piece_move.wav", "piece_capture.wav"];
+        for name in snd_names {
+            let mut path = ASSET_PATH.to_owned();
+            path.push_str(name);
+            let sound = load_sound(&path).await.unwrap();
+            self.sounds.insert(name.to_string(), sound);
         }
 
         // Board
@@ -166,7 +181,12 @@ impl ViewGame {
     pub fn move_piece_on_grid(&mut self, id: usize, to_index: usize) {
         let to_position = self.center_position_for(to_index);
         if let Some(piece) = self.piece_for_id(id) {
-            piece.animate_move(to_position, Duration::from_secs_f32(0.75));
+            if to_position != piece.position {
+                piece.animate_move(to_position, Duration::from_secs_f32(MOVE_DURATION));
+                if let Some(sound) = self.sounds.get(&"piece_move.wav".to_string()) {
+                    play_sound_once(*sound);
+                }
+            }
         }
     }
 
@@ -184,8 +204,10 @@ impl ViewGame {
                     theta = std::f32::consts::PI
                 }
                 piece.set_rotation(theta);
-                piece.animate_move(to_position, Duration::from_secs_f32(0.75));
-             
+                piece.animate_move(to_position, Duration::from_secs_f32(MOVE_DURATION));
+                if let Some(sound) = self.sounds.get(&"piece_capture.wav".to_string()) {
+                    play_sound_once(*sound);
+                }
         }
     }
 

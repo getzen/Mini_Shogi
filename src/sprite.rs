@@ -16,8 +16,7 @@ use std::time::Duration;
 use macroquad::prelude::*;
 
 use crate::lerp::Lerp;
-
-const TEXTURE_PATH: &str = "./assets/";
+use crate::view_game::ASSET_PATH;
 
 #[derive(PartialEq, Eq)]
 pub enum SpriteKind {
@@ -61,7 +60,7 @@ impl Sprite {
     }
 
     pub async fn load_texture(name: &str) -> Texture2D {
-        let mut path = TEXTURE_PATH.to_owned();
+        let mut path = ASSET_PATH.to_owned();
         path.push_str(name);
         load_texture(&path).await.unwrap()
     }

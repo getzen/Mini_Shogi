@@ -1,8 +1,8 @@
 TO-DO:
 
-- Add pause before AI move to allow move animation to complete.
-
 - Add sounds: welcome, move made, promotion, win/loss
+
+- Re-do intro view graphic.
 
 - Add difficulty/ai options to title view.
 
@@ -15,8 +15,6 @@ TO-DO:
 - For reserve pieces, keep AI from evaluating identical reserve pieces.
 
 - Reconsider MonteCarloTree implementation.
-
-- Add ease-in/ease-out to lerp animation.
 
 - Consider a Minimax / MonteCarlo hybrid where the evaluation function of Minimax
 uses a random playout if depth is beyond a certain level and state is Ongoing. That would
