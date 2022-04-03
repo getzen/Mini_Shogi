@@ -16,19 +16,14 @@ use std::time::Duration;
 use macroquad::prelude::*;
 
 use crate::lerp::Lerp;
-//use crate::view_game::ASSET_PATH;
 
+#[allow(dead_code)]
 #[derive(PartialEq, Eq)]
 pub enum SpriteKind {
     Default,
-    Square,
-    Reserve,
-    Piece,
 }
 
 pub struct Sprite {
-    pub id: Option<usize>, // usually a hash value
-    pub kind: SpriteKind,
     pub texture: Texture2D,
     pub position: (f32, f32),
     pub color: Color,
@@ -36,11 +31,13 @@ pub struct Sprite {
     pub highlight_color: Color,
     pub draw_params: DrawTextureParams,
     pub z_order: usize, // view can use this to sort
+    pub id: Option<usize>, // usually a hash value
+    pub kind: Option<SpriteKind>, // can be use for filtering, click detection, etc
     position_lerp: Option<Lerp>,
 }
 
 impl Sprite {
-    pub fn new(kind: SpriteKind, texture: Texture2D, position: (f32, f32)) -> Self {
+    pub fn new(texture: Texture2D, position: (f32, f32)) -> Self {
         let draw_params = DrawTextureParams {
             dest_size: None,
             source: None,
@@ -48,18 +45,20 @@ impl Sprite {
             flip_x: false, flip_y: false,
             pivot: None};
         Self {
-            id: None,
-            kind, texture, position,
+            texture, position,
             color: WHITE,
             highlighted: false,
             highlight_color: LIGHTGRAY,
             draw_params,
             z_order: 0,
+            id: None,
+            kind: None,
             position_lerp: None,
         }
     }
 
     #[allow(dead_code)]
+    // Use AssetLoader instead.
     pub async fn load_texture(name: &str) -> Texture2D {
         let mut path = "./assets".to_owned();
         path.push_str(name);

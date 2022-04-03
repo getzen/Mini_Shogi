@@ -10,6 +10,7 @@ pub struct AssetLoader {}
 
 impl AssetLoader {
 
+    /// Returns the texture associated with the given name.
     pub fn get_texture(name: &str) -> Texture2D {
         match name {
             // view_intro
@@ -31,6 +32,7 @@ impl AssetLoader {
         }
     }
 
+    /// Returns the sound associated with the given name. Async function.
     pub async fn get_sound(name: &str) -> Sound {
         let res = match name {
             "piece_move" => load_sound_from_bytes(include_bytes!("../assets/piece_move.wav")).await,
@@ -43,6 +45,7 @@ impl AssetLoader {
         }
     }
 
+    /// Returns the font associated with the given name.
     pub fn get_font(name: &str) -> Font {
         let res = match name {
             "Menlo" => load_ttf_font_from_bytes(include_bytes!("../assets/Menlo.ttc")),

@@ -28,14 +28,13 @@ impl Text {
             centered: true,
         };
         if let Some(name) = font_name {
-            //slf.text_params.font = Text::load_font(name).await;
             slf.text_params.font = AssetLoader::get_font(name);
         }
         slf
     }
 
     #[allow(dead_code)]
-    /// Loads the ttf or ttc font.
+    /// Loads the ttf or ttc font. Use AssetLoader instead.
     pub async fn load_font(name: &str) -> Font {
         let mut path = ".assets/".to_owned();
         path.push_str(name);

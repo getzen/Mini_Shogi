@@ -17,7 +17,6 @@ use crate::message_sender::{Message, MessageSender};
 use crate::Piece;
 use crate::piece::PieceKind::{self, *};
 use crate::sprite::*;
-use crate::sprite::SpriteKind::*;
 use crate::text::Text;
 
 const BACKGROUND_COLOR: (u8, u8, u8) = (144, 144, 137);
@@ -89,16 +88,16 @@ impl ViewGame {
             for r in 0..self.rows {
                 let index = Game::column_row_to_index(c, r);
                 let position = self.center_position_for(index);
-                let square = Sprite::new(Square, texture, position);
+                let square = Sprite::new(texture, position);
                 self.squares.insert(index, square);
             }
         }
 
         // Promotion lines
         texture = AssetLoader::get_texture("line");
-        let line_top = Sprite::new(Default, texture, PROMO_LINE_TOP);
+        let line_top = Sprite::new(texture, PROMO_LINE_TOP);
         self.promotion_lines.push(line_top);
-        let line_bottom = Sprite::new(Default, texture, PROMO_LINE_BOTTOM);
+        let line_bottom = Sprite::new(texture, PROMO_LINE_BOTTOM);
         self.promotion_lines.push(line_bottom);
 
         // Reserves
@@ -107,12 +106,12 @@ impl ViewGame {
             // Reserve, player 0
             let mut pos_x = RESERVE_0_CENTER.0;
             let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET); 
-            let mut reserve = Sprite::new(Reserve, texture, (pos_x, pos_y));
+            let mut reserve = Sprite::new(texture, (pos_x, pos_y));
             self.reserve_boxes[0].insert(i, reserve);
             // Reserve, player 1
             pos_x = RESERVE_1_CENTER.0;
             pos_y = RESERVE_1_CENTER.1 + i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET);
-            reserve = Sprite::new(Reserve, texture, (pos_x, pos_y));
+            reserve = Sprite::new(texture, (pos_x, pos_y));
             self.reserve_boxes[1].insert(i, reserve);
         }
     }
@@ -135,7 +134,7 @@ impl ViewGame {
     pub fn add_piece(&mut self, piece: &Piece) {
         let texture = self.texture_for(piece.kind);
         let position = self.center_position_for(piece.location_index);
-        let mut sprite = Sprite::new(Piece, texture, position);
+        let mut sprite = Sprite::new(texture, position);
         sprite.set_size(Some(PIECE_SIZE));
         if piece.player == 1 {
             sprite.set_rotation(std::f32::consts::PI);

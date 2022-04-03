@@ -13,6 +13,7 @@ pub const ROWS: usize = 6;
 const GRID_COUNT: usize = 30;
 const PIECES_PER_PLAYER: usize = 8;
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum GameState {
     Ongoing,
