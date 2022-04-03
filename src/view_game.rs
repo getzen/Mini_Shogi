@@ -57,7 +57,7 @@ impl ViewGame {
             "".to_owned(), 
             AI_PROGRESS_CORNER,
             12,
-            Some("Menlo.ttc"),
+            Some("Menlo"),
         ).await;
         ai_progress_text.centered = false;
 
@@ -74,7 +74,7 @@ impl ViewGame {
                 "Welcome!".to_owned(), 
                 TEXT_STATUS_CENTER,
                 18,
-                Some("Menlo.ttc"),
+                Some("Menlo"),
             ).await,
             ai_progress_text,
             piece_move: AssetLoader::get_sound("piece_move").await,
@@ -83,12 +83,6 @@ impl ViewGame {
     }
 
     pub async fn prepare(&mut self) {
-        // // Load textures.
-        // self.piece_textures = AssetLoader::load_textures(&GAME_TEXTURES).await;
-        
-        // // Load sounds.
-        // self.sounds = AssetLoader::load_sounds(&GAME_SOUNDS).await;
-
         // Board
         let mut texture = AssetLoader::get_texture("square");
         for c in 0..self.columns {

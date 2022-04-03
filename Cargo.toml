@@ -16,6 +16,5 @@ num-format = "0.4.0" # converts integers to comma-separated strings
 name = "Yokai"
 identifier = "com.electronzen.Yokai"
 version = "1.0.0"
-resources = ["assets/*"]
 copyright = "Copyright (c) Jane Doe 2016. All rights reserved."
 category = "Game"

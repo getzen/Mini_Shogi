@@ -9,7 +9,7 @@
 
 use macroquad::prelude::*;
 
-const FONT_PATH: &str = "./assets/";
+use crate::asset_loader::AssetLoader;
 
 pub struct Text {
     pub text: String,
@@ -28,20 +28,22 @@ impl Text {
             centered: true,
         };
         if let Some(name) = font_name {
-            slf.text_params.font = Text::load_font(name).await;
+            //slf.text_params.font = Text::load_font(name).await;
+            slf.text_params.font = AssetLoader::get_font(name);
         }
         slf
     }
 
+    #[allow(dead_code)]
     /// Loads the ttf or ttc font.
     pub async fn load_font(name: &str) -> Font {
-        let mut path = FONT_PATH.to_owned();
+        let mut path = ".assets/".to_owned();
         path.push_str(name);
         load_ttf_font(&path).await.unwrap()
     }
 
     #[allow(dead_code)]
-    /// A convenience function to set the sprite's rotation.
+    /// A convenience function to set the text color.
     pub fn set_color(&mut self, color: Color) {
         self.text_params.color = color;
     }

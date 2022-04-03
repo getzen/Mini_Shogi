@@ -2,6 +2,8 @@
 
 use macroquad::audio::load_sound_from_bytes;
 use macroquad::audio::Sound;
+use macroquad::prelude::Font;
+use macroquad::prelude::load_ttf_font_from_bytes;
 use macroquad::texture::Texture2D;
 
 pub struct AssetLoader {}
@@ -30,10 +32,9 @@ impl AssetLoader {
     }
 
     pub async fn get_sound(name: &str) -> Sound {
-        let res;
-        match name {
-            "piece_move" => {res = load_sound_from_bytes(include_bytes!("../assets/piece_move.wav")).await},
-            "piece_capture" => {res = load_sound_from_bytes(include_bytes!("../assets/piece_capture.wav")).await},
+        let res = match name {
+            "piece_move" => load_sound_from_bytes(include_bytes!("../assets/piece_move.wav")).await,
+            "piece_capture" => load_sound_from_bytes(include_bytes!("../assets/piece_capture.wav")).await,
             _ => panic!("No sound by that name."),
         };
         match res {
@@ -42,49 +43,14 @@ impl AssetLoader {
         }
     }
 
-    // fn resource_path(file_name: &str) -> PathBuf {
-    //     match current_exe() {
-    //         Ok(current) => {
-    //             let parent = current.parent().unwrap();
-    //             let path = parent.join(RESOURCE_PATH);
-    //             return path.join(file_name);
-    //         },
-    //         Err(_) => todo!(),
-    //     }
-    // }
-
-    // pub async fn load_textures2(names: &[&'static str]) -> HashMap<&'static str, Texture2D> {
-        
-    //     let mut hash = HashMap::new();
-    //     for name in names {
-    //         let path_buf = ResourceLoader::resource_path(name);
-    //         let path = path_buf.to_str().unwrap();
-            
-    //         let texture = load_texture(&path).await.unwrap();
-    //         hash.insert(name.to_owned(), texture);
-    //     }
-    //     hash
-    // }
-
-    // pub async fn load_textures(names: &[&'static str]) -> HashMap<&'static str, Texture2D> {
-    //     let mut hash = HashMap::new();
-    //     for name in names {
-    //         let path_buf = ResourceLoader::resource_path(name);
-    //         let path = path_buf.to_str().unwrap();
-    //         let texture = load_texture(&path).await.unwrap();
-    //         hash.insert(name.to_owned(), texture);
-    //     }
-    //     hash
-    // }
-
-    // pub async fn load_sounds(names: &[&'static str]) -> HashMap<&'static str, Sound> {
-    //     let mut hash = HashMap::new();
-    //     for name in names {
-    //         let path_buf = ResourceLoader::resource_path(name);
-    //         let path = path_buf.to_str().unwrap();
-    //         let sound = load_sound(&path).await.unwrap();
-    //         hash.insert(name.to_owned(), sound);
-    //     }
-    //     hash
-    // }
+    pub fn get_font(name: &str) -> Font {
+        let res = match name {
+            "Menlo" => load_ttf_font_from_bytes(include_bytes!("../assets/Menlo.ttc")),
+            _ => panic!("No font by that name."),
+        };
+        match res {
+            Ok(font) => font,
+            _ => panic!("Font could not be loaded."),
+        }
+    }
 }

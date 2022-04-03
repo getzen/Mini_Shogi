@@ -9,7 +9,6 @@ use crate::message_sender::{Message, MessageSender};
 use crate::asset_loader::AssetLoader;
 use crate::sprite::*;
 
-
 const TITLE_CORNER: (f32, f32) = (0., 0.);
 const START_CORNER: (f32, f32) = (350., 480.);
 const EXIT_CORNER: (f32, f32) = (350., 620.);
