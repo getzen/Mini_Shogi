@@ -24,6 +24,17 @@ pub struct Piece {
 }
 
 impl Piece {
+    // fn texture_for(piece_kind: PieceKind) -> Texture2D {
+    //     match piece_kind {
+    //         King => AssetLoader::get_texture("king"),
+    //         Gold => "gold.png",
+    //         Silver => "silver.png",
+    //         SilverPro => "silver_pro.png",
+    //         Pawn => "pawn.png",
+    //         PawnPro => "pawn_pro.png",
+    //     }
+    // }
+
     pub fn new(id: usize, kind: PieceKind, player: usize) -> Self {
         Self {
             id, kind, player,

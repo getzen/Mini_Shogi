@@ -59,11 +59,12 @@ impl Sprite {
         }
     }
 
-    // pub async fn load_texture(name: &str) -> Texture2D {
-    //     let mut path = ASSET_PATH.to_owned();
-    //     path.push_str(name);
-    //     load_texture(&path).await.unwrap()
-    // }
+    #[allow(dead_code)]
+    pub async fn load_texture(name: &str) -> Texture2D {
+        let mut path = "./assets".to_owned();
+        path.push_str(name);
+        load_texture(&path).await.unwrap()
+    }
 
     pub fn update_texture(&mut self, new_texture: Texture2D) {
         if self.texture != new_texture {

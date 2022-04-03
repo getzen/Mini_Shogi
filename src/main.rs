@@ -15,7 +15,7 @@ mod lerp;
 mod message_sender;
 mod piece;
 use piece::Piece;
-mod resource_loader;
+mod asset_loader;
 mod sprite;
 mod text;
 mod view_game;
