@@ -7,6 +7,7 @@ mod ai_minimax;
 mod ai_monte_carlo;
 mod ai_monte_carlo_tree;
 mod ai_random;
+mod button;
 mod controller;
 use crate::controller::Controller;
 mod game;

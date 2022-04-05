@@ -53,8 +53,8 @@ pub struct ViewGame {
 impl ViewGame {
     pub async fn new(tx: Sender<Message>, columns: usize, rows: usize) -> Self {
         let mut ai_progress_text = Text::new(
-            "".to_owned(), 
             AI_PROGRESS_CORNER,
+            "".to_owned(), 
             12,
             Some("Menlo"),
         ).await;
@@ -70,8 +70,8 @@ impl ViewGame {
             selected_piece: None,
             move_indices: Vec::new(),
             status_text: Text::new(
-                "Welcome!".to_owned(), 
                 TEXT_STATUS_CENTER,
+                "Welcome!".to_owned(),
                 18,
                 Some("Menlo"),
             ).await,
@@ -88,16 +88,16 @@ impl ViewGame {
             for r in 0..self.rows {
                 let index = Game::column_row_to_index(c, r);
                 let position = self.center_position_for(index);
-                let square = Sprite::new(texture, position);
+                let square = Sprite::new(position, texture);
                 self.squares.insert(index, square);
             }
         }
 
         // Promotion lines
         texture = AssetLoader::get_texture("line");
-        let line_top = Sprite::new(texture, PROMO_LINE_TOP);
+        let line_top = Sprite::new(PROMO_LINE_TOP, texture);
         self.promotion_lines.push(line_top);
-        let line_bottom = Sprite::new(texture, PROMO_LINE_BOTTOM);
+        let line_bottom = Sprite::new(PROMO_LINE_BOTTOM, texture);
         self.promotion_lines.push(line_bottom);
 
         // Reserves
@@ -106,12 +106,12 @@ impl ViewGame {
             // Reserve, player 0
             let mut pos_x = RESERVE_0_CENTER.0;
             let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET); 
-            let mut reserve = Sprite::new(texture, (pos_x, pos_y));
+            let mut reserve = Sprite::new((pos_x, pos_y), texture);
             self.reserve_boxes[0].insert(i, reserve);
             // Reserve, player 1
             pos_x = RESERVE_1_CENTER.0;
             pos_y = RESERVE_1_CENTER.1 + i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET);
-            reserve = Sprite::new(texture, (pos_x, pos_y));
+            reserve = Sprite::new((pos_x, pos_y), texture);
             self.reserve_boxes[1].insert(i, reserve);
         }
     }
@@ -134,7 +134,7 @@ impl ViewGame {
     pub fn add_piece(&mut self, piece: &Piece) {
         let texture = self.texture_for(piece.kind);
         let position = self.center_position_for(piece.location_index);
-        let mut sprite = Sprite::new(texture, position);
+        let mut sprite = Sprite::new(position, texture);
         sprite.set_size(Some(PIECE_SIZE));
         if piece.player == 1 {
             sprite.set_rotation(std::f32::consts::PI);

@@ -12,18 +12,17 @@ use macroquad::prelude::*;
 use crate::asset_loader::AssetLoader;
 
 pub struct Text {
-    pub text: String,
     pub position: (f32, f32),
+    pub text: String,
     pub centered: bool,
     pub text_params: TextParams,
 }
 
 impl Text {
-    pub async fn new(text: String, position: (f32, f32), font_size: u16, font_name: Option<&str>) -> Self {
+    pub async fn new(position: (f32, f32), text: String, font_size: u16, font_name: Option<&str>) -> Self {
         let mut slf =
         Self {
-            text,
-            position,
+            position, text,
             text_params: TextParams { font_size, ..Default::default() },
             centered: true,
         };

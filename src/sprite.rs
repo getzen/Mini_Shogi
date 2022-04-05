@@ -24,8 +24,8 @@ pub enum SpriteKind {
 }
 
 pub struct Sprite {
-    pub texture: Texture2D,
     pub position: (f32, f32),
+    pub texture: Texture2D,
     pub color: Color,
     pub highlighted: bool,
     pub highlight_color: Color,
@@ -37,7 +37,7 @@ pub struct Sprite {
 }
 
 impl Sprite {
-    pub fn new(texture: Texture2D, position: (f32, f32)) -> Self {
+    pub fn new(position: (f32, f32), texture: Texture2D) -> Self {
         let draw_params = DrawTextureParams {
             dest_size: None,
             source: None,
@@ -45,7 +45,7 @@ impl Sprite {
             flip_x: false, flip_y: false,
             pivot: None};
         Self {
-            texture, position,
+            position, texture,
             color: WHITE,
             highlighted: false,
             highlight_color: LIGHTGRAY,

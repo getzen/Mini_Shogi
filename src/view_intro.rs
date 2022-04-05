@@ -37,9 +37,9 @@ impl ViewIntro {
         let exit_pos = texture_position(&exit_tex, EXIT_CORNER);
         Self {
             message_sender: MessageSender::new(tx, None),
-            title: Sprite::new(title_tex, title_pos),
-            start_button: Sprite::new(start_tex, start_pos),
-            exit_button: Sprite::new(exit_tex, exit_pos),
+            title: Sprite::new(title_pos, title_tex),
+            start_button: Sprite::new(start_pos, start_tex),
+            exit_button: Sprite::new(exit_pos, exit_tex),
 
             slider: Slider::new((500., 600.), 100., 33., 0., 100., 1),
         }
