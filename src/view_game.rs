@@ -244,7 +244,7 @@ impl ViewGame {
     fn update_piece_kind(&mut self, id: usize, new_kind: PieceKind) {
         let texture = self.texture_for(new_kind);
         if let Some(sprite) = self.piece_for_id(id) {
-            sprite.update_texture(texture);
+            sprite.texture = texture;
         }
     }
 

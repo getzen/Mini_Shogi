@@ -65,7 +65,7 @@ impl Slider {
         self.value = closest_index as f32 * div_width
     }
 
-    pub fn contains(&self, point: (f32, f32)) -> bool {
+    fn contains(&self, point: (f32, f32)) -> bool {
         point.0 >= self.position.0 
         && point.0 <= self.position.0 + self.width
         && point.1 >= self.position.1 - self.value_marker_radius 
