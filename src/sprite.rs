@@ -81,6 +81,14 @@ impl Sprite {
         }
     }
 
+    #[allow(dead_code)]
+    // Will apply the given texture if it is not the same as the current texture.
+    pub fn update_texture(&mut self, new_texture: Texture2D) {
+        if self.texture != new_texture {
+            self.texture = new_texture;
+        }
+    }
+
     /// Perform animation updates and the like with the time_delta.
     /// If update did something, return true, otherwise false.
     pub fn update(&mut self, time_delta: Duration) -> bool {
