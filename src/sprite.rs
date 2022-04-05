@@ -33,7 +33,7 @@ pub struct Sprite {
     pub z_order: usize, // view can use this to sort
     pub id: Option<usize>, // usually a hash value
     pub kind: Option<SpriteKind>, // can be use for filtering, click detection, etc
-    position_lerp: Option<Lerp>,
+    position_lerp: Option<Lerp>, // created automatically for animation
 }
 
 impl Sprite {

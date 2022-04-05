@@ -60,7 +60,7 @@ impl AI {
             },
             AIMonteCarlo => {
                 sender_clone.min_time_between = Some(Duration::from_millis(100));
-                let mut ai = AIMonteCarlo::new(game, 10, sender_clone);
+                let mut ai = AIMonteCarlo::new(game, 1000, sender_clone);
                 ai.think()
             },
             // AIMonteCarloTree => {

@@ -14,7 +14,7 @@ TO-DO:
 
 - For reserve pieces, keep AI from evaluating identical reserve pieces.
 
-- Reconsider MonteCarloTree implementation.
+- Revisit MonteCarloTree implementation.
 
 - Consider a Minimax / MonteCarlo hybrid where the evaluation function of Minimax
 uses a random playout if depth is beyond a certain level and state is Ongoing. That would

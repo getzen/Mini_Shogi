@@ -16,6 +16,7 @@ mod message_sender;
 mod piece;
 use piece::Piece;
 mod asset_loader;
+mod slider;
 mod sprite;
 mod text;
 mod view_game;

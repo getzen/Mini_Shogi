@@ -7,6 +7,7 @@ use macroquad::prelude::*;
 
 use crate::message_sender::{Message, MessageSender};
 use crate::asset_loader::AssetLoader;
+use crate::slider::*;
 use crate::sprite::*;
 
 const TITLE_CORNER: (f32, f32) = (0., 0.);
@@ -22,6 +23,8 @@ pub struct ViewIntro {
     title: Sprite,
     start_button: Sprite,
     exit_button: Sprite,
+
+    slider: Slider,
 }
 
 impl ViewIntro {
@@ -37,6 +40,8 @@ impl ViewIntro {
             title: Sprite::new(title_tex, title_pos),
             start_button: Sprite::new(start_tex, start_pos),
             exit_button: Sprite::new(exit_tex, exit_pos),
+
+            slider: Slider::new((500., 600.), 100., 33., 0., 100., 1),
         }
     }
 
@@ -60,6 +65,9 @@ impl ViewIntro {
         if on_exit_button && left_button_released {
             self.message_sender.send(Message::ShouldExit);
         }
+
+        let button_down = is_mouse_button_down(MouseButton::Left);
+        self.slider.update(mouse_position(), button_down)
     }
 
     pub fn draw(&mut self) {
@@ -71,6 +79,8 @@ impl ViewIntro {
         self.title.draw();
         self.start_button.draw();
         self.exit_button.draw();
+
+        self.slider.draw();
     }
 
     pub async fn end_frame(&self) {
