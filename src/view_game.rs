@@ -88,7 +88,8 @@ impl ViewGame {
             for r in 0..self.rows {
                 let index = Game::column_row_to_index(c, r);
                 let position = self.center_position_for(index);
-                let square = Sprite::new(position, texture);
+                let mut square = Sprite::new(position, texture);
+                square.alt_color = Some(LIGHTGRAY);
                 self.squares.insert(index, square);
             }
         }
@@ -137,8 +138,9 @@ impl ViewGame {
         let mut sprite = Sprite::new(position, texture);
         sprite.set_size(Some(PIECE_SIZE));
         if piece.player == 1 {
-            sprite.set_rotation(std::f32::consts::PI);
+            sprite.rotation = std::f32::consts::PI;
         }
+        sprite.alt_color = Some(LIGHTGRAY);
         sprite.id = Some(piece.id);
         self.pieces.insert(piece.id, sprite);
     }
@@ -182,7 +184,7 @@ impl ViewGame {
                 if player == 1 {
                     theta = std::f32::consts::PI
                 }
-                piece.set_rotation(theta);
+                piece.rotation = theta;
                 if to_position != piece.position {
                     piece.animate_move(to_position, Duration::from_secs_f32(MOVE_DURATION));
                     play_sound_once(self.piece_capture);
@@ -361,7 +363,8 @@ impl ViewGame {
             self.unselect_piece();
         }
         if let Some(piece) = self.piece_for_id(id) {
-            piece.highlighted = true;
+            //piece.highlighted = true;
+            piece.use_alt_color = true;
             self.selected_piece = Some(id);
         }
     }
@@ -369,7 +372,8 @@ impl ViewGame {
     pub fn unselect_piece(&mut self) {
         if let Some(id) = self.selected_piece {
             if let Some(piece) = self.piece_for_id(id) {
-                piece.highlighted = false;
+                //piece.highlighted = false;
+                piece.use_alt_color = false;
             }
             self.selected_piece = None;
         }
@@ -377,7 +381,8 @@ impl ViewGame {
 
     pub fn set_move_indicies(&mut self, indicies:Vec<usize>) {
         for (index, square) in &mut self.squares {
-            square.highlighted = indicies.contains(index);
+            //square.highlighted = indicies.contains(index);
+            square.use_alt_color = indicies.contains(index);
         }
         self.move_indices = indicies;
     }
@@ -389,7 +394,8 @@ impl ViewGame {
     /// Does what is says on the tin.
     pub fn unhighlight_all_squares(&mut self) {
         for square in &mut self.squares.values_mut() {
-            square.highlighted = false;
+            //square.highlighted = false;
+            square.use_alt_color = false;
         }
     }
 }

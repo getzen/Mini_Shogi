@@ -17,26 +17,38 @@ use macroquad::prelude::*;
 
 use crate::lerp::Lerp;
 
-#[allow(dead_code)]
-#[derive(PartialEq, Eq)]
-pub enum SpriteKind {
-    Default,
-}
-
 pub struct Sprite {
     pub position: (f32, f32),
+
     pub texture: Texture2D,
+    pub alt_texture: Option<Texture2D>,
+    pub use_alt_texture: bool,
+
     pub color: Color,
-    pub highlighted: bool,
-    pub highlight_color: Color,
+    pub alt_color: Option<Color>,
+    pub use_alt_color: bool,
+
     pub draw_params: DrawTextureParams,
+    pub rotation: f32, // breaking out separately from draw_params for convenience
     pub z_order: usize, // view can use this to sort
+    pub is_visible: bool,
+
     pub id: Option<usize>, // usually a hash value
-    pub kind: Option<SpriteKind>, // can be use for filtering, click detection, etc
+
+    // Private
     position_lerp: Option<Lerp>, // created automatically for animation
+    // rotation_lerp, fade_lerp...
 }
 
 impl Sprite {
+    #[allow(dead_code)]
+    // Use AssetLoader instead.
+    async fn load_texture(name: &str) -> Texture2D {
+        let mut path = "./assets".to_owned();
+        path.push_str(name);
+        load_texture(&path).await.unwrap()
+    }
+
     pub fn new(position: (f32, f32), texture: Texture2D) -> Self {
         let draw_params = DrawTextureParams {
             dest_size: None,
@@ -45,34 +57,32 @@ impl Sprite {
             flip_x: false, flip_y: false,
             pivot: None};
         Self {
-            position, texture,
+            position,
+            texture,
+            alt_texture: None,
+            use_alt_texture: false,
             color: WHITE,
-            highlighted: false,
-            highlight_color: LIGHTGRAY,
+            alt_color: None,
+            use_alt_color: false,
             draw_params,
+            rotation: 0.0,
             z_order: 0,
+            is_visible: true,
             id: None,
-            kind: None,
             position_lerp: None,
         }
     }
 
     #[allow(dead_code)]
-    // Use AssetLoader instead.
-    pub async fn load_texture(name: &str) -> Texture2D {
-        let mut path = "./assets".to_owned();
-        path.push_str(name);
-        load_texture(&path).await.unwrap()
+    pub fn get_size(&self) -> Option<(f32, f32)> {
+        let opt_size = self.draw_params.dest_size;
+        if let Some(size) = opt_size {
+            return Some((size.x, size.y));
+        }
+        None
     }
 
     #[allow(dead_code)]
-    /// A convenience function to set the sprite's rotation.
-    pub fn set_rotation(&mut self, theta: f32) {
-        self.draw_params.rotation = theta;
-    }
-
-    #[allow(dead_code)]
-    /// A convenience function to set the sprite's draw size.
     pub fn set_size(&mut self, size: Option<(f32, f32)>) {
         if let Some(s) = size {
             self.draw_params.dest_size = Some(Vec2::new(s.0, s.1));
@@ -81,60 +91,6 @@ impl Sprite {
         }
     }
 
-    #[allow(dead_code)]
-    // Will apply the given texture if it is not the same as the current texture.
-    pub fn update_texture(&mut self, new_texture: Texture2D) {
-        if self.texture != new_texture {
-            self.texture = new_texture;
-        }
-    }
-
-    /// Perform animation updates and the like with the time_delta.
-    /// If update did something, return true, otherwise false.
-    pub fn update(&mut self, time_delta: Duration) -> bool {
-        if let Some(lerp) = &mut self.position_lerp {
-            let results = lerp.update(time_delta);
-            self.position = (results.0, results.1);
-            if !results.2 {
-                self.position_lerp = None;
-            }
-            return true;
-        }
-        false
-    }
-
-    /// Use the Lerp struct to move the sprite.
-    pub fn animate_move(&mut self, to: (f32, f32), duration: Duration) {
-        self.position_lerp = Some(Lerp::new(self.position, to, duration));
-    }
-
-    /// Returns the position at which the sprite should be drawn,
-    /// effectively centering at self.position.
-    fn draw_position(&self) -> (f32, f32) {
-        let (x, y) = self.position;
-        let (w, h) = self.draw_size();
-        (x - w / 2.0, y - h / 2.0)
-    }
-
-    /// Returns the size of the drawn sprite.
-    fn draw_size(&self) -> (f32, f32) {
-        let mut width = self.texture.width();
-        let mut height = self.texture.height();
-        if let Some(dest_size) = self.draw_params.dest_size {
-            width = dest_size.x;
-            height = dest_size.y;
-        }
-        (width, height)
-    }
-
-    pub fn draw(&mut self) {
-        let (x, y) = self.draw_position();
-        let mut draw_color = &self.color;
-        if self.highlighted {
-            draw_color = &self.highlight_color;
-        }
-        draw_texture_ex(self.texture, x, y, *draw_color, self.draw_params.clone());
-    }
 
     #[allow(dead_code)]
     /// Test whether the given point lies in the texture rectangle, considering rotation.
@@ -152,11 +108,59 @@ impl Sprite {
         f32::abs(rot_x) < w / 2.0 && f32::abs(rot_y) < h / 2.0
     }
 
-    #[allow(dead_code)]
-    // Convenience function to automatically highlight when mouse is over.
-    pub fn highlight_on_mouse_over(&mut self) -> bool {
-        let contains = self.contains(mouse_position());
-        self.highlighted = contains;
-        contains
+    /// Returns the position at which the texture should be drawn,
+    /// effectively centering at self.position.
+    fn centered_position(&self) -> (f32, f32) {
+        let (x, y) = self.position;
+        let (w, h) = self.draw_size();
+        (x - w / 2.0, y - h / 2.0)
+    }
+
+    /// Returns the size of the drawn sprite.
+    fn draw_size(&self) -> (f32, f32) {
+        let mut width = self.texture.width();
+        let mut height = self.texture.height();
+        if let Some(dest_size) = self.draw_params.dest_size {
+            width = dest_size.x;
+            height = dest_size.y;
+        }
+        (width, height)
+    }
+
+    /// Perform animation updates and the like with the time_delta.
+    /// If update did something, return true, otherwise false.
+    pub fn update(&mut self, time_delta: Duration) -> bool {
+        // Lerp animation
+        if let Some(lerp) = &mut self.position_lerp {
+            let results = lerp.update(time_delta);
+            self.position = (results.0, results.1);
+            if !results.2 {
+                self.position_lerp = None;
+            }
+            return true;
+        }
+        false
+    }
+
+    /// Use the Lerp struct to move the sprite.
+    pub fn animate_move(&mut self, to: (f32, f32), duration: Duration) {
+        self.position_lerp = Some(Lerp::new(self.position, to, duration));
+    }
+
+    pub fn draw(&mut self) {
+        if !self.is_visible { return; }
+        let mut draw_texture = self.texture;
+        let mut draw_color = self.color;
+
+        if self.use_alt_texture && self.alt_texture.is_some() {
+            draw_texture = self.alt_texture.unwrap();
+        }
+        if self.use_alt_color && self.alt_color.is_some() {
+            draw_color = self.alt_color.unwrap();
+        }
+
+        let (x, y) = self.centered_position();
+        self.draw_params.rotation = self.rotation;
+        draw_texture_ex(draw_texture, x, y, draw_color, self.draw_params.clone());
     }
 }
