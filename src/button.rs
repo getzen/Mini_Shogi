@@ -65,16 +65,16 @@ impl Button {
     #[allow(dead_code)]
     /// Test whether the given point lies in the texture rectangle, considering rotation.
     pub fn contains(&self, point: (f32, f32)) -> bool {
+        let (w, h) = self.draw_size();
         // Get the net test point relative to the sprite's position.
-        let net_x = point.0 - self.position.0;
-        let net_y = point.1 - self.position.1;
+        let net_x = point.0 - self.position.0 - w / 2.0;
+        let net_y = point.1 - self.position.1 - h / 2.0;
         // Rotate the point clockwise (the same direction as Macroquad's rotation). This is a
         // little different than the standard rotation formulas.
         let theta = self.draw_params.rotation;
         let rot_x = net_x * f32::cos(theta) + net_y * f32::sin(theta);
         let rot_y = -net_x * f32::sin(theta) + net_y * f32::cos(theta);
         // See if the rotated point is in the unrotated sprite rectangle.
-        let (w, h) = self.draw_size();
         f32::abs(rot_x) < w / 2.0 && f32::abs(rot_y) < h / 2.0
     }
 

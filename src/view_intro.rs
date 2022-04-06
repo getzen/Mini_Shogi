@@ -72,7 +72,7 @@ impl ViewIntro {
 
         self.exit_button.handle_mouse_events();
         if self.exit_button.is_selected {
-            println!("selected");
+            //println!("selected");
             //self.message_sender.send(Message::ShouldExit);
         }
 
