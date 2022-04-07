@@ -95,6 +95,7 @@ impl Controller {
 
             // Check messages
             self.check_messages().await;
+            self.view_intro.check_messages();
 
             // Take action
             match self.state {

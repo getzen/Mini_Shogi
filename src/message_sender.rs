@@ -1,12 +1,28 @@
-// MessageSender
+/// MessageSender
 
 use std::sync::mpsc::Sender;
 use std::time::{Duration, Instant};
 
+/// Messages for this particular app.
+use crate::ai::AIProgress;
+pub enum Message {
+    // ViewIntro
+    //ButtonPushed(usize),
+    //ButtonToggled(usize),
+    // ViewGame
+    IntroEnded,
+    PieceSelected(usize), // the piece id
+    SquareSelected(usize), // the location index
+    ReserveSelected(usize), // the player
+    AIUpdate(AIProgress),
+    SearchCompleted(AIProgress),
+    ShouldExit,
+}
+
 /// Sends messages using the owned transmitter (tx). If min_time_between is
 /// Messages will be ignored unless min_time has passed since the last message
 /// was sent. (Useful to not overload the receiver (rx) with, for example,
-/// progress update messages.) Set min_time to None to alway send right away.
+/// progress update messages.) Set min_time to None to alway send immediately.
 #[derive(Clone)]
 pub struct MessageSender {
     pub tx: Sender<Message>,
@@ -33,24 +49,12 @@ impl MessageSender {
         if send {
             let result = self.tx.send(message);
             if result.is_err() {
-                println!("MessageSender.transmit_message error.");
+                println!("MessageSender send error.");
             }
             if self.min_time_between.is_some() {
                 self.last_time = Some(Instant::now());
             } 
         }
-        
     }
 }
 
-// Messages for this particular app.
-use crate::ai::AIProgress;
-pub enum Message {
-    IntroEnded,
-    PieceSelected(usize), // the piece id
-    SquareSelected(usize), // the location index
-    ReserveSelected(usize), // the player
-    AIUpdate(AIProgress),
-    SearchCompleted(AIProgress),
-    ShouldExit,
-}

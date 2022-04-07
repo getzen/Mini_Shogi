@@ -1,12 +1,15 @@
 // ViewIntro
 // The intro/title view.
 
+use std::sync::mpsc;
+use std::sync::mpsc::Receiver;
 use std::sync::mpsc::Sender;
 
 use macroquad::prelude::*;
 
 use crate::button::Button;
-use crate::button::ButtonMode::{Push, Toggle};
+use crate::button::ButtonMessage;
+use crate::button::ButtonMode::*;
 
 use crate::message_sender::{Message, MessageSender};
 use crate::asset_loader::AssetLoader;
@@ -29,10 +32,17 @@ pub struct ViewIntro {
     exit_button: Button,
 
     slider: Slider,
+    // Receive messages from view's controls.
+    control_tx: Sender<ButtonMessage>,
+    rx: Receiver<ButtonMessage>,
 }
 
 impl ViewIntro {
     pub async fn new(tx: Sender<Message>) -> Self {
+        // Create message passing transmitter for Buttons to use to communicate
+        // with View as receiver.
+        let (control_tx, rx) = mpsc::channel();
+
         let title_tex = AssetLoader::get_texture("title");
         let title_pos = texture_position(&title_tex, TITLE_CORNER);
         let start_tex = AssetLoader::get_texture("start");
@@ -42,18 +52,19 @@ impl ViewIntro {
         let exit_pos = texture_position(&exit_tex, EXIT_CORNER);
         
         Self {
+            control_tx, rx,
             message_sender: MessageSender::new(tx, None),
             title: Sprite::new(title_pos, title_tex),
             start_button: Sprite::new(start_pos, start_tex),
 
-            //exit_button: Sprite::new(exit_pos, exit_tex),
-            exit_button: Button::new(exit_pos, exit_tex, Toggle),
+            exit_button: Button::new(exit_pos, exit_tex, Push, 2),
 
             slider: Slider::new((500., 600.), 100., 33., 0., 100., 1),
         }
     }
 
     pub fn prepare(&mut self) {
+        self.exit_button.tx = Some(self.control_tx.clone());
     }
 
     pub fn handle_events(&mut self) {
@@ -70,19 +81,30 @@ impl ViewIntro {
             self.message_sender.send(Message::IntroEnded);
         }
 
-        self.exit_button.handle_mouse_events();
-        if self.exit_button.is_selected {
-            //println!("selected");
-            //self.message_sender.send(Message::ShouldExit);
-        }
-
-        // let on_exit_button = self.exit_button.highlight_on_mouse_over();
-        // if on_exit_button && left_button_released {
-        //     self.message_sender.send(Message::ShouldExit);
-        // }
+        self.exit_button.process_mouse_events();
 
         let button_down = is_mouse_button_down(MouseButton::Left);
         self.slider.update(mouse_position(), button_down)
+    }
+
+    pub fn check_messages(&mut self) {
+        let received = self.rx.try_recv();
+        if received.is_ok() {
+            dbg!("ok!");
+            match received.unwrap() {
+                ButtonMessage::Pushed(id) => {
+                   if id == self.exit_button.id {
+                       println!("exit");
+                       self.message_sender.send(Message::ShouldExit);
+                   }
+
+                },
+                ButtonMessage::Toggled(id) => {
+
+                }
+                _ => {},
+            }
+        }
     }
 
     pub fn draw(&mut self) {

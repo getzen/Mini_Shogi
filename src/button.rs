@@ -3,12 +3,22 @@
 // Also, the position refers to the top-left corner of the texture instead
 // of the center.
 
+use std::sync::mpsc::Sender;
+
 use macroquad::prelude::*;
+
+use crate::button::ButtonMessage::*;
+//use crate::message_sender::{MessageSender, Message};
 
 #[allow(dead_code)]
 pub enum ButtonMode {
     Push,
     Toggle,
+}
+
+pub enum ButtonMessage {
+    Pushed(usize),
+    Toggled(usize),
 }
 
 pub struct Button {
@@ -23,20 +33,24 @@ pub struct Button {
     pub selected_color: Option<Color>,
 
     pub draw_params: DrawTextureParams,
-    pub z_order: usize,
+    pub z_order: usize, // default 0
     pub mode: ButtonMode,
 
     pub is_visible: bool,
     pub is_enabled: bool,
     pub is_mouse_over: bool,
     pub is_selected: bool,
+
+    pub id: usize,
+    pub tx: Option<Sender<ButtonMessage>>,
 }
 
 impl Button {
     pub fn new(
         position: (f32, f32), 
         texture: Texture2D, 
-        mode: ButtonMode) -> Self {
+        mode: ButtonMode,
+        id: usize) -> Self {
 
         let draw_params = DrawTextureParams {
             dest_size: None,
@@ -47,7 +61,7 @@ impl Button {
         };
 
         Self {
-            position, texture, mode,
+            position, texture, mode, id,
             disabled_texture: None,
             selected_texture: None,
             color: WHITE,
@@ -59,6 +73,7 @@ impl Button {
             is_enabled: true,
             is_mouse_over: false,
             is_selected: false,
+            tx: None,
         }
     }
 
@@ -89,9 +104,8 @@ impl Button {
         (width, height)
     }
 
-    pub fn handle_mouse_events(&mut self) {
+    pub fn process_mouse_events(&mut self) {
         if !self.is_visible || !self.is_enabled { return; }
-
         self.is_mouse_over = self.contains(mouse_position());
         let button_pressed = is_mouse_button_down(MouseButton::Left);
         // See if button was released *this frame*.
@@ -100,14 +114,23 @@ impl Button {
         match &self.mode {
             ButtonMode::Push => {
                 self.is_selected = self.is_mouse_over && button_pressed;
-                if self.is_selected && button_released {
-                    // send pushed event, then...
+                if self.is_mouse_over && button_released {
+                    dbg!("yes!");
+                    if let Some(sender) = &self.tx {
+                        dbg!("sending!");
+                        sender.send(Pushed(self.id)).expect("Button message send error.");
+                    } else {
+                        dbg!("nope");
+                    }
                     self.is_selected = false;
                 }
             },
             ButtonMode::Toggle => {
                 if self.is_mouse_over && button_released {
                     self.is_selected = !self.is_selected;
+                    if let Some(sender) = &self.tx {
+                        sender.send(Toggled(self.id)).expect("Button message send error.");
+                    }
                 }
             },
         }
