@@ -1,9 +1,12 @@
 // Slider
 
+use std::sync::mpsc::Sender;
 use macroquad::prelude::*;
+use crate::widget_message::WidgetMessage;
+use crate::widget_message::WidgetMessage::*;
 
 pub struct Slider {
-    pub position: (f32, f32),
+    pub position: (f32, f32), // left side
     pub width: f32, // the graphic width
     pub value: f32, // the chosen value
     pub min_value: f32,
@@ -16,6 +19,9 @@ pub struct Slider {
     pub snap_to_tick: bool,
     pub tick_divisions: usize, // # ticks between min and max
     pub tick_height: f32,
+    pub id: usize,
+    pub tx: Option<Sender<WidgetMessage>>,
+    // Private
     is_tracking: bool, // the mouse position
 }
 
@@ -26,23 +32,25 @@ impl Slider {
         value: f32,
         min_value: f32, 
         max_value: f32, 
-        divisions: usize, 
-    ) -> Self {
+        id: usize) -> Self {
+
         Self {
-            position, width, value, min_value, max_value, tick_divisions: divisions,
+            position, width, value, min_value, max_value, id,
             color: BLACK,
             line_thickness: 2.0,
             value_marker_radius: 8.0,
             is_value_marker_solid: true,
             show_ticks: true,
+            tick_divisions: 0,
             tick_height: 12.0,
             snap_to_tick: false,
+            tx: None,
             is_tracking: false,
         }
     }
 
     fn division_width(&self) -> f32 {
-        (self.max_value - self.min_value) / ((self.tick_divisions + 1) as f32)
+        self.width / ((self.tick_divisions + 1) as f32)
     }
 
     fn mouse_pos_to_value(&self, mouse_pos: (f32, f32)) -> f32 {
@@ -51,18 +59,20 @@ impl Slider {
         val.clamp(self.min_value, self.max_value)
     }
 
-    fn snap_to_nearest_value(&mut self, unsnapped_val: f32) {
-        let div_width = self.division_width();
-        let mut closest_distance = f32::MAX;
-        let mut closest_index = 0;
-        for i in 0..(self.tick_divisions + 2) {
-            let distance = (unsnapped_val - i as f32 * div_width).abs();
-            if distance < closest_distance {
-                closest_distance = distance;
-                closest_index = i;
+    fn snap_to_nearest_value(&mut self,) {
+        let mut nearest_distance = f32::MAX;
+        let mut nearest_value = self.min_value;
+        let mut test_value = self.min_value;
+
+        while test_value <= self.max_value {
+            let d = (self.value - test_value).abs();
+            if d < nearest_distance {
+                nearest_distance = d;
+                nearest_value = test_value;
             }
+            test_value += (self.max_value - self.min_value) / (self.tick_divisions + 1) as f32;
         }
-        self.value = closest_index as f32 * div_width
+        self.value = nearest_value;
     }
 
     fn contains(&self, point: (f32, f32)) -> bool {
@@ -72,18 +82,28 @@ impl Slider {
         && point.1 <= self.position.1 + self.value_marker_radius
     }
 
-    pub fn update(&mut self, mouse_pos: (f32, f32), button_down: bool) {
-        if button_down {
+    pub fn process_events(&mut self) {
+        let mouse_pos = mouse_position();
+        let old_value = self.value;
+        let mut send_message = false;
+        if is_mouse_button_down(MouseButton::Left) {
             if !self.is_tracking && self.contains(mouse_pos) {
                 self.is_tracking = true;
             }
             if self.is_tracking {
                 self.value = self.mouse_pos_to_value(mouse_pos);
+                send_message = self.value != old_value && !self.snap_to_tick;
             }
         } else if self.is_tracking {
             self.is_tracking = false;
             if self.snap_to_tick {
-                self.snap_to_nearest_value(self.value);
+                self.snap_to_nearest_value();
+                send_message = self.value != old_value;
+            }
+        }
+        if send_message {
+            if let Some(sender) = &self.tx {
+                sender.send(ValueChanged(self.id, self.value)).expect("Button message send error.");
             }
         }
     }

@@ -56,6 +56,7 @@ impl Sprite {
             rotation: 0.0,
             flip_x: false, flip_y: false,
             pivot: None};
+            
         Self {
             position,
             texture,

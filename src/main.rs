@@ -7,7 +7,6 @@ mod ai_minimax;
 mod ai_monte_carlo;
 mod ai_monte_carlo_tree;
 mod ai_random;
-mod button;
 mod controller;
 use crate::controller::Controller;
 mod game;
@@ -17,11 +16,14 @@ mod message_sender;
 mod piece;
 use piece::Piece;
 mod asset_loader;
-mod slider;
 mod sprite;
 mod text;
 mod view_game;
 mod view_intro;
+
+mod widget_button;
+mod widget_message;
+mod widget_slider;
 
 fn conf() -> Conf {
     Conf {

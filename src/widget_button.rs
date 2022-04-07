@@ -4,11 +4,9 @@
 // of the center.
 
 use std::sync::mpsc::Sender;
-
 use macroquad::prelude::*;
-
-use crate::button::ButtonMessage::*;
-//use crate::message_sender::{MessageSender, Message};
+use crate::widget_message::WidgetMessage;
+use crate::widget_message::WidgetMessage::*;
 
 #[allow(dead_code)]
 pub enum ButtonMode {
@@ -16,13 +14,8 @@ pub enum ButtonMode {
     Toggle,
 }
 
-pub enum ButtonMessage {
-    Pushed(usize),
-    Toggled(usize),
-}
-
 pub struct Button {
-    pub position: (f32, f32),
+    pub position: (f32, f32), // top-left corner
 
     pub texture: Texture2D,
     pub disabled_texture: Option<Texture2D>,
@@ -42,7 +35,7 @@ pub struct Button {
     pub is_selected: bool,
 
     pub id: usize,
-    pub tx: Option<Sender<ButtonMessage>>,
+    pub tx: Option<Sender<WidgetMessage>>,
 }
 
 impl Button {
@@ -104,7 +97,7 @@ impl Button {
         (width, height)
     }
 
-    pub fn process_mouse_events(&mut self) {
+    pub fn process_events(&mut self) {
         if !self.is_visible || !self.is_enabled { return; }
         self.is_mouse_over = self.contains(mouse_position());
         let button_pressed = is_mouse_button_down(MouseButton::Left);
@@ -115,12 +108,8 @@ impl Button {
             ButtonMode::Push => {
                 self.is_selected = self.is_mouse_over && button_pressed;
                 if self.is_mouse_over && button_released {
-                    dbg!("yes!");
                     if let Some(sender) = &self.tx {
-                        dbg!("sending!");
                         sender.send(Pushed(self.id)).expect("Button message send error.");
-                    } else {
-                        dbg!("nope");
                     }
                     self.is_selected = false;
                 }
