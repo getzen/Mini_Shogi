@@ -9,6 +9,7 @@ use crate::widget_message::WidgetMessage;
 use crate::widget_message::WidgetMessage::*;
 
 #[allow(dead_code)]
+#[derive(PartialEq)]
 pub enum ButtonMode {
     Push,
     Toggle,
@@ -36,6 +37,7 @@ pub struct Button {
     pub is_selected: bool,
 
     pub id: usize,
+    pub group_id: usize, // for radio button style groups
     pub tx: Option<Sender<WidgetMessage>>,
 }
 
@@ -67,6 +69,7 @@ impl Button {
             is_enabled: true,
             is_mouse_over: false,
             is_selected: false,
+            group_id: 0,
             tx: None,
         }
     }

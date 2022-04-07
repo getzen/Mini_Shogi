@@ -77,14 +77,17 @@ impl ViewIntro {
 
         texture = AssetLoader::get_texture("human");
         button = Button::new(HUMAN_1_CORNER, texture, ButtonMode::Radio, HUMAN_1_ID);
+        button.group_id = 1;
         self.buttons.insert(HUMAN_1_ID, button);
 
         texture = AssetLoader::get_texture("minimax");
         button = Button::new(MINIMAX_1_CORNER, texture, ButtonMode::Radio, MINIMAX_1_ID);
+        button.group_id = 1;
         self.buttons.insert(MINIMAX_1_ID, button);
 
         texture = AssetLoader::get_texture("monte_carlo");
         button = Button::new(MONTE_1_CORNER, texture, ButtonMode::Radio, MONTE_1_ID);
+        button.group_id = 1;
         self.buttons.insert(MONTE_1_ID, button);
 
 
@@ -129,25 +132,28 @@ impl ViewIntro {
                     println!("toggled id: {}", id);
                 }
                 WidgetMessage::Selected(id) => {
+                    
                     match id {
-                        HUMAN_1_ID => {
-                            self.buttons.get_mut(&MINIMAX_1_ID).unwrap().is_selected = false;
-                            self.buttons.get_mut(&MONTE_1_ID).unwrap().is_selected = false;
+                        HUMAN_1_ID | MINIMAX_1_ID | MONTE_1_ID => {
+                            self.deselect_buttons(1, id);
                         }
-                        MINIMAX_1_ID => {
-                            self.buttons.get_mut(&HUMAN_1_ID).unwrap().is_selected = false;
-                            self.buttons.get_mut(&MONTE_1_ID).unwrap().is_selected = false;
-                        }
-                        MONTE_1_ID => {
-                            self.buttons.get_mut(&HUMAN_1_ID).unwrap().is_selected = false;
-                            self.buttons.get_mut(&MINIMAX_1_ID).unwrap().is_selected = false;
-                        }
+                        
                         _ => {},
                     }
                 }
                 WidgetMessage::ValueChanged(id, val) => {
                     println!("slider id: {}, new value: {}", id, val);
                 },
+            }
+        }
+    }
+
+    /// Deselects all the buttons with given group_id. Ignores the button with
+    /// the except_id.
+    fn deselect_buttons(&mut self, group_id: usize, except_id: usize) {
+        for button in self.buttons.values_mut() {
+            if button.group_id == group_id && button.id != except_id {
+                button.is_selected = false;
             }
         }
     }
