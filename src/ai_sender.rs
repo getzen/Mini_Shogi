@@ -1,4 +1,8 @@
 /// AISender
+/// Sends messages using the owned transmitter (tx). If min_time_between is
+/// Messages will be ignored unless min_time has passed since the last message
+/// was sent. (Useful to not overload the receiver (rx) with, for example,
+/// progress update messages.) Set min_time to None to alway send immediately.
 
 use std::sync::mpsc::Sender;
 use std::time::{Duration, Instant};
@@ -10,10 +14,6 @@ pub enum AIMessage {
     SearchCompleted(AIProgress),
 }
 
-/// Sends messages using the owned transmitter (tx). If min_time_between is
-/// Messages will be ignored unless min_time has passed since the last message
-/// was sent. (Useful to not overload the receiver (rx) with, for example,
-/// progress update messages.) Set min_time to None to alway send immediately.
 #[derive(Clone)]
 pub struct AISender {
     pub tx: Sender<AIMessage>,
