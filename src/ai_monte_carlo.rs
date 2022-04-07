@@ -5,12 +5,12 @@
 
 use crate::{Game, GameState};
 use crate::ai::{AIProgress, Think};
-use crate::message_sender::{Message, MessageSender};
+use crate::ai_sender::{AIMessage, AISender};
 
 pub struct AIMonteCarlo {
     game: Game,
     rounds: usize,
-    message_sender: MessageSender,
+    message_sender: AISender,
 }
 
 impl Think for AIMonteCarlo {
@@ -20,7 +20,7 @@ impl Think for AIMonteCarlo {
 }
 
 impl AIMonteCarlo {
-    pub fn new(game: Game, rounds: usize, message_sender: MessageSender) -> Self {
+    pub fn new(game: Game, rounds: usize, message_sender: AISender) -> Self {
         Self {
             game, rounds, message_sender,
         }
@@ -88,7 +88,7 @@ impl AIMonteCarlo {
             }
             progress.pv = vec![best_node.last_move.unwrap()];
             progress.duration = now.elapsed();
-            self.message_sender.send(Message::AIUpdate(progress.clone()));       
+            self.message_sender.send(AIMessage::AIUpdate(progress.clone()));       
         }
         progress.best_node = Some(best_node);
         progress.duration = now.elapsed();

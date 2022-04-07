@@ -6,7 +6,7 @@ use crate::ai::{AIProgress, Think};
 use crate::Game;
 use crate::GameState;
 use crate::game::Move;
-use crate::message_sender::{Message, MessageSender};
+use crate::ai_sender::{AIMessage, AISender};
 use crate::piece::PieceKind::*;
 
 pub struct AIMinimax {
@@ -17,7 +17,7 @@ pub struct AIMinimax {
     search_player: usize, // need to remember this before things get hairy
     now: Instant, // tracks elapsed time
     progress: AIProgress,
-    message_sender: MessageSender,
+    message_sender: AISender,
 }
 
 impl Think for AIMinimax {
@@ -38,7 +38,7 @@ impl Think for AIMinimax {
 }
 
 impl AIMinimax {
-    pub fn new(game: Game, depth: usize, message_sender: MessageSender) -> Self {
+    pub fn new(game: Game, depth: usize, message_sender: AISender) -> Self {
         let p = game.current_player;
         Self {
             game, depth,
@@ -75,7 +75,7 @@ impl AIMinimax {
                         self.progress.best_node = Some(*node);
                     }
                     self.progress.duration = self.now.elapsed();
-                    self.message_sender.send(Message::AIUpdate(self.progress.clone()));
+                    self.message_sender.send(AIMessage::AIUpdate(self.progress.clone()));
                 }
                 
                 if beta <= alpha {

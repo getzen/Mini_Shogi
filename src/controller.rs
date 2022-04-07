@@ -10,7 +10,7 @@ use num_format::{Locale, ToFormattedString};
 
 use crate::ai::AI;
 use crate::ai::AIProgress;
-use crate::message_sender::{AIMessage, MessageSender};
+use crate::ai_sender::{AIMessage, AISender};
 use crate::game::*;
 use crate::GameState;
 use crate::controller::AppState::*;
@@ -319,7 +319,7 @@ impl Controller {
         // These variables are captured by the thread.
         let ai_kind = self.player_kinds[self.game.current_player];
         let game_copy = self.game;
-        let message_sender = MessageSender::new(self.ai_tx.clone(), None);
+        let message_sender = AISender::new(self.ai_tx.clone(), None);
 
         std::thread::spawn(move || {
             AI::think(ai_kind, game_copy, message_sender);

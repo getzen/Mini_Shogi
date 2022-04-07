@@ -7,14 +7,13 @@ use crate::ai_random::AIRandom;
 use crate::ai_minimax::AIMinimax;
 use crate::ai_monte_carlo::AIMonteCarlo;
 //use crate::ai_monte_carlo_tree::AIMonteCarloTree;
+use crate::ai_sender::AISender;
+use crate::ai_sender::AIMessage;
 
-use crate::game::Move;
-use crate::message_sender::Message;
 use crate::controller::PlayerKind;
 use crate::controller::PlayerKind::*;
-
 use crate::Game;
-use crate::message_sender::MessageSender;
+use crate::game::Move;
 
 pub trait Think {
     fn think(&mut self) -> AIProgress;
@@ -46,7 +45,7 @@ impl AIProgress {
 pub struct AI {}
 
 impl AI {
-    pub fn think(ai_kind: PlayerKind, game: Game, mut message_sender: MessageSender) {
+    pub fn think(ai_kind: PlayerKind, game: Game, mut message_sender: AISender) {
         let mut sender_clone = message_sender.clone();
         let progress: AIProgress = match ai_kind {
             AIRandom => {
@@ -70,6 +69,6 @@ impl AI {
             // },
             _ => {panic!("AI::think panic!")},
         };
-        message_sender.send(Message::SearchCompleted(progress));
+        message_sender.send(AIMessage::SearchCompleted(progress));
     }
 }

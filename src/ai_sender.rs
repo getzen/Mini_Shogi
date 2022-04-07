@@ -1,4 +1,4 @@
-/// MessageSender
+/// AISender
 
 use std::sync::mpsc::Sender;
 use std::time::{Duration, Instant};
@@ -15,21 +15,21 @@ pub enum AIMessage {
 /// was sent. (Useful to not overload the receiver (rx) with, for example,
 /// progress update messages.) Set min_time to None to alway send immediately.
 #[derive(Clone)]
-pub struct MessageSender {
-    pub tx: Sender<Message>,
+pub struct AISender {
+    pub tx: Sender<AIMessage>,
     pub min_time_between: Option<Duration>,
     last_time: Option<Instant>,
 }
 
-impl MessageSender {
-    pub fn new(tx: Sender<Message>, min_time_between: Option<Duration>) -> Self {
+impl AISender {
+    pub fn new(tx: Sender<AIMessage>, min_time_between: Option<Duration>) -> Self {
         Self {
             tx, min_time_between,
             last_time: None,
         }
     }
     
-    pub fn send(&mut self, message: Message) {
+    pub fn send(&mut self, message: AIMessage) {
         let mut send = false;
         if self.min_time_between.is_none() || self.last_time.is_none() {
             send = true;

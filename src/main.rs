@@ -12,7 +12,7 @@ use crate::controller::Controller;
 mod game;
 use game::{Game, GameState, GameLocation};
 mod lerp;
-mod message_sender;
+mod ai_sender;
 mod piece;
 use piece::Piece;
 mod asset_loader;

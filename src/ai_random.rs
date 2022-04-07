@@ -2,15 +2,15 @@
 
 use crate::ai::{AIProgress, Think};
 use crate::Game;
-use crate::message_sender::{Message, MessageSender};
+use crate::ai_sender::{AIMessage, AISender};
 
 pub struct AIRandom {
     game: Game,
-    message_sender: MessageSender
+    message_sender: AISender
 }
 
 impl AIRandom {
-    pub fn new(game: Game, message_sender: MessageSender) -> Self {
+    pub fn new(game: Game, message_sender: AISender) -> Self {
         Self {
             game, message_sender,
         }
@@ -31,7 +31,7 @@ impl Think for AIRandom {
         progress.best_node = Some(node);
         progress.is_complete = true;
         let return_progress = progress.clone();
-        self.message_sender.send(Message::AIUpdate(progress));
+        self.message_sender.send(AIMessage::AIUpdate(progress));
         return_progress
     }
 }
