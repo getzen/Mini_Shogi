@@ -102,7 +102,7 @@ impl ViewIntro {
                     println!("toggled id: {}", id);
                 }
                 WidgetMessage::ValueChanged(id, val) => {
-                    println!("new value: {}", val);
+                    println!("slider id: {}, new value: {}", id, val);
                 },
             }
         }
