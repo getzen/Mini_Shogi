@@ -37,7 +37,7 @@ pub struct Button {
     pub is_selected: bool,
 
     pub id: usize,
-    pub group_id: usize, // for radio button style groups
+    pub group_id: usize, // for radio-style groups
     pub tx: Option<Sender<WidgetMessage>>,
 }
 
