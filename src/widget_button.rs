@@ -12,6 +12,7 @@ use crate::widget_message::WidgetMessage::*;
 pub enum ButtonMode {
     Push,
     Toggle,
+    Radio,
 }
 
 pub struct Button {
@@ -58,7 +59,7 @@ impl Button {
             disabled_texture: None,
             selected_texture: None,
             color: WHITE,
-            disabled_color: Some(DARKGRAY),
+            disabled_color: Some(GRAY),
             selected_color: Some(YELLOW),
             draw_params,
             z_order: 0,
@@ -120,6 +121,16 @@ impl Button {
                     if let Some(sender) = &self.tx {
                         sender.send(Toggled(self.id)).expect("Button message send error.");
                     }
+                }
+            },
+            ButtonMode::Radio => {
+                if self.is_mouse_over && button_released {
+                    if !self.is_selected {
+                        if let Some(sender) = &self.tx {
+                            sender.send(Selected(self.id)).expect("Button message send error.");
+                        }
+                    }
+                    self.is_selected = true;
                 }
             },
         }

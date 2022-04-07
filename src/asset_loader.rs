@@ -18,6 +18,9 @@ impl AssetLoader {
             "start" => Texture2D::from_file_with_format(include_bytes!("../assets/start.png"),None,),
             "rules" => Texture2D::from_file_with_format(include_bytes!("../assets/rules.png"),None,),
             "exit" => Texture2D::from_file_with_format(include_bytes!("../assets/exit.png"),None,),
+            "human" => Texture2D::from_file_with_format(include_bytes!("../assets/human.png"),None,),
+            "minimax" => Texture2D::from_file_with_format(include_bytes!("../assets/minimax.png"),None,),
+            "monte_carlo" => Texture2D::from_file_with_format(include_bytes!("../assets/monte_carlo.png"),None,),
             // view board
             "square" => Texture2D::from_file_with_format(include_bytes!("../assets/square.png"),None,),
             "line" => Texture2D::from_file_with_format(include_bytes!("../assets/line.png"),None,),
