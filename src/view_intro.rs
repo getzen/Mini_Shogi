@@ -20,12 +20,20 @@ const START_CORNER: (f32, f32) = (680., 745.);
 const START_ID: usize = 0;
 const EXIT_CORNER: (f32, f32) = (20., 745.);
 const EXIT_ID: usize = 1;
+
 const HUMAN_1_CORNER: (f32, f32) = (295., 340.);
 const HUMAN_1_ID: usize = 2;
 const MINIMAX_1_CORNER: (f32, f32) = (395., 340.);
 const MINIMAX_1_ID: usize = 3;
 const MONTE_1_CORNER: (f32, f32) = (515., 340.);
 const MONTE_1_ID: usize = 4;
+
+const HUMAN_2_CORNER: (f32, f32) = (295., 535.);
+const HUMAN_2_ID: usize = 5;
+const MINIMAX_2_CORNER: (f32, f32) = (395., 535.);
+const MINIMAX_2_ID: usize = 6;
+const MONTE_2_CORNER: (f32, f32) = (515., 535.);
+const MONTE_2_ID: usize = 7;
 
 pub enum ViewIntroMessage {
     ShouldStart,
@@ -75,9 +83,11 @@ impl ViewIntro {
         button = Button::new(EXIT_CORNER, texture, ButtonMode::Push, EXIT_ID);
         self.buttons.insert(EXIT_ID, button);
 
+        // Player 1
         texture = AssetLoader::get_texture("human");
         button = Button::new(HUMAN_1_CORNER, texture, ButtonMode::Radio, HUMAN_1_ID);
         button.group_id = 1;
+        button.is_selected = true;
         self.buttons.insert(HUMAN_1_ID, button);
 
         texture = AssetLoader::get_texture("minimax");
@@ -90,9 +100,27 @@ impl ViewIntro {
         button.group_id = 1;
         self.buttons.insert(MONTE_1_ID, button);
 
+        // Player 2
+        texture = AssetLoader::get_texture("human");
+        button = Button::new(HUMAN_2_CORNER, texture, ButtonMode::Radio, HUMAN_2_ID);
+        button.group_id = 2;
+        button.is_selected = true;
+        self.buttons.insert(HUMAN_2_ID, button);
 
+        texture = AssetLoader::get_texture("minimax");
+        button = Button::new(MINIMAX_2_CORNER, texture, ButtonMode::Radio, MINIMAX_2_ID);
+        button.group_id = 2;
+        self.buttons.insert(MINIMAX_2_ID, button);
+
+        texture = AssetLoader::get_texture("monte_carlo");
+        button = Button::new(MONTE_2_CORNER, texture, ButtonMode::Radio, MONTE_2_ID);
+        button.group_id = 2;
+        self.buttons.insert(MONTE_2_ID, button);
+
+        // Set common elements
         for button in self.buttons.values_mut() {
             button.color = LIGHTGRAY;
+            button.selected_color = Some(Color::from_rgba(246, 194, 81, 255));
             button.tx = Some(self.widget_tx.clone());
         }
 
@@ -131,13 +159,14 @@ impl ViewIntro {
                 WidgetMessage::Toggled(id) => {
                     println!("toggled id: {}", id);
                 }
-                WidgetMessage::Selected(id) => {
-                    
+                WidgetMessage::Selected(id) => { // radio-style groupings
                     match id {
                         HUMAN_1_ID | MINIMAX_1_ID | MONTE_1_ID => {
                             self.deselect_buttons(1, id);
                         }
-                        
+                        HUMAN_2_ID | MINIMAX_2_ID | MONTE_2_ID => {
+                            self.deselect_buttons(2, id);
+                        }
                         _ => {},
                     }
                 }
