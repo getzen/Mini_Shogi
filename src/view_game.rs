@@ -13,7 +13,6 @@ use crate::Game;
 use crate::game::NONE;
 use crate::controller::AppState;
 use crate::controller::AppState::*;
-use crate::message_sender::{Message, MessageSender};
 use crate::Piece;
 use crate::piece::PieceKind::{self, *};
 use crate::sprite::*;
@@ -34,8 +33,15 @@ const AI_PROGRESS_CORNER: (f32, f32) = (20., 770.);
 const PIECE_SIZE: (f32, f32) = (70., 75.);
 const MOVE_DURATION: f32 = 0.25;
 
+pub enum ViewGameMessage {
+    PieceSelected(usize), // the piece id
+    SquareSelected(usize), // the location index
+    ReserveSelected(usize), // the player
+    ShouldExit,
+}
+
 pub struct ViewGame {
-    message_sender: MessageSender, // sends event messages to controller
+    tx: Sender<ViewGameMessage>, // sends event messages to controller
     columns: usize,
     rows: usize,
     squares: HashMap<usize, Sprite>, // key: location index
@@ -51,10 +57,9 @@ pub struct ViewGame {
 }
 
 impl ViewGame {
-    pub async fn new(tx: Sender<Message>, columns: usize, rows: usize) -> Self {
+    pub async fn new(tx: Sender<ViewGameMessage>, columns: usize, rows: usize) -> Self {
         Self {
-            message_sender: MessageSender::new(tx, None),
-            columns, rows,
+            tx, columns, rows,
             squares: HashMap::new(),
             promotion_lines: Vec::new(),
             reserve_boxes: vec!(HashMap::new(), HashMap::new()),
@@ -252,7 +257,7 @@ impl ViewGame {
     pub fn handle_events(&mut self) {
         // Key presses.
         if is_key_down(KeyCode::Escape) {
-            self.message_sender.send(Message::ShouldExit);
+            self.tx.send(ViewGameMessage::ShouldExit).expect("ViewGame message send error.");
         }
 
         // Mouse position and buttons.
@@ -265,7 +270,7 @@ impl ViewGame {
         for piece in &self.pieces {
         //for (id, piece) in &self.pieces {
             if left_button && piece.contains(mouse_pos) {
-                self.message_sender.send(Message::PieceSelected(piece.id.unwrap()));
+                self.tx.send(ViewGameMessage::PieceSelected(piece.id.unwrap())).expect("ViewGame message send error.");
                 clicked_handled = true;
             }
         }
@@ -274,7 +279,7 @@ impl ViewGame {
             // Squares
             for (index, square) in &self.squares {
                 if left_button && square.contains(mouse_pos) {
-                    self.message_sender.send(Message::SquareSelected(*index));
+                    self.tx.send(ViewGameMessage::SquareSelected(*index)).expect("ViewGame message send error.");
                     clicked_handled = true;
                 }
             }
@@ -285,7 +290,7 @@ impl ViewGame {
             for i in 0..2 {
                 for (_index, reserve) in &self.reserve_boxes[i] {
                     if left_button && reserve.contains(mouse_pos) {
-                        self.message_sender.send(Message::ReserveSelected(i));
+                        self.tx.send(ViewGameMessage::ReserveSelected(i)).expect("ViewGame message send error.");
                     }
                 }
             }

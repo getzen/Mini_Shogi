@@ -10,13 +10,13 @@ use num_format::{Locale, ToFormattedString};
 
 use crate::ai::AI;
 use crate::ai::AIProgress;
-use crate::message_sender::{Message, MessageSender};
+use crate::message_sender::{AIMessage, MessageSender};
 use crate::game::*;
 use crate::GameState;
 use crate::controller::AppState::*;
 use crate::controller::PlayerKind::*;
-use crate::view_game::ViewGame;
-use crate::view_intro::ViewIntro;
+use crate::view_game::{ViewGame, ViewGameMessage};
+use crate::view_intro::{ViewIntro, ViewIntroMessage};
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum AppState {
@@ -49,24 +49,29 @@ pub struct Controller {
     view_game: ViewGame,
     pub state: AppState,
     node_history: Vec<Game>,
-    rx: Receiver<Message>,
-    tx: Sender<Message>,
+    view_intro_rx: Receiver<ViewIntroMessage>,
+    view_game_rx: Receiver<ViewGameMessage>,
+    ai_tx: Sender<AIMessage>,
+    ai_rx: Receiver<AIMessage>,
     pv_text: String,
 }
 
 impl Controller {
     pub async fn new() -> Self {
-        // Create message passing transmitter for View and Game to use to communicate
-        // with Controller as receiver.
-        let (tx, rx) = mpsc::channel();
+        let (view_intro_tx, view_intro_rx) = mpsc::channel();
+        let (view_game_tx, view_game_rx) = mpsc::channel();
+        let (ai_tx, ai_rx) = mpsc::channel();
+
         Self {
             player_kinds: Vec::new(),
             game: Game::new(),
-            view_intro: ViewIntro::new(tx.clone()).await,
-            view_game: ViewGame::new(tx.clone(), COLS, ROWS, ).await,
+            view_intro: ViewIntro::new(view_intro_tx).await,
+            view_game: ViewGame::new(view_game_tx, COLS, ROWS).await,
             state: Intro,
             node_history: Vec::new(),
-            rx, tx,
+            view_intro_rx,
+            view_game_rx,
+            ai_tx, ai_rx,
             pv_text: String::from(""),
         }
     }
@@ -128,33 +133,51 @@ impl Controller {
     }
 
     async fn check_messages(&mut self) {
-        let received = self.rx.try_recv();
+        // From ViewIntro
+        let received = self.view_intro_rx.try_recv();
         if received.is_ok() {
             match received.unwrap() {
-                Message::IntroEnded => {
+                ViewIntroMessage::ShouldStart => {
                     self.next_player();
                 },
-                Message::PieceSelected(id) => {
+                ViewIntroMessage::ShouldExit => self.state = Exit,
+            }
+        }
+        // From ViewGame
+        let received = self.view_game_rx.try_recv();
+        if received.is_ok() {
+            match received.unwrap() {
+                ViewGameMessage::PieceSelected(id) => {
                     self.piece_selected(id);
                 },
-                Message::SquareSelected(index) => {
+                ViewGameMessage::SquareSelected(index) => {
                     self.square_selected(index);
                 },
-                Message::ReserveSelected(player) => {
+                ViewGameMessage::ReserveSelected(player) => {
                     self.reserve_selected(player);
                 },
-                Message::AIUpdate(progress) => {
+                ViewGameMessage::ShouldExit => {
+                    self.state = Exit;
+                },
+            }
+        }
+
+        // From AI
+        let received = self.ai_rx.try_recv();
+        if received.is_ok() {
+            match received.unwrap() {
+                AIMessage::AIUpdate(progress) => {
                     //if self.state == AIThinking {
                         self.pv_text = self.format_ai_progress(&progress);
                     //}
                 }
-                Message::SearchCompleted(progress) => {
+                AIMessage::SearchCompleted(progress) => {
                     let node = progress.best_node.unwrap();
                     self.use_node(node);
                     self.pv_text = self.format_ai_progress(&progress);
                     self.state = WaitingOnAnimation;
                 },
-                Message::ShouldExit => self.state = Exit,
+                
             }
         }
     }
@@ -296,7 +319,7 @@ impl Controller {
         // These variables are captured by the thread.
         let ai_kind = self.player_kinds[self.game.current_player];
         let game_copy = self.game;
-        let message_sender = MessageSender::new(self.tx.clone(), None);
+        let message_sender = MessageSender::new(self.ai_tx.clone(), None);
 
         std::thread::spawn(move || {
             AI::think(ai_kind, game_copy, message_sender);

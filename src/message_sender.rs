@@ -3,20 +3,11 @@
 use std::sync::mpsc::Sender;
 use std::time::{Duration, Instant};
 
-/// Messages for this particular app.
 use crate::ai::AIProgress;
-pub enum Message {
-    // ViewIntro
-    //ButtonPushed(usize),
-    //ButtonToggled(usize),
-    // ViewGame
-    IntroEnded,
-    PieceSelected(usize), // the piece id
-    SquareSelected(usize), // the location index
-    ReserveSelected(usize), // the player
+
+pub enum AIMessage {
     AIUpdate(AIProgress),
     SearchCompleted(AIProgress),
-    ShouldExit,
 }
 
 /// Sends messages using the owned transmitter (tx). If min_time_between is

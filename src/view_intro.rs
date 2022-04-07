@@ -7,7 +7,6 @@ use std::sync::mpsc::Sender;
 
 use macroquad::prelude::*;
 
-use crate::message_sender::{Message, MessageSender};
 use crate::asset_loader::AssetLoader;
 use crate::sprite::*;
 
@@ -20,28 +19,34 @@ const TITLE_CORNER: (f32, f32) = (0., 0.);
 const START_CORNER: (f32, f32) = (350., 480.);
 const EXIT_CORNER: (f32, f32) = (350., 620.);
 
+pub enum ViewIntroMessage {
+    ShouldStart,
+    ShouldExit,
+}
+
 /// Given the corner position, returns the center of the given texture.
 fn texture_position(texture: &Texture2D, corner: (f32, f32)) -> (f32, f32) {
     (corner.0 + texture.width() / 2.0, corner.1 + texture.height() / 2.0)
 }
 
 pub struct ViewIntro {
-    message_sender: MessageSender, // sends event messages to controller
+    // Sends messages to controller.
+    tx: Sender<ViewIntroMessage>, 
+    // Receive messages from view's widgets.
+    widget_tx: Sender<WidgetMessage>, // copy given to widgets
+    widget_rx: Receiver<WidgetMessage>,
+
     title: Sprite,
     start_button: Button,
     exit_button: Button,
-
     slider: Slider,
-    // Receive messages from view's controls.
-    control_tx: Sender<WidgetMessage>,
-    rx: Receiver<WidgetMessage>,
 }
 
 impl ViewIntro {
-    pub async fn new(tx: Sender<Message>) -> Self {
+    pub async fn new(tx: Sender<ViewIntroMessage>) -> Self {
         // Create message passing transmitter for Buttons to use to communicate
         // with View as receiver.
-        let (control_tx, rx) = mpsc::channel();
+        let (widget_tx, widget_rx) = mpsc::channel();
 
         let title_tex = AssetLoader::get_texture("title");
         let title_pos = texture_position(&title_tex, TITLE_CORNER);
@@ -51,8 +56,7 @@ impl ViewIntro {
         let exit_pos = texture_position(&exit_tex, EXIT_CORNER);
         
         Self {
-            control_tx, rx,
-            message_sender: MessageSender::new(tx, None),
+            tx, widget_tx, widget_rx,
             title: Sprite::new(title_pos, title_tex),
             start_button: Button::new(start_pos, start_tex, ButtonMode::Push, 1),
             exit_button: Button::new(exit_pos, exit_tex, ButtonMode::Push, 2),
@@ -68,9 +72,9 @@ impl ViewIntro {
     }
 
     pub fn prepare(&mut self) {
-        self.start_button.tx = Some(self.control_tx.clone());
-        self.exit_button.tx = Some(self.control_tx.clone());
-        self.slider.tx = Some(self.control_tx.clone());
+        self.start_button.tx = Some(self.widget_tx.clone());
+        self.exit_button.tx = Some(self.widget_tx.clone());
+        self.slider.tx = Some(self.widget_tx.clone());
         self.slider.tick_divisions = 8;
         self.slider.snap_to_tick = true;
     }
@@ -78,7 +82,7 @@ impl ViewIntro {
     pub fn handle_events(&mut self) {
         // Key presses.
         if is_key_down(KeyCode::Escape) {
-            self.message_sender.send(Message::ShouldExit);
+            self.tx.send(ViewIntroMessage::ShouldExit).expect("Intro message send error.");
         }
         // Widgets. They may send messages.
         self.start_button.process_events();
@@ -87,15 +91,15 @@ impl ViewIntro {
     }
 
     pub fn check_messages(&mut self) {
-        let received = self.rx.try_recv();
+        let received = self.widget_rx.try_recv();
         if received.is_ok() {
             match received.unwrap() {
                 WidgetMessage::Pushed(id) => {
                     if id == self.start_button.id {
-                        self.message_sender.send(Message::IntroEnded);
+                        self.tx.send(ViewIntroMessage::ShouldStart).expect("Intro message send error.");
                     }
                     if id == self.exit_button.id {
-                        self.message_sender.send(Message::ShouldExit);
+                        self.tx.send(ViewIntroMessage::ShouldExit).expect("Intro message send error.");
                     }
                 },
                 WidgetMessage::Toggled(id) => {
