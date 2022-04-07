@@ -56,7 +56,7 @@ impl Sprite {
             rotation: 0.0,
             flip_x: false, flip_y: false,
             pivot: None};
-            
+
         Self {
             position,
             texture,
@@ -91,7 +91,6 @@ impl Sprite {
             self.draw_params.dest_size = None;
         }
     }
-
 
     #[allow(dead_code)]
     /// Test whether the given point lies in the texture rectangle, considering rotation.

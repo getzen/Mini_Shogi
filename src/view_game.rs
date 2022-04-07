@@ -52,14 +52,6 @@ pub struct ViewGame {
 
 impl ViewGame {
     pub async fn new(tx: Sender<Message>, columns: usize, rows: usize) -> Self {
-        let mut ai_progress_text = Text::new(
-            AI_PROGRESS_CORNER,
-            "".to_owned(), 
-            12,
-            Some("Menlo"),
-        ).await;
-        ai_progress_text.centered = false;
-
         Self {
             message_sender: MessageSender::new(tx, None),
             columns, rows,
@@ -75,13 +67,20 @@ impl ViewGame {
                 18,
                 Some("Menlo"),
             ).await,
-            ai_progress_text,
+            ai_progress_text: Text::new(
+                AI_PROGRESS_CORNER,
+                "".to_owned(), 
+                12,
+                Some("Menlo"),
+            ).await,
             piece_move: AssetLoader::get_sound("piece_move").await,
             piece_capture: AssetLoader::get_sound("piece_capture").await,
         }
     }
 
     pub async fn prepare(&mut self) {
+        self.status_text.centered = true;
+
         // Board
         let mut texture = AssetLoader::get_texture("square");
         for c in 0..self.columns {

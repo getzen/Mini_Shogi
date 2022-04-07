@@ -19,13 +19,19 @@ pub struct Text {
 }
 
 impl Text {
-    pub async fn new(position: (f32, f32), text: String, font_size: u16, font_name: Option<&str>) -> Self {
+    pub async fn new(
+        position: (f32, f32), 
+        text: String, 
+        font_size: u16, 
+        font_name: Option<&str>) -> Self {
+        
         let mut slf =
         Self {
             position, text,
             text_params: TextParams { font_size, ..Default::default() },
-            centered: true,
+            centered: false,
         };
+        
         if let Some(name) = font_name {
             slf.text_params.font = AssetLoader::get_font(name);
         }
