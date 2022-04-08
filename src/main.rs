@@ -32,7 +32,7 @@ fn conf() -> Conf {
         window_height: 800,
         high_dpi: true,
         //fullscreen: bool,
-        //sample_count: i32,
+        sample_count: 0,
         //window_resizable: bool,
         //icon: Option<Icon>,
         ..Default::default()

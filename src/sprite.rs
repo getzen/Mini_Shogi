@@ -93,6 +93,14 @@ impl Sprite {
     }
 
     #[allow(dead_code)]
+    pub fn set_scale(&mut self, scale: f32) {
+        let dest_size = Vec2::new(
+            self.texture.width() * scale, 
+            self.texture.height() * scale);
+        self.draw_params.dest_size = Some(dest_size);
+    }
+
+    #[allow(dead_code)]
     /// Test whether the given point lies in the texture rectangle, considering rotation.
     pub fn contains(&self, point: (f32, f32)) -> bool {
         // Get the net test point relative to the sprite's position.
