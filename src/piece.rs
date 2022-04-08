@@ -1,7 +1,6 @@
 // Piece
 
-use crate::GameLocation;
-use crate::GameLocation::*;
+use crate::game::GameLocation;
 use crate::piece::PieceKind::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -38,7 +37,7 @@ impl Piece {
     pub fn new(id: usize, kind: PieceKind, player: usize) -> Self {
         Self {
             id, kind, player,
-            location: OutOfGame,
+            location: GameLocation::OutOfGame,
             location_index: usize::MAX,
         }
     }

@@ -3,9 +3,9 @@
 
 use std::collections::HashSet;
 
-use crate::GameState::*;
-use crate::GameLocation::*;
-use crate::Piece;
+use crate::game::GameState::*;
+use crate::game::GameLocation::*;
+use crate::piece::Piece;
 use crate::piece::PieceKind::*;
 
 pub const COLS: usize = 5;

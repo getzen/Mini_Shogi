@@ -7,13 +7,11 @@ use crate::ai_random::AIRandom;
 use crate::ai_minimax::AIMinimax;
 use crate::ai_monte_carlo::AIMonteCarlo;
 //use crate::ai_monte_carlo_tree::AIMonteCarloTree;
-use crate::ai_sender::AISender;
-use crate::ai_sender::AIMessage;
+use crate::ai_sender::{AISender, AIMessage};
 
 use crate::controller::PlayerKind;
 use crate::controller::PlayerKind::*;
-use crate::Game;
-use crate::game::Move;
+use crate::game::{Game, Move};
 
 pub trait Think {
     fn think(&mut self) -> AIProgress;

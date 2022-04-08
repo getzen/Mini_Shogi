@@ -1,7 +1,6 @@
 // Board
 // Holds an array of Squares that can be accessed with 2D x,y coordinates.
 
-
 use crate::{Coord, Piece};
 
 #[derive(Debug, Clone)]

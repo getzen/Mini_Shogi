@@ -9,11 +9,10 @@ use macroquad::audio::{Sound, play_sound_once};
 use macroquad::prelude::*;
 
 use crate::asset_loader::AssetLoader;
-use crate::Game;
-use crate::game::NONE;
+use crate::game::{Game, NONE};
 use crate::controller::AppState;
 use crate::controller::AppState::*;
-use crate::Piece;
+use crate::piece::Piece;
 use crate::piece::PieceKind::{self, *};
 use crate::sprite::*;
 use crate::text::Text;

@@ -3,7 +3,7 @@
 // AIMonteCarloTree is supposedly stronger, but I can't *quite* get it to work.
 // It also uses a lot of memory.
 
-use crate::{Game, GameState};
+use crate::game::{Game, GameState};
 use crate::ai::{AIProgress, Think};
 use crate::ai_sender::{AIMessage, AISender};
 

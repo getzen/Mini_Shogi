@@ -8,11 +8,10 @@ use std::time::Duration;
 use macroquad::prelude::get_frame_time;
 use num_format::{Locale, ToFormattedString};
 
-use crate::ai::AI;
-use crate::ai::AIProgress;
+use crate::ai::{AI, AIProgress};
 use crate::ai_sender::{AIMessage, AISender};
 use crate::game::*;
-use crate::GameState;
+use crate::game::{Game, GameState};
 use crate::controller::AppState::*;
 use crate::controller::PlayerKind::*;
 use crate::view_game::{ViewGame, ViewGameMessage};

@@ -3,8 +3,7 @@
 use std::time::Instant;
 
 use crate::ai::{AIProgress, Think};
-use crate::Game;
-use crate::GameState;
+use crate::game::{Game, GameState};
 use crate::game::Move;
 use crate::ai_sender::{AIMessage, AISender};
 use crate::piece::PieceKind::*;

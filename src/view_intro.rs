@@ -10,8 +10,7 @@ use macroquad::prelude::*;
 
 use crate::asset_loader::AssetLoader;
 
-use crate::widget_button::Button;
-use crate::widget_button::ButtonMode;
+use crate::widget_button::{Button, ButtonMode};
 use crate::widget_message::WidgetMessage;
 use crate::widget_slider::*;
 
