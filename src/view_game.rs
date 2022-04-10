@@ -92,7 +92,7 @@ impl ViewGame {
                 let index = Game::column_row_to_index(c, r);
                 let position = self.center_position_for(index);
                 let mut square = Sprite::new(position, texture);
-                square.set_scale(0.5);
+                //square.set_scale(0.5);
                 square.alt_color = Some(LIGHTGRAY);
                 self.squares.insert(index, square);
             }
@@ -101,10 +101,10 @@ impl ViewGame {
         // Promotion lines
         texture = AssetLoader::get_texture("line");
         let mut line_top = Sprite::new(PROMO_LINE_TOP, texture);
-        line_top.set_scale(0.5);
+        //line_top.set_scale(0.5);
         self.promotion_lines.push(line_top);
         let mut line_bottom = Sprite::new(PROMO_LINE_BOTTOM, texture);
-        line_bottom.set_scale(0.5);
+        //line_bottom.set_scale(0.5);
         self.promotion_lines.push(line_bottom);
 
         // Reserves
@@ -114,13 +114,13 @@ impl ViewGame {
             let mut pos_x = RESERVE_0_CENTER.0;
             let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET); 
             let mut reserve = Sprite::new((pos_x, pos_y), texture);
-            reserve.set_scale(0.5);
+            //reserve.set_scale(0.5);
             self.reserve_boxes[0].insert(i, reserve);
             // Reserve, player 1
             pos_x = RESERVE_1_CENTER.0;
             pos_y = RESERVE_1_CENTER.1 + i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET);
             reserve = Sprite::new((pos_x, pos_y), texture);
-            reserve.set_scale(0.5);
+            //reserve.set_scale(0.5);
             self.reserve_boxes[1].insert(i, reserve);
         }
     }

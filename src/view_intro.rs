@@ -119,7 +119,7 @@ impl ViewIntro {
 
         // Set common elements
         for button in self.buttons.values_mut() {
-            button.set_scale(0.5); // all files are _2x.
+            //button.set_scale(0.5); // all files are _2x.
             button.color = LIGHTGRAY;
             button.selected_color = Some(Color::from_rgba(246, 194, 81, 255));
             button.tx = Some(self.widget_tx.clone());
@@ -194,9 +194,9 @@ impl ViewIntro {
         
         draw_texture(self.background_tex, TITLE_CORNER.0, TITLE_CORNER.1, WHITE);
 
-        let mut params = DrawTextureParams::default();
-        params.dest_size = Some(Vec2::new(800., 800.));
-        draw_texture_ex(self.background_tex, TITLE_CORNER.0, TITLE_CORNER.1, WHITE, params);
+        // let mut params = DrawTextureParams::default();
+        // params.dest_size = Some(Vec2::new(800., 800.));
+        // draw_texture_ex(self.background_tex, TITLE_CORNER.0, TITLE_CORNER.1, WHITE, params);
 
         // Widgets
         for button in self.buttons.values_mut() {

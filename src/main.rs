@@ -28,9 +28,9 @@ fn conf() -> Conf {
         window_title: String::from("Yokai"),
         window_width: 800,
         window_height: 800,
-        high_dpi: true,
+        high_dpi: false,
         //fullscreen: bool,
-        sample_count: 0,
+        //sample_count: 0,
         //window_resizable: bool,
         //icon: Option<Icon>,
         ..Default::default()
@@ -39,6 +39,12 @@ fn conf() -> Conf {
 
 #[macroquad::main(conf)]
 async fn main() {
+    unsafe {
+        let gl = get_internal_gl();
+        println!("dpi_scale: {}", gl.quad_context.dpi_scale());
+        
+    }
+    println!("dpi_scale: {}", screen_width() / 800.0);
     let mut controller = Controller::new().await;
     controller.prepare().await;
     controller.go().await;
