@@ -17,6 +17,14 @@ use crate::controller::PlayerKind::*;
 use crate::view_game::{ViewGame, ViewGameMessage};
 use crate::view_intro::{ViewIntro, ViewIntroMessage};
 
+#[derive(Clone)]
+pub struct GameOptions {
+    pub player_0: PlayerKind,
+    pub player_1: PlayerKind,
+    pub search_depth: usize,
+    pub search_rounds: usize,
+}
+
 #[derive(PartialEq, Clone, Copy)]
 pub enum AppState {
     Intro,
@@ -136,7 +144,8 @@ impl Controller {
         let received = self.view_intro_rx.try_recv();
         if received.is_ok() {
             match received.unwrap() {
-                ViewIntroMessage::ShouldStart => {
+                ViewIntroMessage::ShouldStart(game_options) => {
+                    // match game_options.player_0...
                     self.next_player();
                 },
                 ViewIntroMessage::ShouldExit => self.state = Exit,
