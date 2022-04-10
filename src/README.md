@@ -2,8 +2,6 @@ TO-DO:
 
 - Add sounds: welcome, promotion, win/loss
 
-- Re-do intro view graphic.
-
 - Add difficulty/ai options to title view.
 
 - Add forward/back action functionality.

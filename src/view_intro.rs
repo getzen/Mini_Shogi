@@ -26,6 +26,7 @@ const MINIMAX_1_CORNER: (f32, f32) = (395., 340.);
 const MINIMAX_1_ID: usize = 3;
 const MONTE_1_CORNER: (f32, f32) = (515., 340.);
 const MONTE_1_ID: usize = 4;
+const DIFFICULTY_SLIDER_1_CORNER: (f32, f32) = (295., 410.);
 
 const HUMAN_2_CORNER: (f32, f32) = (295., 535.);
 const HUMAN_2_ID: usize = 5;
@@ -48,7 +49,7 @@ pub struct ViewIntro {
 
     background_tex: Texture2D,
     buttons: HashMap<usize, Button>,
-    slider: Slider,
+    slider_1: Slider,
 }
 
 impl ViewIntro {
@@ -60,9 +61,9 @@ impl ViewIntro {
             background_tex: AssetLoader::get_texture("title"),
             buttons: HashMap::new(),
 
-            slider: Slider::new(
-                (300., 600.), 
-                300., 
+            slider_1: Slider::new(
+                DIFFICULTY_SLIDER_1_CORNER, 
+                360., 
                 1., 
                 0., 
                 9., 
@@ -124,9 +125,9 @@ impl ViewIntro {
             button.tx = Some(self.widget_tx.clone());
         }
 
-        self.slider.tx = Some(self.widget_tx.clone());
-        self.slider.tick_divisions = 8;
-        self.slider.snap_to_tick = true;
+        self.slider_1.tx = Some(self.widget_tx.clone());
+        self.slider_1.tick_divisions = 8;
+        self.slider_1.snap_to_tick = true;
     }
 
     pub fn handle_events(&mut self) {
@@ -138,7 +139,7 @@ impl ViewIntro {
         for button in self.buttons.values_mut() {
             button.process_events();
         }
-        self.slider.process_events();
+        self.slider_1.process_events();
     }
 
     pub fn check_messages(&mut self) {
@@ -201,7 +202,7 @@ impl ViewIntro {
         for button in self.buttons.values_mut() {
             button.draw();
         }
-        self.slider.draw();
+        self.slider_1.draw();
     }
 
     pub async fn end_frame(&self) {
