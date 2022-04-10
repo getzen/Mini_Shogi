@@ -10,6 +10,9 @@ use macroquad::prelude::*;
 
 use crate::asset_loader::AssetLoader;
 
+use crate::controller::GameOptions;
+use crate::controller::PlayerKind::*;
+
 use crate::widget_button::{Button, ButtonMode};
 use crate::widget_message::WidgetMessage;
 use crate::widget_slider::*;
@@ -20,23 +23,23 @@ const START_ID: usize = 0;
 const EXIT_CORNER: (f32, f32) = (20., 745.);
 const EXIT_ID: usize = 1;
 
-const HUMAN_1_CORNER: (f32, f32) = (295., 340.);
-const HUMAN_1_ID: usize = 2;
-const MINIMAX_1_CORNER: (f32, f32) = (395., 340.);
-const MINIMAX_1_ID: usize = 3;
-const MONTE_1_CORNER: (f32, f32) = (515., 340.);
-const MONTE_1_ID: usize = 4;
-const DIFFICULTY_SLIDER_1_CORNER: (f32, f32) = (295., 410.);
+const HUMAN_0_CORNER: (f32, f32) = (295., 340.);
+const HUMAN_0_ID: usize = 2;
+const MINIMAX_0_CORNER: (f32, f32) = (395., 340.);
+const MINIMAX_0_ID: usize = 3;
+const MONTE_0_CORNER: (f32, f32) = (515., 340.);
+const MONTE_0_ID: usize = 4;
+const DIFFICULTY_SLIDER_0_CORNER: (f32, f32) = (295., 410.);
 
-const HUMAN_2_CORNER: (f32, f32) = (295., 535.);
-const HUMAN_2_ID: usize = 5;
-const MINIMAX_2_CORNER: (f32, f32) = (395., 535.);
-const MINIMAX_2_ID: usize = 6;
-const MONTE_2_CORNER: (f32, f32) = (515., 535.);
-const MONTE_2_ID: usize = 7;
+const HUMAN_1_CORNER: (f32, f32) = (295., 535.);
+const HUMAN_1_ID: usize = 5;
+const MINIMAX_1_CORNER: (f32, f32) = (395., 535.);
+const MINIMAX_1_ID: usize = 6;
+const MONTE_1_CORNER: (f32, f32) = (515., 535.);
+const MONTE_1_ID: usize = 7;
 
 pub enum ViewIntroMessage {
-    ShouldStart,
+    ShouldStart(GameOptions),
     ShouldExit,
 }
 
@@ -49,7 +52,9 @@ pub struct ViewIntro {
 
     background_tex: Texture2D,
     buttons: HashMap<usize, Button>,
-    slider_1: Slider,
+    slider_0: Slider,
+
+    game_options: GameOptions,
 }
 
 impl ViewIntro {
@@ -61,13 +66,14 @@ impl ViewIntro {
             background_tex: AssetLoader::get_texture("title"),
             buttons: HashMap::new(),
 
-            slider_1: Slider::new(
-                DIFFICULTY_SLIDER_1_CORNER, 
+            slider_0: Slider::new(
+                DIFFICULTY_SLIDER_0_CORNER, 
                 360., 
                 1., 
                 0., 
                 9., 
                 0),
+            game_options: GameOptions {player_0: Human, player_1: AIMinimax, search_depth: 3, search_rounds: 1000},
         }
     }
 
@@ -85,37 +91,37 @@ impl ViewIntro {
 
         // Player 1
         texture = AssetLoader::get_texture("human");
-        button = Button::new(HUMAN_1_CORNER, texture, ButtonMode::Radio, HUMAN_1_ID);
+        button = Button::new(HUMAN_0_CORNER, texture, ButtonMode::Radio, HUMAN_0_ID);
         button.group_id = 1;
+        button.is_selected = true;
+        self.buttons.insert(HUMAN_0_ID, button);
+
+        texture = AssetLoader::get_texture("minimax");
+        button = Button::new(MINIMAX_0_CORNER, texture, ButtonMode::Radio, MINIMAX_0_ID);
+        button.group_id = 1;
+        self.buttons.insert(MINIMAX_0_ID, button);
+
+        texture = AssetLoader::get_texture("monte_carlo");
+        button = Button::new(MONTE_0_CORNER, texture, ButtonMode::Radio, MONTE_0_ID);
+        button.group_id = 1;
+        self.buttons.insert(MONTE_0_ID, button);
+
+        // Player 2
+        texture = AssetLoader::get_texture("human");
+        button = Button::new(HUMAN_1_CORNER, texture, ButtonMode::Radio, HUMAN_1_ID);
+        button.group_id = 2;
         button.is_selected = true;
         self.buttons.insert(HUMAN_1_ID, button);
 
         texture = AssetLoader::get_texture("minimax");
         button = Button::new(MINIMAX_1_CORNER, texture, ButtonMode::Radio, MINIMAX_1_ID);
-        button.group_id = 1;
+        button.group_id = 2;
         self.buttons.insert(MINIMAX_1_ID, button);
 
         texture = AssetLoader::get_texture("monte_carlo");
         button = Button::new(MONTE_1_CORNER, texture, ButtonMode::Radio, MONTE_1_ID);
-        button.group_id = 1;
+        button.group_id = 2;
         self.buttons.insert(MONTE_1_ID, button);
-
-        // Player 2
-        texture = AssetLoader::get_texture("human");
-        button = Button::new(HUMAN_2_CORNER, texture, ButtonMode::Radio, HUMAN_2_ID);
-        button.group_id = 2;
-        button.is_selected = true;
-        self.buttons.insert(HUMAN_2_ID, button);
-
-        texture = AssetLoader::get_texture("minimax");
-        button = Button::new(MINIMAX_2_CORNER, texture, ButtonMode::Radio, MINIMAX_2_ID);
-        button.group_id = 2;
-        self.buttons.insert(MINIMAX_2_ID, button);
-
-        texture = AssetLoader::get_texture("monte_carlo");
-        button = Button::new(MONTE_2_CORNER, texture, ButtonMode::Radio, MONTE_2_ID);
-        button.group_id = 2;
-        self.buttons.insert(MONTE_2_ID, button);
 
         // Set common elements
         for button in self.buttons.values_mut() {
@@ -125,9 +131,40 @@ impl ViewIntro {
             button.tx = Some(self.widget_tx.clone());
         }
 
-        self.slider_1.tx = Some(self.widget_tx.clone());
-        self.slider_1.tick_divisions = 8;
-        self.slider_1.snap_to_tick = true;
+        self.slider_0.tx = Some(self.widget_tx.clone());
+        
+    }
+
+    fn set_controls_from_options(&mut self) {
+        let id = match self.game_options.player_0 {
+            Human => HUMAN_0_ID,
+            AIMinimax => MINIMAX_0_ID,
+            AIMonteCarlo => MONTE_0_ID,
+            AIRandom | AIMonteCarloTree => panic!(),
+        };
+        self.buttons.get_mut(&id).unwrap().is_selected = true;
+
+        if self.game_options.player_0 == AIMinimax {
+            self.slider_0.value = self.game_options.search_depth as f32;
+            self.slider_0.max_value = 9.;
+            self.slider_0.tick_divisions = 8;
+            self.slider_0.snap_to_tick = true;
+        }
+        if self.game_options.player_0 == AIMonteCarlo {
+            self.slider_0.value = self.game_options.search_rounds as f32;
+            self.slider_0.max_value = 10_000.;
+            self.slider_0.tick_divisions = 0;
+            self.slider_0.snap_to_tick = false;
+        }
+
+
+        let id = match self.game_options.player_1 {
+            Human => HUMAN_1_ID,
+            AIMinimax => MINIMAX_1_ID,
+            AIMonteCarlo => MONTE_1_ID,
+            AIRandom | AIMonteCarloTree => panic!(),
+        };
+        self.buttons.get_mut(&id).unwrap().is_selected = true;
     }
 
     pub fn handle_events(&mut self) {
@@ -139,7 +176,7 @@ impl ViewIntro {
         for button in self.buttons.values_mut() {
             button.process_events();
         }
-        self.slider_1.process_events();
+        self.slider_0.process_events();
     }
 
     pub fn check_messages(&mut self) {
@@ -149,7 +186,7 @@ impl ViewIntro {
                 WidgetMessage::Pushed(id) => {
                     match id {
                         START_ID => {
-                            self.tx.send(ViewIntroMessage::ShouldStart).expect("Intro message send error.");
+                            self.tx.send(ViewIntroMessage::ShouldStart(self.game_options.clone())).expect("Intro message send error.");
                         },
                         EXIT_ID => {
                             self.tx.send(ViewIntroMessage::ShouldExit).expect("Intro message send error.");
@@ -162,10 +199,22 @@ impl ViewIntro {
                 }
                 WidgetMessage::Selected(id) => { // radio-style groupings
                     match id {
-                        HUMAN_1_ID | MINIMAX_1_ID | MONTE_1_ID => {
+                        HUMAN_0_ID => {
                             self.deselect_buttons(1, id);
+                            self.game_options.player_0 = Human;
+                            self.set_controls_from_options();
+                        },
+                        MINIMAX_0_ID => {
+                            self.deselect_buttons(1, id);
+                            self.game_options.player_0 = AIMinimax;
+                            self.set_controls_from_options();
+                        },
+                        MONTE_0_ID => {
+                            self.deselect_buttons(1, id);
+                            self.game_options.player_0 = AIMonteCarlo;
+                            self.set_controls_from_options();
                         }
-                        HUMAN_2_ID | MINIMAX_2_ID | MONTE_2_ID => {
+                        HUMAN_1_ID | MINIMAX_1_ID | MONTE_1_ID => {
                             self.deselect_buttons(2, id);
                         }
                         _ => {},
@@ -202,7 +251,7 @@ impl ViewIntro {
         for button in self.buttons.values_mut() {
             button.draw();
         }
-        self.slider_1.draw();
+        self.slider_0.draw();
     }
 
     pub async fn end_frame(&self) {
