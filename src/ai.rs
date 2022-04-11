@@ -50,7 +50,7 @@ impl AI {
             kind = AIRandom;
         }
         if kind == AIMonteCarlo && player.search_rounds == 0 {
-            kind == AIRandom;
+            kind = AIRandom;
         }
         let progress: AIProgress = match kind {
             AIRandom => {
