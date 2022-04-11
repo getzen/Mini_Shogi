@@ -325,12 +325,12 @@ impl Controller {
         self.state = AIThinking;
 
         // These variables are captured by the thread.
-        let ai_kind = self.players[self.game.current_player].kind;
+        let player = self.players[self.game.current_player];
         let game_copy = self.game;
         let message_sender = AISender::new(self.ai_tx.clone(), None);
 
         std::thread::spawn(move || {
-            AI::think(ai_kind, game_copy, message_sender);
+            AI::think(player, game_copy, message_sender);
         });
     }
 }

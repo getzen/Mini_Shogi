@@ -213,6 +213,7 @@ impl ViewIntro {
             button.process_events();
         }
         self.slider_0.process_events();
+        self.slider_1.process_events();
     }
 
     pub fn check_messages(&mut self) {
@@ -272,7 +273,14 @@ impl ViewIntro {
                             self.player_0.search_rounds = val as usize;
                         }
                     }
-                    println!("slider id: {}, new value: {}", id, val);
+                    if id == self.slider_1.id {
+                        if self.player_1.kind == AIMinimax {
+                            self.player_1.search_depth = val as usize;
+                        }
+                        if self.player_1.kind == AIMonteCarlo {
+                            self.player_1.search_rounds = val as usize;
+                        }
+                    }
                 },
             }
         }

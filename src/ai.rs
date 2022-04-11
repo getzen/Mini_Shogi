@@ -9,7 +9,7 @@ use crate::ai_monte_carlo::AIMonteCarlo;
 //use crate::ai_monte_carlo_tree::AIMonteCarloTree;
 use crate::ai_sender::{AISender, AIMessage};
 
-use crate::controller::PlayerKind;
+use crate::controller::Player;
 use crate::controller::PlayerKind::*;
 use crate::game::{Game, Move};
 
@@ -43,21 +43,28 @@ impl AIProgress {
 pub struct AI {}
 
 impl AI {
-    pub fn think(ai_kind: PlayerKind, game: Game, mut message_sender: AISender) {
+    pub fn think(player: Player, game: Game, mut message_sender: AISender) {
         let mut sender_clone = message_sender.clone();
-        let progress: AIProgress = match ai_kind {
+        let mut kind = player.kind;
+        if kind == AIMinimax && player.search_depth == 0 {
+            kind = AIRandom;
+        }
+        if kind == AIMonteCarlo && player.search_rounds == 0 {
+            kind == AIRandom;
+        }
+        let progress: AIProgress = match kind {
             AIRandom => {
                 let mut ai = AIRandom::new(game, sender_clone);
                 ai.think()
             },
             AIMinimax => {
                 sender_clone.min_time_between = Some(Duration::from_millis(100));
-                let mut ai = AIMinimax::new(game, 3, sender_clone);
+                let mut ai = AIMinimax::new(game, player.search_depth, sender_clone);
                 ai.think()
             },
             AIMonteCarlo => {
                 sender_clone.min_time_between = Some(Duration::from_millis(100));
-                let mut ai = AIMonteCarlo::new(game, 100, sender_clone);
+                let mut ai = AIMonteCarlo::new(game, player.search_rounds, sender_clone);
                 ai.think()
             },
             // AIMonteCarloTree => {
