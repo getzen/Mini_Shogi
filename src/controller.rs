@@ -70,7 +70,7 @@ impl Controller {
         let (ai_tx, ai_rx) = mpsc::channel();
 
         Self {
-            players: Vec::new(),
+            players: Vec::new(), // supplied by view_intro
             game: Game::new(),
             view_intro: ViewIntro::new(view_intro_tx).await,
             view_game: ViewGame::new(view_game_tx, COLS, ROWS).await,
@@ -84,8 +84,6 @@ impl Controller {
     }
 
     pub async fn prepare(&mut self) {
-        self.players.push(Player { id: 0, kind: Human, search_depth: 0, search_rounds: 0 });
-        self.players.push(Player { id: 0, kind: Human, search_depth: 0, search_rounds: 0 });
         self.game.prepare();
         self.view_intro.prepare();
         self.view_game.prepare().await;
