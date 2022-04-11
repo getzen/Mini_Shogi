@@ -13,6 +13,7 @@ use crate::asset_loader::AssetLoader;
 use crate::controller::Player;
 use crate::controller::PlayerKind::*;
 
+use crate::text::Text;
 use crate::widget_button::{Button, ButtonMode};
 use crate::widget_message::WidgetMessage;
 use crate::widget_slider::*;
@@ -30,6 +31,7 @@ const MINIMAX_0_ID: usize = 3;
 const MONTE_0_CORNER: (f32, f32) = (515., 340.);
 const MONTE_0_ID: usize = 4;
 const DIFFICULTY_SLIDER_0_CORNER: (f32, f32) = (295., 410.);
+const SLIDER_0_TEXT_CENTER: (f32, f32) = (445., 447.);
 
 const HUMAN_1_CORNER: (f32, f32) = (295., 535.);
 const HUMAN_1_ID: usize = 5;
@@ -38,6 +40,7 @@ const MINIMAX_1_ID: usize = 6;
 const MONTE_1_CORNER: (f32, f32) = (515., 535.);
 const MONTE_1_ID: usize = 7;
 const DIFFICULTY_SLIDER_1_CORNER: (f32, f32) = (295., 600.);
+const SLIDER_1_TEXT_CENTER: (f32, f32) = (445., 637.);
 
 pub enum ViewIntroMessage {
     ShouldStart(Vec<Player>),
@@ -54,7 +57,9 @@ pub struct ViewIntro {
     background_tex: Texture2D,
     buttons: HashMap<usize, Button>,
     slider_0: Slider,
+    slider_0_text: Text,
     slider_1: Slider,
+    slider_1_text: Text,
 
     player_0: Player,
     player_1: Player,
@@ -70,7 +75,11 @@ impl ViewIntro {
             buttons: HashMap::new(),
 
             slider_0: Slider::new(DIFFICULTY_SLIDER_0_CORNER, 360., 1., 0., 0., 0),
+            slider_0_text: Text::new(SLIDER_0_TEXT_CENTER, "hello".to_string(), 18, Some("Menlo")).await,
+
             slider_1: Slider::new(DIFFICULTY_SLIDER_1_CORNER, 360., 1., 0., 0., 1),
+            slider_1_text: Text::new(SLIDER_1_TEXT_CENTER, "world".to_string(), 18, Some("Menlo")).await,
+
             player_0: Player { id: 0, kind: Human, search_depth: 3, search_rounds: 500 },
             player_1: Player { id: 1, kind: AIMinimax, search_depth: 3, search_rounds: 500 },
         }
@@ -129,7 +138,13 @@ impl ViewIntro {
         }
 
         self.slider_0.tx = Some(self.widget_tx.clone());
+        self.slider_0_text.set_color(BLACK);
+        self.slider_0_text.centered = true;
+
         self.slider_1.tx = Some(self.widget_tx.clone());
+        self.slider_1_text.set_color(BLACK);
+        self.slider_1_text.centered = true;
+
         self.set_player_controls(0);
         self.set_player_controls(1);
     }
@@ -153,9 +168,13 @@ impl ViewIntro {
             self.select_button(0, button_id);
 
             match self.player_0.kind {
-                Human => self.slider_0.is_visible = false,
+                Human => {
+                    self.slider_0.is_visible = false;
+                    self.slider_0_text.is_visible = false;
+                },
                 AIMinimax => {
                     self.slider_0.is_visible = true;
+                    self.slider_0_text.is_visible = true;
                     self.slider_0.value = self.player_0.search_depth as f32;
                     self.slider_0.max_value = 9.;
                     self.slider_0.tick_divisions = 8;
@@ -163,6 +182,7 @@ impl ViewIntro {
                 },
                 AIMonteCarlo => {
                     self.slider_0.is_visible = true;
+                    self.slider_0_text.is_visible = true;
                     self.slider_0.value = self.player_0.search_rounds as f32;
                     self.slider_0.max_value = 1_000.;
                     self.slider_0.tick_divisions = 0;
@@ -183,9 +203,13 @@ impl ViewIntro {
             self.select_button(1, button_id);
     
             match self.player_1.kind {
-                Human => self.slider_1.is_visible = false,
+                Human => {
+                    self.slider_1.is_visible = false;
+                    self.slider_1_text.is_visible = false;
+                },
                 AIMinimax => {
                     self.slider_1.is_visible = true;
+                    self.slider_1_text.is_visible = true;
                     self.slider_1.value = self.player_1.search_depth as f32;
                     self.slider_1.max_value = 9.;
                     self.slider_1.tick_divisions = 8;
@@ -193,6 +217,7 @@ impl ViewIntro {
                 },
                 AIMonteCarlo => {
                     self.slider_1.is_visible = true;
+                    self.slider_1_text.is_visible = true;
                     self.slider_1.value = self.player_1.search_rounds as f32;
                     self.slider_1.max_value = 1_000.;
                     self.slider_1.tick_divisions = 0;
@@ -272,6 +297,7 @@ impl ViewIntro {
                         if self.player_0.kind == AIMonteCarlo {
                             self.player_0.search_rounds = val as usize;
                         }
+                        //self.set_player_controls(0);
                     }
                     if id == self.slider_1.id {
                         if self.player_1.kind == AIMinimax {
@@ -280,6 +306,7 @@ impl ViewIntro {
                         if self.player_1.kind == AIMonteCarlo {
                             self.player_1.search_rounds = val as usize;
                         }
+                        //self.set_player_controls(1);
                     }
                 },
             }
@@ -300,8 +327,26 @@ impl ViewIntro {
         for button in self.buttons.values_mut() {
             button.draw();
         }
+
         self.slider_0.draw();
+        // Use live values here so user sees the values change when dragging.
+        self.slider_0_text.text = match self.player_0.kind {
+            Human => "".to_string(),
+            AIMinimax => format!("{} move look-ahead", (self.slider_0.value + 0.5) as usize),
+            AIMonteCarlo => format!("{} play outs", (self.slider_0.value) as usize),
+            _ => "".to_string(),
+        };
+        self.slider_0_text.draw();
+
         self.slider_1.draw();
+        // Use live values here so user sees the values change when dragging.
+        self.slider_1_text.text = match self.player_1.kind {
+            Human => "".to_string(),
+            AIMinimax => format!("{} move look-ahead", (self.slider_1.value + 0.5) as usize),
+            AIMonteCarlo => format!("{} play outs", (self.slider_1.value) as usize),
+            _ => "".to_string(),
+        };
+        self.slider_1_text.draw();
     }
 
     pub async fn end_frame(&self) {

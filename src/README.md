@@ -1,9 +1,7 @@
 TO-DO:
 
 - Add sounds: welcome, promotion, win/loss
-
-- Add difficulty/ai options to title view.
-
+ 
 - Add forward/back action functionality.
 
 - Add ability to restart game.

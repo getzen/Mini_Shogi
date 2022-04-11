@@ -16,6 +16,7 @@ pub struct Text {
     pub text: String,
     pub centered: bool,
     pub text_params: TextParams,
+    pub is_visible: bool,
 }
 
 impl Text {
@@ -30,6 +31,7 @@ impl Text {
             position, text,
             text_params: TextParams { font_size, ..Default::default() },
             centered: false,
+            is_visible: true,
         };
         
         if let Some(name) = font_name {
@@ -73,6 +75,7 @@ impl Text {
     }
 
     pub fn draw(&mut self) {
+        if !self.is_visible { return; }
         let (x, y) = self.draw_position();
         draw_text_ex(&self.text, x, y, self.text_params);
     }
