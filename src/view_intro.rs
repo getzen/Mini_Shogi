@@ -37,6 +37,7 @@ const MINIMAX_1_CORNER: (f32, f32) = (395., 535.);
 const MINIMAX_1_ID: usize = 6;
 const MONTE_1_CORNER: (f32, f32) = (515., 535.);
 const MONTE_1_ID: usize = 7;
+const DIFFICULTY_SLIDER_1_CORNER: (f32, f32) = (295., 600.);
 
 pub enum ViewIntroMessage {
     ShouldStart(Vec<Player>),
@@ -53,6 +54,7 @@ pub struct ViewIntro {
     background_tex: Texture2D,
     buttons: HashMap<usize, Button>,
     slider_0: Slider,
+    slider_1: Slider,
 
     player_0: Player,
     player_1: Player,
@@ -67,13 +69,8 @@ impl ViewIntro {
             background_tex: AssetLoader::get_texture("title"),
             buttons: HashMap::new(),
 
-            slider_0: Slider::new(
-                DIFFICULTY_SLIDER_0_CORNER, 
-                360., 
-                1., 
-                0., 
-                9., 
-                0),
+            slider_0: Slider::new(DIFFICULTY_SLIDER_0_CORNER, 360., 1., 0., 0., 0),
+            slider_1: Slider::new(DIFFICULTY_SLIDER_1_CORNER, 360., 1., 0., 0., 1),
             player_0: Player { id: 0, kind: Human, search_depth: 3, search_rounds: 500 },
             player_1: Player { id: 1, kind: AIMinimax, search_depth: 3, search_rounds: 500 },
         }
@@ -111,7 +108,6 @@ impl ViewIntro {
         texture = AssetLoader::get_texture("human");
         button = Button::new(HUMAN_1_CORNER, texture, ButtonMode::Radio, HUMAN_1_ID);
         button.group_id = 1;
-        button.is_selected = true;
         self.buttons.insert(HUMAN_1_ID, button);
 
         texture = AssetLoader::get_texture("minimax");
@@ -133,55 +129,77 @@ impl ViewIntro {
         }
 
         self.slider_0.tx = Some(self.widget_tx.clone());
-        
+        self.slider_1.tx = Some(self.widget_tx.clone());
+        self.set_player_controls(0);
+        self.set_player_controls(1);
     }
 
-    fn set_player_controls(&mut self, player: Player) {
-        if player.id == 0 {
-            let id = match player.kind {
+    /// Selects the given button and deselects all others in the group.
+    fn select_button(&mut self, group_id: usize, button_id: usize) {
+        for button in self.buttons.values_mut() {
+            if button.group_id != group_id { continue; }
+            button.is_selected = button.id == button_id;
+        }
+    }
+
+    fn set_player_controls(&mut self, player_id: usize) {
+        if player_id == 0 {
+            let button_id = match self.player_0.kind {
                 Human => HUMAN_0_ID,
                 AIMinimax => MINIMAX_0_ID,
                 AIMonteCarlo => MONTE_0_ID,
                 AIRandom | AIMonteCarloTree => panic!(),
             };
-            self.select_button(0, id);
-    
-            if player.kind == AIMinimax {
-                self.slider_0.value = player.search_depth as f32;
-                self.slider_0.max_value = 9.;
-                self.slider_0.tick_divisions = 8;
-                self.slider_0.snap_to_tick = true;
+            self.select_button(0, button_id);
+
+            match self.player_0.kind {
+                Human => self.slider_0.is_visible = false,
+                AIMinimax => {
+                    self.slider_0.is_visible = true;
+                    self.slider_0.value = self.player_0.search_depth as f32;
+                    self.slider_0.max_value = 9.;
+                    self.slider_0.tick_divisions = 8;
+                    self.slider_0.snap_to_tick = true;
+                },
+                AIMonteCarlo => {
+                    self.slider_0.is_visible = true;
+                    self.slider_0.value = self.player_0.search_rounds as f32;
+                    self.slider_0.max_value = 1_000.;
+                    self.slider_0.tick_divisions = 0;
+                    self.slider_0.snap_to_tick = false;
+                },
+                _ => {},
             }
-            if player.kind == AIMonteCarlo {
-                self.slider_0.value = player.search_rounds as f32;
-                self.slider_0.max_value = 10_000.;
-                self.slider_0.tick_divisions = 0;
-                self.slider_0.snap_to_tick = false;
-            }
+
         }
 
-        if player.id == 1 {
-            let id = match player.kind {
+        if player_id == 1 {
+            let button_id = match self.player_1.kind {
                 Human => HUMAN_1_ID,
                 AIMinimax => MINIMAX_1_ID,
                 AIMonteCarlo => MONTE_1_ID,
                 AIRandom | AIMonteCarloTree => panic!(),
             };
-            self.select_button(1, id);
-            //self.buttons.get_mut(&id).unwrap().is_selected = true;
+            self.select_button(1, button_id);
     
-            // if player.kind == AIMinimax {
-            //     self.slider_1.value = player.search_depth as f32;
-            //     self.slider_1.max_value = 9.;
-            //     self.slider_1.tick_divisions = 8;
-            //     self.slider_1.snap_to_tick = true;
-            // }
-            // if player.kind == AIMonteCarlo {
-            //     self.slider_1.value = player.search_rounds as f32;
-            //     self.slider_1.max_value = 1_000.;
-            //     self.slider_1.tick_divisions = 0;
-            //     self.slider_1.snap_to_tick = false;
-            // }
+            match self.player_1.kind {
+                Human => self.slider_1.is_visible = false,
+                AIMinimax => {
+                    self.slider_1.is_visible = true;
+                    self.slider_1.value = self.player_1.search_depth as f32;
+                    self.slider_1.max_value = 9.;
+                    self.slider_1.tick_divisions = 8;
+                    self.slider_1.snap_to_tick = true;
+                },
+                AIMonteCarlo => {
+                    self.slider_1.is_visible = true;
+                    self.slider_1.value = self.player_0.search_rounds as f32;
+                    self.slider_1.max_value = 1_000.;
+                    self.slider_1.tick_divisions = 0;
+                    self.slider_1.snap_to_tick = false;
+                },
+                _ => {},
+            }
         }
     }
 
@@ -220,19 +238,28 @@ impl ViewIntro {
                     match id {
                         HUMAN_0_ID => {
                             self.player_0.kind = Human;
-                            self.set_player_controls(self.player_0);
+                            self.set_player_controls(0);
                         },
                         MINIMAX_0_ID => {
                             self.player_0.kind = AIMinimax;
-                            self.set_player_controls(self.player_0);
+                            self.set_player_controls(0);
                         },
                         MONTE_0_ID => {
                             self.player_0.kind = AIMonteCarlo;
-                            self.set_player_controls(self.player_0);
+                            self.set_player_controls(0);
+                        },
+                        HUMAN_1_ID => {
+                            self.player_1.kind = Human;
+                            self.set_player_controls(1);
+                        },
+                        MINIMAX_1_ID => {
+                            self.player_1.kind = AIMinimax;
+                            self.set_player_controls(1);
+                        },
+                        MONTE_1_ID => {
+                            self.player_1.kind = AIMonteCarlo;
+                            self.set_player_controls(1);
                         }
-                        // HUMAN_1_ID | MINIMAX_1_ID | MONTE_1_ID => {
-                        //     self.deselect_buttons(2, id);
-                        // }
                         _ => {},
                     }
                 }
@@ -251,13 +278,6 @@ impl ViewIntro {
         }
     }
 
-    /// Selects the given button and deselects all others in the group.
-    fn select_button(&mut self, group_id: usize, button_id: usize) {
-        for button in self.buttons.values_mut() {
-            button.is_selected = button.group_id == group_id && button.id == button_id;
-        }
-    }
-
     pub fn draw(&mut self) {
         // Background
         clear_background(Color::from_rgba(222, 222, 193, 255));
@@ -273,6 +293,7 @@ impl ViewIntro {
             button.draw();
         }
         self.slider_0.draw();
+        self.slider_1.draw();
     }
 
     pub async fn end_frame(&self) {

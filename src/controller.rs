@@ -17,7 +17,7 @@ use crate::controller::PlayerKind::*;
 use crate::view_game::{ViewGame, ViewGameMessage};
 use crate::view_intro::{ViewIntro, ViewIntroMessage};
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Player {
     pub id: usize,
     pub kind: PlayerKind,

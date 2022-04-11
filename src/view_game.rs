@@ -103,7 +103,7 @@ impl ViewGame {
         let line_top = Sprite::new(PROMO_LINE_TOP, texture);
         //line_top.set_scale(0.5);
         self.promotion_lines.push(line_top);
-        let ine_bottom = Sprite::new(PROMO_LINE_BOTTOM, texture);
+        let line_bottom = Sprite::new(PROMO_LINE_BOTTOM, texture);
         //line_bottom.set_scale(0.5);
         self.promotion_lines.push(line_bottom);
 

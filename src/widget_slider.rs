@@ -19,6 +19,7 @@ pub struct Slider {
     pub snap_to_tick: bool,
     pub tick_divisions: usize, // # ticks between min and max
     pub tick_height: f32,
+    pub is_visible: bool,
     pub id: usize,
     pub tx: Option<Sender<WidgetMessage>>,
     // Private
@@ -44,6 +45,7 @@ impl Slider {
             tick_divisions: 0,
             tick_height: 12.0,
             snap_to_tick: false,
+            is_visible: true,
             tx: None,
             is_tracking: false,
         }
@@ -109,6 +111,7 @@ impl Slider {
     }
 
     pub fn draw(&self) {
+        if !self.is_visible { return; }
         // Slider line
         draw_line(
             self.position.0, 
