@@ -270,20 +270,20 @@ impl Controller {
         // let nodes_string = progress.nodes.to_formatted_string(&Locale::en);
         // let mut text = format!("nodes: {}", nodes_string);
         let percent_string = (progress.percent_complete * 100.0) as usize;
-        let mut text = format!("%: {}", percent_string);
+        let mut text = format!("{}%", percent_string);
 
         let ms = progress.duration.as_millis();
         let ms_string = progress.duration.as_millis().to_formatted_string(&Locale::en);
         if ms > 0 {
             let nps = (progress.nodes as f64 / ms as f64 * 1_000.0) as usize;
             let nps_string = nps.to_formatted_string(&Locale::en);
-            text.push_str(&format!(" / ms: {} = nps: {}", ms_string, nps_string));
+            text.push_str(&format!(" | ms: {} | nps: {}", ms_string, nps_string));
         } else {
-            text.push_str(" / ms: 0 = nps: --");
+            text.push_str(" | ms: 0 | nps: --");
         }
         let score_string = (progress.score as isize).to_formatted_string(&Locale::en);
-        text.push_str(&format!(". score: {}", score_string));
-        text.push_str(". pv: ");
+        text.push_str(&format!(" | score: {}", score_string));
+        text.push_str(" | pv: ");
         for i in 0..progress.pv.len() {
             let the_move = progress.pv[i];
             let piece = self.game.piece_for(the_move.0);

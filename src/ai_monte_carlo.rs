@@ -37,6 +37,9 @@ impl AIMonteCarlo {
         let mut best_score = f64::MIN;
         
         // Examine and score each move.
+        let mut index = 0;
+        let length = child_nodes.len();
+
         for node in child_nodes {
             let mut node_score = 0.0;
             
@@ -86,9 +89,11 @@ impl AIMonteCarlo {
                 best_node = node;
                 progress.score = best_score;
             }
+            progress.percent_complete = (index + 1) as f64 / length as f64;
             progress.pv = vec![best_node.last_move.unwrap()];
             progress.duration = now.elapsed();
-            self.message_sender.send(AIMessage::AIUpdate(progress.clone()));       
+            self.message_sender.send(AIMessage::AIUpdate(progress.clone()));
+            index += 1;     
         }
         progress.best_node = Some(best_node);
         progress.duration = now.elapsed();

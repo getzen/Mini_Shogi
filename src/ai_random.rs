@@ -29,6 +29,7 @@ impl Think for AIRandom {
         progress.nodes = child_nodes.len() + 1;
         progress.pv = vec![node.last_move.unwrap()];
         progress.best_node = Some(node);
+        progress.percent_complete = 1.0;
         progress.is_complete = true;
         let return_progress = progress.clone();
         self.message_sender.send(AIMessage::AIUpdate(progress));
