@@ -10,7 +10,7 @@ use macroquad::prelude::*;
 
 use crate::asset_loader::AssetLoader;
 
-use crate::controller::GameOptions;
+use crate::controller::Player;
 use crate::controller::PlayerKind::*;
 
 use crate::widget_button::{Button, ButtonMode};
@@ -39,7 +39,7 @@ const MONTE_1_CORNER: (f32, f32) = (515., 535.);
 const MONTE_1_ID: usize = 7;
 
 pub enum ViewIntroMessage {
-    ShouldStart(GameOptions),
+    ShouldStart(Vec<Player>),
     ShouldExit,
 }
 
@@ -54,7 +54,8 @@ pub struct ViewIntro {
     buttons: HashMap<usize, Button>,
     slider_0: Slider,
 
-    game_options: GameOptions,
+    player_0: Player,
+    player_1: Player,
 }
 
 impl ViewIntro {
@@ -73,7 +74,8 @@ impl ViewIntro {
                 0., 
                 9., 
                 0),
-            game_options: GameOptions {player_0: Human, player_1: AIMinimax, search_depth: 3, search_rounds: 1000},
+            player_0: Player { id: 0, kind: Human, search_depth: 3, search_rounds: 500 },
+            player_1: Player { id: 1, kind: AIMinimax, search_depth: 3, search_rounds: 500 },
         }
     }
 
@@ -89,38 +91,37 @@ impl ViewIntro {
         button = Button::new(EXIT_CORNER, texture, ButtonMode::Push, EXIT_ID);
         self.buttons.insert(EXIT_ID, button);
 
-        // Player 1
+        // Player 0
         texture = AssetLoader::get_texture("human");
         button = Button::new(HUMAN_0_CORNER, texture, ButtonMode::Radio, HUMAN_0_ID);
-        button.group_id = 1;
-        button.is_selected = true;
+        button.group_id = 0;
         self.buttons.insert(HUMAN_0_ID, button);
 
         texture = AssetLoader::get_texture("minimax");
         button = Button::new(MINIMAX_0_CORNER, texture, ButtonMode::Radio, MINIMAX_0_ID);
-        button.group_id = 1;
+        button.group_id = 0;
         self.buttons.insert(MINIMAX_0_ID, button);
 
         texture = AssetLoader::get_texture("monte_carlo");
         button = Button::new(MONTE_0_CORNER, texture, ButtonMode::Radio, MONTE_0_ID);
-        button.group_id = 1;
+        button.group_id = 0;
         self.buttons.insert(MONTE_0_ID, button);
 
-        // Player 2
+        // Player 1
         texture = AssetLoader::get_texture("human");
         button = Button::new(HUMAN_1_CORNER, texture, ButtonMode::Radio, HUMAN_1_ID);
-        button.group_id = 2;
+        button.group_id = 1;
         button.is_selected = true;
         self.buttons.insert(HUMAN_1_ID, button);
 
         texture = AssetLoader::get_texture("minimax");
         button = Button::new(MINIMAX_1_CORNER, texture, ButtonMode::Radio, MINIMAX_1_ID);
-        button.group_id = 2;
+        button.group_id = 1;
         self.buttons.insert(MINIMAX_1_ID, button);
 
         texture = AssetLoader::get_texture("monte_carlo");
         button = Button::new(MONTE_1_CORNER, texture, ButtonMode::Radio, MONTE_1_ID);
-        button.group_id = 2;
+        button.group_id = 1;
         self.buttons.insert(MONTE_1_ID, button);
 
         // Set common elements
@@ -135,36 +136,53 @@ impl ViewIntro {
         
     }
 
-    fn set_controls_from_options(&mut self) {
-        let id = match self.game_options.player_0 {
-            Human => HUMAN_0_ID,
-            AIMinimax => MINIMAX_0_ID,
-            AIMonteCarlo => MONTE_0_ID,
-            AIRandom | AIMonteCarloTree => panic!(),
-        };
-        self.buttons.get_mut(&id).unwrap().is_selected = true;
-
-        if self.game_options.player_0 == AIMinimax {
-            self.slider_0.value = self.game_options.search_depth as f32;
-            self.slider_0.max_value = 9.;
-            self.slider_0.tick_divisions = 8;
-            self.slider_0.snap_to_tick = true;
+    fn set_player_controls(&mut self, player: Player) {
+        if player.id == 0 {
+            let id = match player.kind {
+                Human => HUMAN_0_ID,
+                AIMinimax => MINIMAX_0_ID,
+                AIMonteCarlo => MONTE_0_ID,
+                AIRandom | AIMonteCarloTree => panic!(),
+            };
+            self.select_button(0, id);
+    
+            if player.kind == AIMinimax {
+                self.slider_0.value = player.search_depth as f32;
+                self.slider_0.max_value = 9.;
+                self.slider_0.tick_divisions = 8;
+                self.slider_0.snap_to_tick = true;
+            }
+            if player.kind == AIMonteCarlo {
+                self.slider_0.value = player.search_rounds as f32;
+                self.slider_0.max_value = 10_000.;
+                self.slider_0.tick_divisions = 0;
+                self.slider_0.snap_to_tick = false;
+            }
         }
-        if self.game_options.player_0 == AIMonteCarlo {
-            self.slider_0.value = self.game_options.search_rounds as f32;
-            self.slider_0.max_value = 10_000.;
-            self.slider_0.tick_divisions = 0;
-            self.slider_0.snap_to_tick = false;
+
+        if player.id == 1 {
+            let id = match player.kind {
+                Human => HUMAN_1_ID,
+                AIMinimax => MINIMAX_1_ID,
+                AIMonteCarlo => MONTE_1_ID,
+                AIRandom | AIMonteCarloTree => panic!(),
+            };
+            self.select_button(1, id);
+            //self.buttons.get_mut(&id).unwrap().is_selected = true;
+    
+            // if player.kind == AIMinimax {
+            //     self.slider_1.value = player.search_depth as f32;
+            //     self.slider_1.max_value = 9.;
+            //     self.slider_1.tick_divisions = 8;
+            //     self.slider_1.snap_to_tick = true;
+            // }
+            // if player.kind == AIMonteCarlo {
+            //     self.slider_1.value = player.search_rounds as f32;
+            //     self.slider_1.max_value = 1_000.;
+            //     self.slider_1.tick_divisions = 0;
+            //     self.slider_1.snap_to_tick = false;
+            // }
         }
-
-
-        let id = match self.game_options.player_1 {
-            Human => HUMAN_1_ID,
-            AIMinimax => MINIMAX_1_ID,
-            AIMonteCarlo => MONTE_1_ID,
-            AIRandom | AIMonteCarloTree => panic!(),
-        };
-        self.buttons.get_mut(&id).unwrap().is_selected = true;
     }
 
     pub fn handle_events(&mut self) {
@@ -186,7 +204,8 @@ impl ViewIntro {
                 WidgetMessage::Pushed(id) => {
                     match id {
                         START_ID => {
-                            self.tx.send(ViewIntroMessage::ShouldStart(self.game_options.clone())).expect("Intro message send error.");
+                            let players = vec![self.player_0, self.player_1];
+                            self.tx.send(ViewIntroMessage::ShouldStart(players)).expect("Intro message send error.");
                         },
                         EXIT_ID => {
                             self.tx.send(ViewIntroMessage::ShouldExit).expect("Intro message send error.");
@@ -200,40 +219,42 @@ impl ViewIntro {
                 WidgetMessage::Selected(id) => { // radio-style groupings
                     match id {
                         HUMAN_0_ID => {
-                            self.deselect_buttons(1, id);
-                            self.game_options.player_0 = Human;
-                            self.set_controls_from_options();
+                            self.player_0.kind = Human;
+                            self.set_player_controls(self.player_0);
                         },
                         MINIMAX_0_ID => {
-                            self.deselect_buttons(1, id);
-                            self.game_options.player_0 = AIMinimax;
-                            self.set_controls_from_options();
+                            self.player_0.kind = AIMinimax;
+                            self.set_player_controls(self.player_0);
                         },
                         MONTE_0_ID => {
-                            self.deselect_buttons(1, id);
-                            self.game_options.player_0 = AIMonteCarlo;
-                            self.set_controls_from_options();
+                            self.player_0.kind = AIMonteCarlo;
+                            self.set_player_controls(self.player_0);
                         }
-                        HUMAN_1_ID | MINIMAX_1_ID | MONTE_1_ID => {
-                            self.deselect_buttons(2, id);
-                        }
+                        // HUMAN_1_ID | MINIMAX_1_ID | MONTE_1_ID => {
+                        //     self.deselect_buttons(2, id);
+                        // }
                         _ => {},
                     }
                 }
                 WidgetMessage::ValueChanged(id, val) => {
+                    if id == self.slider_0.id {
+                        if self.player_0.kind == AIMinimax {
+                            self.player_0.search_depth = val as usize;
+                        }
+                        if self.player_0.kind == AIMonteCarlo {
+                            self.player_0.search_rounds = val as usize;
+                        }
+                    }
                     println!("slider id: {}, new value: {}", id, val);
                 },
             }
         }
     }
 
-    /// Deselects all the buttons with given group_id. Ignores the button with
-    /// the except_id.
-    fn deselect_buttons(&mut self, group_id: usize, except_id: usize) {
+    /// Selects the given button and deselects all others in the group.
+    fn select_button(&mut self, group_id: usize, button_id: usize) {
         for button in self.buttons.values_mut() {
-            if button.group_id == group_id && button.id != except_id {
-                button.is_selected = false;
-            }
+            button.is_selected = button.group_id == group_id && button.id == button_id;
         }
     }
 

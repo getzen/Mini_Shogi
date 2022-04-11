@@ -100,10 +100,10 @@ impl ViewGame {
 
         // Promotion lines
         texture = AssetLoader::get_texture("line");
-        let mut line_top = Sprite::new(PROMO_LINE_TOP, texture);
+        let line_top = Sprite::new(PROMO_LINE_TOP, texture);
         //line_top.set_scale(0.5);
         self.promotion_lines.push(line_top);
-        let mut line_bottom = Sprite::new(PROMO_LINE_BOTTOM, texture);
+        let ine_bottom = Sprite::new(PROMO_LINE_BOTTOM, texture);
         //line_bottom.set_scale(0.5);
         self.promotion_lines.push(line_bottom);
 

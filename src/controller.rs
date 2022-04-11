@@ -18,9 +18,9 @@ use crate::view_game::{ViewGame, ViewGameMessage};
 use crate::view_intro::{ViewIntro, ViewIntroMessage};
 
 #[derive(Clone)]
-pub struct GameOptions {
-    pub player_0: PlayerKind,
-    pub player_1: PlayerKind,
+pub struct Player {
+    pub id: usize,
+    pub kind: PlayerKind,
     pub search_depth: usize,
     pub search_rounds: usize,
 }
@@ -50,7 +50,7 @@ pub enum PlayerKind {
 }
 
 pub struct Controller {
-    player_kinds: Vec<PlayerKind>,
+    players: Vec<Player>,
     game: Game,
     view_intro: ViewIntro,
     view_game: ViewGame,
@@ -70,7 +70,7 @@ impl Controller {
         let (ai_tx, ai_rx) = mpsc::channel();
 
         Self {
-            player_kinds: Vec::new(),
+            players: Vec::new(),
             game: Game::new(),
             view_intro: ViewIntro::new(view_intro_tx).await,
             view_game: ViewGame::new(view_game_tx, COLS, ROWS).await,
@@ -84,8 +84,8 @@ impl Controller {
     }
 
     pub async fn prepare(&mut self) {
-        self.player_kinds.push(PlayerKind::Human);
-        self.player_kinds.push(PlayerKind::AIMonteCarlo);
+        self.players.push(Player { id: 0, kind: Human, search_depth: 0, search_rounds: 0 });
+        self.players.push(Player { id: 0, kind: Human, search_depth: 0, search_rounds: 0 });
         self.game.prepare();
         self.view_intro.prepare();
         self.view_game.prepare().await;
@@ -144,8 +144,8 @@ impl Controller {
         let received = self.view_intro_rx.try_recv();
         if received.is_ok() {
             match received.unwrap() {
-                ViewIntroMessage::ShouldStart(game_options) => {
-                    // match game_options.player_0...
+                ViewIntroMessage::ShouldStart(players) => {
+                    self.players = players;
                     self.next_player();
                 },
                 ViewIntroMessage::ShouldExit => self.state = Exit,
@@ -311,7 +311,7 @@ impl Controller {
             },
             _ => {
                 let p = self.game.current_player;
-                if self.player_kinds[p] == Human {
+                if self.players[p].kind == Human {
                     self.state = HumanTurn;
                 } else {
                     self.state = AITurnBegin;
@@ -325,7 +325,7 @@ impl Controller {
         self.state = AIThinking;
 
         // These variables are captured by the thread.
-        let ai_kind = self.player_kinds[self.game.current_player];
+        let ai_kind = self.players[self.game.current_player].kind;
         let game_copy = self.game;
         let message_sender = AISender::new(self.ai_tx.clone(), None);
 
