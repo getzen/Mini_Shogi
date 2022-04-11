@@ -193,7 +193,7 @@ impl ViewIntro {
                 },
                 AIMonteCarlo => {
                     self.slider_1.is_visible = true;
-                    self.slider_1.value = self.player_0.search_rounds as f32;
+                    self.slider_1.value = self.player_1.search_rounds as f32;
                     self.slider_1.max_value = 1_000.;
                     self.slider_1.tick_divisions = 0;
                     self.slider_1.snap_to_tick = false;

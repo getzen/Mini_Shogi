@@ -59,9 +59,14 @@ impl AIMinimax {
 
         // Maximizing
         if maximizing {
-            for node in &child_nodes {
+            for (index, node) in child_nodes.iter().enumerate() {
                 let child_score = self.alpha_beta(*node, depth-1, false, alpha, beta, &mut child_pv);
+                
+                // Progress reporting
                 self.progress.nodes += 1;
+                if depth == self.depth {
+                    self.progress.percent_complete = (index + 1) as f64 / child_nodes.len() as f64;
+                }
 
                 if child_score > alpha {
                     alpha = child_score;

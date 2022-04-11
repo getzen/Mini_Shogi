@@ -23,6 +23,7 @@ pub struct AIProgress {
     pub nodes: usize,
     pub pv: Vec<Move>,
     pub duration: Duration,
+    pub percent_complete: f64,
     pub score: f64,
     pub best_node: Option<Game>,
 }
@@ -34,6 +35,7 @@ impl AIProgress {
             nodes: 0,
             pv: Vec::new(),
             duration: Duration::new(0, 0),
+            percent_complete: 0.0,
             score: 0.0,
             best_node: None,
         }

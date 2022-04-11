@@ -143,6 +143,7 @@ impl Controller {
         if received.is_ok() {
             match received.unwrap() {
                 ViewIntroMessage::ShouldStart(players) => {
+                    //dbg!(players[1].search_depth);
                     self.players = players;
                     self.next_player();
                 },
@@ -266,8 +267,11 @@ impl Controller {
     }
 
     fn format_ai_progress(&self, progress: &AIProgress) -> String {
-        let nodes_string = progress.nodes.to_formatted_string(&Locale::en);
-        let mut text = format!("nodes: {}", nodes_string);
+        // let nodes_string = progress.nodes.to_formatted_string(&Locale::en);
+        // let mut text = format!("nodes: {}", nodes_string);
+        let percent_string = (progress.percent_complete * 100.0) as usize;
+        let mut text = format!("%: {}", percent_string);
+
         let ms = progress.duration.as_millis();
         let ms_string = progress.duration.as_millis().to_formatted_string(&Locale::en);
         if ms > 0 {
