@@ -144,7 +144,7 @@ impl ViewGame {
         let texture = self.texture_for(piece.kind);
         let position = self.center_position_for(piece.location_index);
         let mut sprite = Sprite::new(position, texture);
-        sprite.set_size(Some(PIECE_SIZE));
+        sprite.size = PIECE_SIZE;
         if piece.player == 1 {
             sprite.rotation = std::f32::consts::PI;
         }
