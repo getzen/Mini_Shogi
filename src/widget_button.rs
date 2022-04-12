@@ -48,14 +48,6 @@ impl Button {
         mode: ButtonMode,
         id: usize) -> Self {
 
-        let draw_params = DrawTextureParams {
-            dest_size: None,
-            source: None,
-            rotation: 0.0,
-            flip_x: false, flip_y: false,
-            pivot: None
-        };
-
         Self {
             position, texture, mode, id,
             disabled_texture: None,
@@ -63,7 +55,7 @@ impl Button {
             color: WHITE,
             disabled_color: Some(GRAY),
             selected_color: Some(YELLOW),
-            draw_params,
+            draw_params: DrawTextureParams::default(),
             z_order: 0,
             is_visible: true,
             is_enabled: true,
