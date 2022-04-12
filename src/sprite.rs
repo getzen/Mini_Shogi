@@ -138,7 +138,6 @@ impl Sprite {
         // }
         // params source, flip_x, etc. =
 
-        // This 'if' statement avoids copying the texture.
         if !self.use_alt_texture {
             draw_texture_ex(self.texture, x, y, draw_color, params);
         } else {

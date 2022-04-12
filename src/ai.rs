@@ -47,14 +47,8 @@ pub struct AI {}
 impl AI {
     pub fn think(player: Player, game: Game, mut message_sender: AISender) {
         let mut sender_clone = message_sender.clone();
-        let mut kind = player.kind;
-        if kind == AIMinimax && player.search_depth == 0 {
-            kind = AIRandom;
-        }
-        if kind == AIMonteCarlo && player.search_rounds == 0 {
-            kind = AIRandom;
-        }
-        let progress: AIProgress = match kind {
+        
+        let progress: AIProgress = match player.kind {
             AIRandom => {
                 let mut ai = AIRandom::new(game, sender_clone);
                 ai.think()

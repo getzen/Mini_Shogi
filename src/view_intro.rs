@@ -74,10 +74,10 @@ impl ViewIntro {
             background_tex: AssetLoader::get_texture("title"),
             buttons: HashMap::new(),
 
-            slider_0: Slider::new(DIFFICULTY_SLIDER_0_CORNER, 360., 1., 0., 0., 0),
+            slider_0: Slider::new(DIFFICULTY_SLIDER_0_CORNER, 360., 1., 1., 1., 0),
             slider_0_text: Text::new(SLIDER_0_TEXT_CENTER, "hello".to_string(), 18, Some("Menlo")).await,
 
-            slider_1: Slider::new(DIFFICULTY_SLIDER_1_CORNER, 360., 1., 0., 0., 1),
+            slider_1: Slider::new(DIFFICULTY_SLIDER_1_CORNER, 360., 1., 1., 1., 1),
             slider_1_text: Text::new(SLIDER_1_TEXT_CENTER, "world".to_string(), 18, Some("Menlo")).await,
 
             player_0: Player { id: 0, kind: Human, search_depth: 3, search_rounds: 500 },
@@ -177,7 +177,7 @@ impl ViewIntro {
                     self.slider_0_text.is_visible = true;
                     self.slider_0.value = self.player_0.search_depth as f32;
                     self.slider_0.max_value = 9.;
-                    self.slider_0.tick_divisions = 8;
+                    self.slider_0.tick_divisions = 7;
                     self.slider_0.snap_to_tick = true;
                 },
                 AIMonteCarlo => {
@@ -212,7 +212,7 @@ impl ViewIntro {
                     self.slider_1_text.is_visible = true;
                     self.slider_1.value = self.player_1.search_depth as f32;
                     self.slider_1.max_value = 9.;
-                    self.slider_1.tick_divisions = 8;
+                    self.slider_1.tick_divisions = 7;
                     self.slider_1.snap_to_tick = true;
                 },
                 AIMonteCarlo => {
