@@ -133,9 +133,9 @@ impl Sprite {
         let mut params = DrawTextureParams::default();
         params.dest_size = Some(Vec2::new(self.size.0, self.size.1));
         params.rotation = self.rotation;
-        if let Some(piv) = self.pivot {
-            params.pivot = Some(Vec2::new(piv.0, piv.1));
-        }
+        // if let Some(piv) = self.pivot {
+        //     params.pivot = Some(Vec2::new(piv.0, piv.1));
+        // }
         // params source, flip_x, etc. =
 
         // This 'if' statement avoids copying the texture.
