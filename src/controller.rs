@@ -97,7 +97,7 @@ impl Controller {
     /// The main control loop.
     pub async fn go(&mut self) {
         loop {
-            // Events and state management
+            // Event and state management
             match self.state {
                 Intro => {
                     self.view_intro.handle_events();
