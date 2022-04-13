@@ -1,7 +1,7 @@
 // Controller
 // Handles the app flow and is the intermediary between the view and model.
 
-use std::sync::{mpsc, WaitTimeoutResult};
+use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::time::Duration;
 
