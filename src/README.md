@@ -11,9 +11,11 @@ There are two AI opponents:
 
 - Minimax. The classic "look x moves ahead" algorithm used in many perfect information situations. It has alpha-beta pruning, but it otherwise unsophisticated. On my computer, it can search about 900,000 board positions per second, but it's still rather weak since the evaluation function is currently terrible. Be aware that Llooking ahead move than about 7 moves is rather slow.
 
-- Monte Carlo. This algorithm makes each available move and then randomly plays out the game to completion a certain number of times (rounds). Due to its stochatic nature, it plays with more variability than Minimax. This is a "pure" Monte Carlo, a simple version that doesn't have the advantages of a full Monte Carlo Tree Search, which I hope to add later.
+- Monte Carlo. This algorithm makes each available move and then randomly plays out the game to completion a certain number of times (rounds). Due to its stochatic nature, it plays with more variability than Minimax. This is a "pure" Monte Carlo, a simple version that doesn't have the advantages of a full Monte Carlo Tree Search, which I hope to add later. It searches about 120,000 positions per second on my computer.
 
 ##To-Do:
+
+- Add rules view.
 
 - Add sounds: welcome, promotion, win/loss
  
