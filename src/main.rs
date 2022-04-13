@@ -25,7 +25,7 @@ use crate::controller::Controller;
 
 fn conf() -> Conf {
     Conf {
-        window_title: String::from("Yokai"),
+        window_title: String::from("Yōkaï No Mori"),
         window_width: 800,
         window_height: 800,
         high_dpi: false,
