@@ -3,8 +3,7 @@
 // This code is based on: https://github.com/wlongxiang/mcts/blob/main/monte_carlo_tree_search.py
 
 // NON-FUNCTIONAL. See critical bug in ucb_select()
-// ALSO, for Yokai, I started using SlotMap to store the pieces. That made hashing 'Game'
-// impossible, so this whole thing will need to be reworked somehow.
+// I think this whole thing will need to be reworked somehow.
 
 // use std::collections::HashMap;
 // use std::time::{Duration, Instant};
