@@ -1,7 +1,7 @@
 // Controller
 // Handles the app flow and is the intermediary between the view and model.
 
-use std::sync::mpsc;
+use std::sync::{mpsc, WaitTimeoutResult};
 use std::sync::mpsc::{Receiver, Sender};
 use std::time::Duration;
 
@@ -97,42 +97,51 @@ impl Controller {
     /// The main control loop.
     pub async fn go(&mut self) {
         loop {
-            // Handle events
-            match self.state {
-                Intro => self.view_intro.handle_events(),
-                _ => self.view_game.handle_events(),
-            }
-
-            // Check messages
-            self.check_messages().await;
-            self.view_intro.check_messages();
-
-            // Take action
-            match self.state {
-                AITurnBegin => self.begin_ai_turn(),
-                NextPlayer => self.next_player(),
-                Exit => break,
-                _ => {},
-            }
-
-            // Update view
-            let time_delta = Duration::from_secs_f32(get_frame_time());
-            let active = self.view_game.update(time_delta);
-            if !active && self.state == WaitingOnAnimation {
-                self.state = NextPlayer;
-            }
-
-            // Draw view
+            // Events and state management
             match self.state {
                 Intro => {
-                    self.view_intro.draw();
-                    self.view_intro.end_frame().await;
-                }
-                _ => {
+                    self.view_intro.handle_events();
+                    self.view_intro.check_messages();
+                    self.check_messages().await;
+                },
+                HumanTurn | AIThinking | WaitingOnAnimation | Player0Won | Player1Won | Draw => {
+                    self.view_game.handle_events();
+                    self.check_messages().await;
+                },
+                AITurnBegin => {
+                    self.begin_ai_turn();
+                },
+                NextPlayer => {
+                    self.next_player();
+                },
+                Exit => {
+                    break;
+                },
+            }
+            // Animation updates
+            match  self.state {
+                WaitingOnAnimation => {
+                    // Animation
+                    let time_delta = Duration::from_secs_f32(get_frame_time());
+                    let active = self.view_game.update(time_delta);
+                    if !active && self.state == WaitingOnAnimation {
+                        self.state = NextPlayer;
+                    }
+                },
+                _ => {},
+            }
+            // Drawing
+            match self.state {
+                Intro => {
+                     self.view_intro.draw();
+                     self.view_intro.end_frame().await;
+                },
+                HumanTurn | AIThinking | Player0Won | Player1Won | Draw | WaitingOnAnimation => {
                     self.view_game.draw_board();
                     self.view_game.draw_ui(&self.state, &self.pv_text);
                     self.view_game.end_frame().await;
                 },
+                _ => {},
             }
         }
     }
