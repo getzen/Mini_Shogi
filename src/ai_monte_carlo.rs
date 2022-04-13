@@ -51,14 +51,13 @@ impl AIMonteCarlo {
                     let mut sub_children = child.child_nodes(child.current_player);
                     let rand_index = fastrand::usize(0..sub_children.len());
                     child = sub_children.swap_remove(rand_index);
+                    //child = sub_children[rand_index];
                     progress.nodes += 1;
                 }
 
-                // Below, losses are weighted heavier than wins. In tic-tac-toe, this was
-                // needed to prevent moves that allowed the opponent to win in the very
-                // next move. Seems hack-ish though.
+                // May need to play with the win vs loss weighting to get good results.
                 const WIN_VAL: f64 = 1.0;
-                const LOSS_VAL: f64 = -7.0;
+                const LOSS_VAL: f64 = -1.0;
                 
                 match child.state {
                     GameState::Draw => {
