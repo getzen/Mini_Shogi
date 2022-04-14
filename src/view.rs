@@ -1,10 +1,12 @@
 // View
-// Utility methods
+// Utility methods related to high-resolution displays.
 
 use macroquad::prelude::get_internal_gl;
 
-// This should be 2.0 if images are twice their intended display size
-// to handle Retina displays. End assets names with "-2x" as a reminder.
+/// The ratio of the image actual size versus the intended display size.
+/// For example, it should be 2.0 if images are twice their intended display
+/// size for sharpness with Retina displays. Consider ending assets names with
+/// "_2x" as a reminder.
 const IMAGE_ASSETS_SCALE: f32 = 2.0;
 
 pub struct View {}
