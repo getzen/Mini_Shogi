@@ -121,7 +121,6 @@ impl Controller {
             // Animation updates
             match  self.state {
                 WaitingOnAnimation => {
-                    // Animation
                     let time_delta = Duration::from_secs_f32(get_frame_time());
                     let active = self.view_game.update(time_delta);
                     if !active && self.state == WaitingOnAnimation {
@@ -177,7 +176,6 @@ impl Controller {
                 },
             }
         }
-
         // From AI
         let received = self.ai_rx.try_recv();
         if received.is_ok() {
@@ -193,7 +191,6 @@ impl Controller {
                     self.pv_text = self.format_ai_progress(&progress);
                     self.state = WaitingOnAnimation;
                 },
-                
             }
         }
     }
@@ -215,7 +212,6 @@ impl Controller {
                 if let Some(piece_id) = self.view_game.selected_piece_id() {
                     self.perform_move(piece_id, location_index);
                 }
-                
                 self.state = WaitingOnAnimation;
             } 
             // Unselect everything

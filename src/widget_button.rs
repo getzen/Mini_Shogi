@@ -4,7 +4,10 @@
 // of the center.
 
 use std::sync::mpsc::Sender;
+
 use macroquad::prelude::*;
+
+use crate::View;
 use crate::widget_message::WidgetMessage;
 use crate::widget_message::WidgetMessage::*;
 
@@ -76,7 +79,10 @@ impl Button {
 
     #[allow(dead_code)]
     /// Test whether the given point lies in the texture rectangle, considering rotation.
-    pub fn contains(&self, point: (f32, f32)) -> bool {
+    pub fn contains(&self, mut point: (f32, f32)) -> bool {
+        // Convert point to logical units.
+        point = View::logi_pos(point);
+
         let (w, h) = self.draw_size();
         // Get the net test point relative to the sprite's position.
         let net_x = point.0 - self.position.0 - w / 2.0;
@@ -162,7 +168,7 @@ impl Button {
                 draw_color = self.disabled_color.unwrap();
             }
         }
-        let (x, y) = self.position;
+        let (x, y) = View::phys_pos(self.position);
         draw_texture_ex(draw_texture, x, y, draw_color, self.draw_params.clone());
     }
 }

@@ -15,6 +15,7 @@ mod lerp;
 mod piece;
 mod sprite;
 mod text;
+mod view;
 mod view_game;
 mod view_intro;
 mod widget_button;
@@ -22,13 +23,14 @@ mod widget_message;
 mod widget_slider;
 
 use crate::controller::Controller;
+use crate::view::View;
 
 fn conf() -> Conf {
     Conf {
         window_title: String::from("Yōkaï No Mori"),
         window_width: 800,
         window_height: 800,
-        high_dpi: false,
+        high_dpi: true,
         //fullscreen: bool,
         //sample_count: 0,
         //window_resizable: bool,
@@ -39,12 +41,7 @@ fn conf() -> Conf {
 
 #[macroquad::main(conf)]
 async fn main() {
-    unsafe {
-        let gl = get_internal_gl();
-        println!("dpi_scale: {}", gl.quad_context.dpi_scale());
-        
-    }
-    println!("dpi_scale: {}", screen_width() / 800.0);
+    println!("dpi_scale: {}", View::dpi_scale());
     let mut controller = Controller::new().await;
     controller.prepare().await;
     controller.go().await;
