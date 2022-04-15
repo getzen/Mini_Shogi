@@ -1,4 +1,6 @@
-// Asset Loader
+/// Asset Loader
+///
+/// *** See view.rs to set image scale factor *** 
 
 use macroquad::audio::load_sound_from_bytes;
 use macroquad::audio::Sound;
