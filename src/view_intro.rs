@@ -14,7 +14,6 @@ use crate::controller::Player;
 use crate::controller::PlayerKind::*;
 
 use crate::text::Text;
-use crate::View;
 use crate::widget_button::{Button, ButtonMode};
 use crate::widget_message::WidgetMessage;
 use crate::widget_slider::*;
@@ -132,7 +131,6 @@ impl ViewIntro {
 
         // Set common elements
         for button in self.buttons.values_mut() {
-            button.set_scale(View::adj_scale());
             button.color = LIGHTGRAY;
             button.selected_color = Some(Color::from_rgba(246, 194, 81, 255));
             button.tx = Some(self.widget_tx.clone());
