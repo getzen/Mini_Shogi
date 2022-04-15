@@ -13,7 +13,7 @@ use crate::View;
 use crate::asset_loader::AssetLoader;
 
 pub struct Text {
-    pub position: (f32, f32),
+    pub phys_position: (f32, f32),
     pub text: String,
     pub centered: bool,
     pub text_params: TextParams,
@@ -21,20 +21,23 @@ pub struct Text {
 }
 
 impl Text {
+    /// Creates a new Text with the given logical position, text, font size, and font name.
+    /// The font size will be automatically adjusted to the dpi scale.
     pub async fn new(
-        position: (f32, f32), 
+        logi_position: (f32, f32), 
         text: String, 
-        font_size: u16, 
+        logi_font_size: u16, 
         font_name: Option<&str>) -> Self {
 
         let mut params = TextParams::default();
-        params.font_size = (font_size as f32 * View::dpi_scale()) as u16;
+        params.font_size = (logi_font_size as f32 * View::dpi_scale()) as u16;
         if let Some(name) = font_name {
             params.font = AssetLoader::get_font(name);
         }
 
         Self {
-            position, text,
+            phys_position: View::phys_pos(logi_position), 
+            text,
             text_params: params,
             centered: false,
             is_visible: true,
@@ -50,15 +53,26 @@ impl Text {
     }
 
     #[allow(dead_code)]
+    /// Get the logical position of the sprite.
+    pub fn get_logi_position(&self) -> (f32, f32) {
+        View::logi_pos(self.phys_position)
+    }
+
+    #[allow(dead_code)]
+    /// Set the logical position of the sprite.
+    pub fn set_logi_position(&mut self, logi_position: (f32, f32)) {
+        self.phys_position = View::phys_pos(logi_position);
+    }
+
+    #[allow(dead_code)]
     /// A convenience function to set the text color.
     pub fn set_color(&mut self, color: Color) {
         self.text_params.color = color;
     }
 
-    /// Returns the position at which the text should be drawn, considering centering.
+    /// Returns the physical position at which the text should be drawn, considering centering.
     fn draw_position(&self) -> (f32, f32) {
-        let (x, y) = View::phys_pos(self.position);
-        //let (x, y) = self.position;
+        let (x, y) = self.phys_position;
         let (w, h) = self.draw_size();
         if self.centered {
             (x - w / 2.0, y - h / 2.0)

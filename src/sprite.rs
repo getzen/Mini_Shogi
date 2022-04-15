@@ -12,7 +12,7 @@ use crate::View;
 use crate::lerp::Lerp;
 
 pub struct Sprite {
-    /// Position in physical pixels.
+    /// Position in physical pixels of the center.
     /// Use set_logi_position for logical pixel positioning.
     pub phys_position: (f32, f32),
     /// Rotation in radians clockwise
@@ -118,17 +118,17 @@ impl Sprite {
 
     #[allow(dead_code)]
     /// Test whether the logical position lies in texture rectange, considering rotation.
-    pub fn contains_logi_pos(&self, logi_pos: (f32, f32)) -> bool {
-        self.contains_phys_pos(View::phys_pos(logi_pos))
+    pub fn contains_logi_position(&self, logi_pos: (f32, f32)) -> bool {
+        self.contains_phys_position(View::phys_pos(logi_pos))
     }
 
     #[allow(dead_code)]
     /// Test whether the physical point lies in the texture rectangle, considering rotation.
     /// Note: Macroquad's mouse_position() gives the physical location of the mouse.
-    pub fn contains_phys_pos(&self, phys_pos: (f32, f32)) -> bool {
+    pub fn contains_phys_position(&self, phys_position: (f32, f32)) -> bool {
         // Get the net test point relative to the sprite's position.
-        let net_x = phys_pos.0 - self.phys_position.0;
-        let net_y = phys_pos.1 - self.phys_position.1;
+        let net_x = phys_position.0 - self.phys_position.0;
+        let net_y = phys_position.1 - self.phys_position.1;
         // Rotate the point clockwise (the same direction as Macroquad's rotation). This is a
         // little different than the standard rotation formulas.
         let theta = self.rotation;

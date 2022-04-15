@@ -109,9 +109,7 @@ impl Button {
     /// Test whether the physical point lies in the texture rectangle, considering rotation.
     /// Note: Macroquad's mouse_position() gives the physical location of the mouse.
     pub fn contains_phys_position(&self, phys_position: (f32, f32)) -> bool {
-        //let (w, h) = self.logical_size();
         let size = self.draw_params.dest_size.unwrap();
-        // Get the net test point relative to the sprite's position.
         let net_x = phys_position.0 - self.phys_position.0 - size.x / 2.0;
         let net_y = phys_position.1 - self.phys_position.1 - size.y / 2.0;
         // Rotate the point clockwise (the same direction as Macroquad's rotation).
