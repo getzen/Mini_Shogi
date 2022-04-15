@@ -1,7 +1,10 @@
 // Slider
 
 use std::sync::mpsc::Sender;
+
 use macroquad::prelude::*;
+
+use crate::View;
 use crate::widget_message::WidgetMessage;
 use crate::widget_message::WidgetMessage::*;
 
@@ -56,7 +59,10 @@ impl Slider {
     }
 
     fn mouse_pos_to_value(&self, mouse_pos: (f32, f32)) -> f32 {
-        let rel_x = mouse_pos.0 - self.position.0;
+        // Convert point to logical units.
+        let point = View::logi_pos(mouse_pos);
+
+        let rel_x = point.0 - self.position.0;
         let val = rel_x / self.width * (self.max_value - self.min_value) + self.min_value;
         val.clamp(self.min_value, self.max_value)
     }
@@ -78,10 +84,13 @@ impl Slider {
     }
 
     fn contains(&self, point: (f32, f32)) -> bool {
-        point.0 >= self.position.0 
-        && point.0 <= self.position.0 + self.width
-        && point.1 >= self.position.1 - self.value_marker_radius 
-        && point.1 <= self.position.1 + self.value_marker_radius
+        // Convert point to logical units.
+        let pt = View::logi_pos(point);
+
+        pt.0 >= self.position.0 
+        && pt.0 <= self.position.0 + self.width
+        && pt.1 >= self.position.1 - self.value_marker_radius 
+        && pt.1 <= self.position.1 + self.value_marker_radius
     }
 
     pub fn process_events(&mut self) {
@@ -112,69 +121,40 @@ impl Slider {
 
     pub fn draw(&self) {
         if !self.is_visible { return; }
+
+        // Convert logical position to physical pixel position.
+        let (x, y) = View::phys_pos(self.position);
+        let width = self.width * View::dpi_scale();
+        let tick_height = self.tick_height * View::dpi_scale();
+        let thickness = self.line_thickness * View::dpi_scale();
+
         // Slider line
-        draw_line(
-            self.position.0, 
-            self.position.1, 
-            self.position.0 + self.width, 
-            self.position.1, 
-            self.line_thickness, 
-            self.color
-        );
+        draw_line(x, y, x + width, y, thickness, self.color);
 
         if self.show_ticks {
             // Min value tick
-            draw_line(
-                self.position.0, 
-                self.position.1 - self.tick_height * 0.5, 
-                self.position.0, 
-                self.position.1 + self.tick_height * 0.5, 
-                self.line_thickness, 
-                self.color
-            );
+            draw_line(x, y - tick_height * 0.5, x, y + tick_height * 0.5, thickness, self.color);
 
             // Max value tick
-            draw_line(
-                self.position.0 + self.width, 
-                self.position.1 - self.tick_height * 0.5, 
-                self.position.0 + self.width, 
-                self.position.1 + self.tick_height * 0.5, 
-                self.line_thickness, 
-                self.color
-            );
+            draw_line(x + width, y - tick_height * 0.5, x + width, y + tick_height * 0.5, thickness, self.color);
 
             // Division ticks in between
             if self.tick_divisions > 0 {
                 for d in 0..self.tick_divisions {
-                    let x = self.position.0 + self.division_width() * ((d + 1) as f32);
-                    draw_line(
-                        x, 
-                        self.position.1 - self.tick_height * 0.5, 
-                        x, 
-                        self.position.1 + self.tick_height * 0.5, 
-                        self.line_thickness, 
-                        self.color
-                    );
+                    let x = x + self.division_width() * View::dpi_scale() * ((d + 1) as f32);
+                    draw_line(x, y - tick_height * 0.5, x, y + tick_height * 0.5, thickness, self.color);
                 }
             }
         }
 
         // Value marker
         let x_ratio = (self.value - self.min_value) / (self.max_value - self.min_value);
-        let pt_x = x_ratio * self.width;
+        let pt_x = x_ratio * self.width * View::dpi_scale();
+        let radius = self.value_marker_radius * View::dpi_scale();
         if self.is_value_marker_solid {
-            draw_circle(
-                self.position.0 + pt_x, 
-                self.position.1, 
-                self.value_marker_radius, 
-                self.color);
+            draw_circle(x + pt_x, y, radius, self.color);
         } else {
-            draw_circle_lines(
-                self.position.0 + pt_x, 
-                self.position.1, 
-                self.value_marker_radius, 
-                self.line_thickness, 
-                self.color);
+            draw_circle_lines(x + pt_x, y, radius, thickness, self.color);
         }
     }
 }
