@@ -51,6 +51,12 @@ impl Button {
         mode: ButtonMode,
         id: usize) -> Self {
 
+        // Adjust texture draw size based on the dpi scale.
+        let mut params = DrawTextureParams::default();
+        let size_x = texture.width() * View::adj_scale();
+        let size_y = texture.height() * View::adj_scale();
+        params.dest_size = Some(Vec2::new(size_x, size_y));
+
         Self {
             position, texture, mode, id,
             disabled_texture: None,
@@ -58,7 +64,7 @@ impl Button {
             color: WHITE,
             disabled_color: Some(GRAY),
             selected_color: Some(YELLOW),
-            draw_params: DrawTextureParams::default(),
+            draw_params: params,
             z_order: 0,
             is_visible: true,
             is_enabled: true,
@@ -69,13 +75,13 @@ impl Button {
         }
     }
 
-    #[allow(dead_code)]
-    pub fn set_scale(&mut self, scale: f32) {
-        let dest_size = Vec2::new(
-            self.texture.width() * scale, 
-            self.texture.height() * scale);
-        self.draw_params.dest_size = Some(dest_size);
-    }
+    // #[allow(dead_code)]
+    // pub fn set_scale(&mut self, scale: f32) {
+    //     let dest_size = Vec2::new(
+    //         self.texture.width() * scale, 
+    //         self.texture.height() * scale);
+    //     self.draw_params.dest_size = Some(dest_size);
+    // }
 
     #[allow(dead_code)]
     /// Test whether the given point lies in the texture rectangle, considering rotation.
@@ -83,12 +89,15 @@ impl Button {
         // Convert point to logical units.
         point = View::logi_pos(point);
 
-        let (w, h) = self.draw_size();
+        let (w, h) = self.logical_size();
+        //let w = self.texture.width() / 2.0;
+        //let h = self.texture.height() / 2.0;
+
+
         // Get the net test point relative to the sprite's position.
         let net_x = point.0 - self.position.0 - w / 2.0;
         let net_y = point.1 - self.position.1 - h / 2.0;
-        // Rotate the point clockwise (the same direction as Macroquad's rotation). This is a
-        // little different than the standard rotation formulas.
+        // Rotate the point clockwise (the same direction as Macroquad's rotation).
         let theta = self.draw_params.rotation;
         let rot_x = net_x * f32::cos(theta) + net_y * f32::sin(theta);
         let rot_y = -net_x * f32::sin(theta) + net_y * f32::cos(theta);
@@ -96,13 +105,13 @@ impl Button {
         f32::abs(rot_x) < w / 2.0 && f32::abs(rot_y) < h / 2.0
     }
 
-     /// Returns the size of the drawn sprite.
-     fn draw_size(&self) -> (f32, f32) {
-        let mut width = self.texture.width();
-        let mut height = self.texture.height();
+     /// Returns the size of button in logical units.
+     fn logical_size(&self) -> (f32, f32) {
+        let mut width = self.texture.width() / View::dpi_scale();
+        let mut height = self.texture.height() / View::dpi_scale();
         if let Some(dest_size) = self.draw_params.dest_size {
-            width = dest_size.x;
-            height = dest_size.y;
+            width = dest_size.x / View::dpi_scale();
+            height = dest_size.y / View::dpi_scale();
         }
         (width, height)
     }
@@ -168,6 +177,7 @@ impl Button {
                 draw_color = self.disabled_color.unwrap();
             }
         }
+        // Convert logical position to physical pixel position.
         let (x, y) = View::phys_pos(self.position);
         draw_texture_ex(draw_texture, x, y, draw_color, self.draw_params.clone());
     }
