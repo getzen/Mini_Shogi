@@ -9,29 +9,46 @@ use crate::widget_message::WidgetMessage;
 use crate::widget_message::WidgetMessage::*;
 
 pub struct Slider {
-    pub position: (f32, f32), // left side
-    pub width: f32, // the graphic width
-    pub value: f32, // the chosen value
+    /// Position in physical pixels of the left-center.
+    /// Use set_logi_position for logical pixel positioning.
+    pub phys_position: (f32, f32),
+    /// The widget width in physical pixels.
+    pub phys_width: f32,
+    /// The thickness in physical pixels of the lines that make up the slider.
+    pub phys_line_thickness: f32,
+    /// The tick height in physical pixels. Half the tick is above
+    /// the line, half is below.
+    pub phys_tick_height: f32,
+    /// The marker radius in physical pixels.
+    pub phys_value_marker_radius: f32, // the current value marker
+    /// If true, the marker is a solid circle, otherwise an outline.
+    pub is_value_marker_solid: bool,
+    /// The number of ticks betweeen mix and max values.
+    pub tick_divisions: usize,
+    /// If true, the min, max, and division tick marks will be drawn.
+    pub show_ticks: bool,
+    /// If true, the value will snap to the division ticks when the
+    /// mouse is released.
+    pub snap_to_tick: bool,
+    pub color: Color,
+
+    /// The current value.
+    pub value: f32,
     pub min_value: f32,
     pub max_value: f32,
-    pub color: Color,
-    pub line_thickness: f32,
-    pub value_marker_radius: f32, // the current value marker
-    pub is_value_marker_solid: bool,
-    pub show_ticks: bool, // the min, max, and division ticks
-    pub snap_to_tick: bool,
-    pub tick_divisions: usize, // # ticks between min and max
-    pub tick_height: f32,
+
     pub is_visible: bool,
     pub id: usize,
     pub tx: Option<Sender<WidgetMessage>>,
+    
     // Private
     is_tracking: bool, // the mouse position
 }
 
 impl Slider {
+    /// Creates a new Slider with the given position and width in logical pixels.
     pub fn new(
-        position: (f32, f32), 
+        logi_position: (f32, f32), 
         width: f32, 
         value: f32,
         min_value: f32, 
@@ -39,31 +56,45 @@ impl Slider {
         id: usize) -> Self {
 
         Self {
-            position, width, value, min_value, max_value, id,
-            color: BLACK,
-            line_thickness: 2.0,
-            value_marker_radius: 8.0,
+            phys_position: View::phys_pos(logi_position),
+            phys_width: width * View::dpi_scale(),
+            phys_line_thickness: 1.0 * View::dpi_scale(),
+            phys_tick_height: 10.0 * View::dpi_scale(),
+            phys_value_marker_radius: 10.0 * View::dpi_scale(),
             is_value_marker_solid: true,
-            show_ticks: true,
             tick_divisions: 0,
-            tick_height: 12.0,
+            show_ticks: true,
             snap_to_tick: false,
+            color: BLACK,
+
+            value, min_value, max_value,
+
             is_visible: true,
+            id,
             tx: None,
             is_tracking: false,
         }
     }
 
-    fn division_width(&self) -> f32 {
-        self.width / ((self.tick_divisions + 1) as f32)
+    #[allow(dead_code)]
+    /// Get the logical position of the sprite.
+    pub fn get_logi_position(&self) -> (f32, f32) {
+        View::logi_pos(self.phys_position)
     }
 
-    fn mouse_pos_to_value(&self, mouse_pos: (f32, f32)) -> f32 {
-        // Convert point to logical units.
-        let point = View::logi_pos(mouse_pos);
+    #[allow(dead_code)]
+    /// Set the logical position of the sprite.
+    pub fn set_logi_position(&mut self, logi_position: (f32, f32)) {
+        self.phys_position = View::phys_pos(logi_position);
+    }
 
-        let rel_x = point.0 - self.position.0;
-        let val = rel_x / self.width * (self.max_value - self.min_value) + self.min_value;
+    fn division_width(&self) -> f32 {
+        self.phys_width / ((self.tick_divisions + 1) as f32)
+    }
+
+    fn mouse_position_to_value(&self, position: (f32, f32)) -> f32 {
+        let rel_x = position.0 - self.phys_position.0;
+        let val = rel_x / self.phys_width * (self.max_value - self.min_value) + self.min_value;
         val.clamp(self.min_value, self.max_value)
     }
 
@@ -83,14 +114,12 @@ impl Slider {
         self.value = nearest_value;
     }
 
-    fn contains(&self, point: (f32, f32)) -> bool {
-        // Convert point to logical units.
-        let pt = View::logi_pos(point);
-
-        pt.0 >= self.position.0 
-        && pt.0 <= self.position.0 + self.width
-        && pt.1 >= self.position.1 - self.value_marker_radius 
-        && pt.1 <= self.position.1 + self.value_marker_radius
+    /// Test whether the physical point lies in the slider's area.
+    fn contains_phys_position(&self, phys_position: (f32, f32)) -> bool {
+        phys_position.0 >= self.phys_position.0 
+        && phys_position.0 <= self.phys_position.0 + self.phys_width
+        && phys_position.1 >= self.phys_position.1 - self.phys_value_marker_radius 
+        && phys_position.1 <= self.phys_position.1 + self.phys_value_marker_radius
     }
 
     pub fn process_events(&mut self) {
@@ -98,11 +127,11 @@ impl Slider {
         let old_value = self.value;
         let mut send_message = false;
         if is_mouse_button_down(MouseButton::Left) {
-            if !self.is_tracking && self.contains(mouse_pos) {
+            if !self.is_tracking && self.contains_phys_position(mouse_pos) {
                 self.is_tracking = true;
             }
             if self.is_tracking {
-                self.value = self.mouse_pos_to_value(mouse_pos);
+                self.value = self.mouse_position_to_value(mouse_pos);
                 send_message = self.value != old_value && !self.snap_to_tick;
             }
         } else if self.is_tracking {
@@ -122,39 +151,51 @@ impl Slider {
     pub fn draw(&self) {
         if !self.is_visible { return; }
 
-        // Convert logical position to physical pixel position.
-        let (x, y) = View::phys_pos(self.position);
-        let width = self.width * View::dpi_scale();
-        let tick_height = self.tick_height * View::dpi_scale();
-        let thickness = self.line_thickness * View::dpi_scale();
+        let (x, y) = self.phys_position;
 
         // Slider line
-        draw_line(x, y, x + width, y, thickness, self.color);
+        draw_line(x, y, x + self.phys_width, y, self.phys_line_thickness, self.color);
 
         if self.show_ticks {
             // Min value tick
-            draw_line(x, y - tick_height * 0.5, x, y + tick_height * 0.5, thickness, self.color);
+            draw_line(
+                x, 
+                y - self.phys_tick_height * 0.5, 
+                x, y + self.phys_tick_height * 0.5, 
+                self.phys_line_thickness, 
+                self.color);
 
             // Max value tick
-            draw_line(x + width, y - tick_height * 0.5, x + width, y + tick_height * 0.5, thickness, self.color);
+            draw_line(
+                x + self.phys_width, 
+                y - self.phys_tick_height * 0.5, 
+                x + self.phys_width, 
+                y + self.phys_tick_height * 0.5, 
+                self.phys_line_thickness, 
+                self.color);
 
             // Division ticks in between
             if self.tick_divisions > 0 {
                 for d in 0..self.tick_divisions {
-                    let x = x + self.division_width() * View::dpi_scale() * ((d + 1) as f32);
-                    draw_line(x, y - tick_height * 0.5, x, y + tick_height * 0.5, thickness, self.color);
+                    let x = x + self.division_width() * ((d + 1) as f32);
+                    draw_line(
+                        x, 
+                        y - self.phys_tick_height * 0.5, 
+                        x, 
+                        y + self.phys_tick_height * 0.5, 
+                        self.phys_line_thickness,
+                        self.color);
                 }
             }
         }
 
         // Value marker
         let x_ratio = (self.value - self.min_value) / (self.max_value - self.min_value);
-        let pt_x = x_ratio * self.width * View::dpi_scale();
-        let radius = self.value_marker_radius * View::dpi_scale();
+        let pt_x = x_ratio * self.phys_width;
         if self.is_value_marker_solid {
-            draw_circle(x + pt_x, y, radius, self.color);
+            draw_circle(x + pt_x, y, self.phys_value_marker_radius, self.color);
         } else {
-            draw_circle_lines(x + pt_x, y, radius, thickness, self.color);
+            draw_circle_lines(x + pt_x, y, self.phys_value_marker_radius, self.phys_line_thickness, self.color);
         }
     }
 }

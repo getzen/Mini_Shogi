@@ -20,7 +20,11 @@ pub enum ButtonMode {
 }
 
 pub struct Button {
-    pub position: (f32, f32), // top-left corner
+    /// Position in physical pixels of the top-left corner.
+    /// Use set_logi_position for logical pixel positioning.
+    pub phys_position: (f32, f32),
+    /// Rotation in radians clockwise
+    pub rotation: f32,
 
     pub texture: Texture2D,
     pub disabled_texture: Option<Texture2D>,
@@ -30,7 +34,6 @@ pub struct Button {
     pub disabled_color: Option<Color>,
     pub selected_color: Option<Color>,
 
-    pub draw_params: DrawTextureParams,
     pub z_order: usize, // default 0
     pub mode: ButtonMode,
 
@@ -42,11 +45,18 @@ pub struct Button {
     pub id: usize,
     pub group_id: usize, // for radio-style groups
     pub tx: Option<Sender<WidgetMessage>>,
+    
+    // Private
+    draw_params: DrawTextureParams,
+
 }
 
+/// Creates a new Button with the given logical position, texture, mode, and id.
+/// The texture will be automatically scaled, if needed, for the dpi scale.
+/// In view.rs, see IMAGE_ASSETS_SCALE.
 impl Button {
     pub fn new(
-        position: (f32, f32), 
+        logi_position: (f32, f32), 
         texture: Texture2D, 
         mode: ButtonMode,
         id: usize) -> Self {
@@ -58,7 +68,9 @@ impl Button {
         params.dest_size = Some(Vec2::new(size_x, size_y));
 
         Self {
-            position, texture, mode, id,
+            phys_position: View::phys_pos(logi_position),
+            rotation: 0.,
+            texture, mode, id,
             disabled_texture: None,
             selected_texture: None,
             color: WHITE,
@@ -75,47 +87,51 @@ impl Button {
         }
     }
 
-    // #[allow(dead_code)]
-    // pub fn set_scale(&mut self, scale: f32) {
-    //     let dest_size = Vec2::new(
-    //         self.texture.width() * scale, 
-    //         self.texture.height() * scale);
-    //     self.draw_params.dest_size = Some(dest_size);
-    // }
+    #[allow(dead_code)]
+    /// Get the logical position of the sprite.
+    pub fn get_logi_position(&self) -> (f32, f32) {
+        View::logi_pos(self.phys_position)
+    }
 
     #[allow(dead_code)]
-    /// Test whether the given point lies in the texture rectangle, considering rotation.
-    pub fn contains(&self, mut point: (f32, f32)) -> bool {
-        // Convert point to logical units.
-        point = View::logi_pos(point);
+    /// Set the logical position of the sprite.
+    pub fn set_logi_position(&mut self, logi_position: (f32, f32)) {
+        self.phys_position = View::phys_pos(logi_position);
+    }
 
-        let (w, h) = self.logical_size();
+    #[allow(dead_code)]
+    /// Test whether the logical position lies in texture rectange, considering rotation.
+    pub fn contains_logi_position(&self, logi_pos: (f32, f32)) -> bool {
+        self.contains_phys_position(View::phys_pos(logi_pos))
+    }
 
+    #[allow(dead_code)]
+    /// Test whether the physical point lies in the texture rectangle, considering rotation.
+    /// Note: Macroquad's mouse_position() gives the physical location of the mouse.
+    pub fn contains_phys_position(&self, phys_position: (f32, f32)) -> bool {
+        //let (w, h) = self.logical_size();
+        let size = self.draw_params.dest_size.unwrap();
         // Get the net test point relative to the sprite's position.
-        let net_x = point.0 - self.position.0 - w / 2.0;
-        let net_y = point.1 - self.position.1 - h / 2.0;
+        let net_x = phys_position.0 - self.phys_position.0 - size.x / 2.0;
+        let net_y = phys_position.1 - self.phys_position.1 - size.y / 2.0;
         // Rotate the point clockwise (the same direction as Macroquad's rotation).
         let theta = self.draw_params.rotation;
         let rot_x = net_x * f32::cos(theta) + net_y * f32::sin(theta);
         let rot_y = -net_x * f32::sin(theta) + net_y * f32::cos(theta);
         // See if the rotated point is in the unrotated sprite rectangle.
-        f32::abs(rot_x) < w / 2.0 && f32::abs(rot_y) < h / 2.0
+        f32::abs(rot_x) < size.x / 2.0 && f32::abs(rot_y) < size.y / 2.0
     }
 
-     /// Returns the size of button in logical units.
-     fn logical_size(&self) -> (f32, f32) {
-        let mut width = self.texture.width() / View::dpi_scale();
-        let mut height = self.texture.height() / View::dpi_scale();
-        if let Some(dest_size) = self.draw_params.dest_size {
-            width = dest_size.x / View::dpi_scale();
-            height = dest_size.y / View::dpi_scale();
-        }
-        (width, height)
+    #[allow(dead_code)]
+    /// Returns the size of button in logical units.
+    fn logical_size(&self) -> (f32, f32) {
+        let size = self.draw_params.dest_size.unwrap();
+        (size.x / View::dpi_scale(), size.y / View::dpi_scale())
     }
 
     pub fn process_events(&mut self) {
         if !self.is_visible || !self.is_enabled { return; }
-        self.is_mouse_over = self.contains(mouse_position());
+        self.is_mouse_over = self.contains_phys_position(mouse_position());
         let button_pressed = is_mouse_button_down(MouseButton::Left);
         // See if button was released *this frame*.
         let button_released = is_mouse_button_released(MouseButton::Left);
@@ -175,7 +191,7 @@ impl Button {
             }
         }
         // Convert logical position to physical pixel position.
-        let (x, y) = View::phys_pos(self.position);
+        let (x, y) = self.phys_position;
         draw_texture_ex(draw_texture, x, y, draw_color, self.draw_params.clone());
     }
 }
