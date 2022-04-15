@@ -1,5 +1,5 @@
 // View
-// Utility methods related to high-resolution displays.
+// Utility methods related to high-resolution image display.
 
 use macroquad::prelude::get_internal_gl;
 
@@ -27,14 +27,14 @@ impl View {
 
     /// Returns the physical pixels position, considering the dpi scale,
     /// given the logical positions. Use to place sprites and other elements.
-    pub fn phys_pos(logical_position: (f32, f32)) -> (f32, f32) {
-        (logical_position.0 * View::dpi_scale(), logical_position.1 * View::dpi_scale())
+    pub fn phys_pos(logi_position: (f32, f32)) -> (f32, f32) {
+        (logi_position.0 * View::dpi_scale(), logi_position.1 * View::dpi_scale())
     }
 
     /// Returns the logical position, considering the dpi scale, given the 
     /// physical pixel position. Use to scale mouse coordinates, for instance.
-    pub fn logi_pos(physical_position: (f32, f32)) -> (f32, f32) {
-        (physical_position.0 / View::dpi_scale(), physical_position.1 / View::dpi_scale())
+    pub fn logi_pos(phys_position: (f32, f32)) -> (f32, f32) {
+        (phys_position.0 / View::dpi_scale(), phys_position.1 / View::dpi_scale())
     }
 }
 

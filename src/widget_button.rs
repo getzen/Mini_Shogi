@@ -90,9 +90,6 @@ impl Button {
         point = View::logi_pos(point);
 
         let (w, h) = self.logical_size();
-        //let w = self.texture.width() / 2.0;
-        //let h = self.texture.height() / 2.0;
-
 
         // Get the net test point relative to the sprite's position.
         let net_x = point.0 - self.position.0 - w / 2.0;

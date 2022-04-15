@@ -29,7 +29,6 @@ const RESERVE_BOX_OFFSET: f32 = 20.;
 const RESERVE_PIECE_OFFSET: f32 = 12.;
 const TEXT_STATUS_CENTER: (f32, f32) = (400., 60.0);
 const AI_PROGRESS_CORNER: (f32, f32) = (20., 770.);
-const PIECE_SIZE: (f32, f32) = (70., 75.);
 const MOVE_DURATION: f32 = 0.25;
 
 pub enum ViewGameMessage {
@@ -92,7 +91,6 @@ impl ViewGame {
                 let index = Game::column_row_to_index(c, r);
                 let position = self.center_position_for(index);
                 let mut square = Sprite::new(position, texture);
-                //square.set_scale(0.5);
                 square.alt_color = Some(LIGHTGRAY);
                 self.squares.insert(index, square);
             }
@@ -101,10 +99,8 @@ impl ViewGame {
         // Promotion lines
         texture = AssetLoader::get_texture("line");
         let line_top = Sprite::new(PROMO_LINE_TOP, texture);
-        //line_top.set_scale(0.5);
         self.promotion_lines.push(line_top);
         let line_bottom = Sprite::new(PROMO_LINE_BOTTOM, texture);
-        //line_bottom.set_scale(0.5);
         self.promotion_lines.push(line_bottom);
 
         // Reserves
@@ -114,13 +110,11 @@ impl ViewGame {
             let mut pos_x = RESERVE_0_CENTER.0;
             let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET); 
             let mut reserve = Sprite::new((pos_x, pos_y), texture);
-            //reserve.set_scale(0.5);
             self.reserve_boxes[0].insert(i, reserve);
             // Reserve, player 1
             pos_x = RESERVE_1_CENTER.0;
             pos_y = RESERVE_1_CENTER.1 + i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET);
             reserve = Sprite::new((pos_x, pos_y), texture);
-            //reserve.set_scale(0.5);
             self.reserve_boxes[1].insert(i, reserve);
         }
     }
@@ -144,13 +138,11 @@ impl ViewGame {
         let texture = self.texture_for(piece.kind);
         let position = self.center_position_for(piece.location_index);
         let mut sprite = Sprite::new(position, texture);
-        sprite.size = PIECE_SIZE;
         if piece.player == 1 {
             sprite.rotation = std::f32::consts::PI;
         }
         sprite.alt_color = Some(LIGHTGRAY);
         sprite.id = Some(piece.id);
-        //sprite.set_scale(0.5);
         self.pieces.insert(piece.id, sprite);
     }
 
@@ -173,7 +165,7 @@ impl ViewGame {
     pub fn move_piece_on_grid(&mut self, id: usize, to_index: usize) {
         let to_position = self.center_position_for(to_index);
         if let Some(piece) = self.piece_for_id(id) {
-            if to_position != piece.position {
+            if to_position != piece.get_logi_position() {
                 piece.animate_move(to_position, Duration::from_secs_f32(MOVE_DURATION));
                 play_sound_once(self.piece_move);
             }
@@ -181,7 +173,7 @@ impl ViewGame {
     }
 
     fn move_piece_to_reserve(&mut self, player: usize, id: usize, reserve_index: usize, count_index: usize) {
-        let reserve_pos = self.reserve_boxes[player].get(&reserve_index).unwrap().position;
+        let reserve_pos = self.reserve_boxes[player].get(&reserve_index).unwrap().get_logi_position();
         if let Some(piece) = self.piece_for_id(id) {
                 let mut to_position = reserve_pos;
                 if player == 0 {
@@ -194,7 +186,7 @@ impl ViewGame {
                     theta = std::f32::consts::PI
                 }
                 piece.rotation = theta;
-                if to_position != piece.position {
+                if to_position != piece.get_logi_position() {
                     piece.animate_move(to_position, Duration::from_secs_f32(MOVE_DURATION));
                     play_sound_once(self.piece_capture);
                 }
@@ -273,8 +265,7 @@ impl ViewGame {
 
         // Detect piece hits first.
         for piece in &self.pieces {
-        //for (id, piece) in &self.pieces {
-            if left_button && piece.contains(mouse_pos) {
+            if left_button && piece.contains_phys_pos(mouse_pos) {
                 self.tx.send(ViewGameMessage::PieceSelected(piece.id.unwrap())).expect("ViewGame message send error.");
                 clicked_handled = true;
             }
@@ -283,7 +274,7 @@ impl ViewGame {
         if !clicked_handled {
             // Squares
             for (index, square) in &self.squares {
-                if left_button && square.contains(mouse_pos) {
+                if left_button && square.contains_phys_pos(mouse_pos) {
                     self.tx.send(ViewGameMessage::SquareSelected(*index)).expect("ViewGame message send error.");
                     clicked_handled = true;
                 }
@@ -294,7 +285,7 @@ impl ViewGame {
             // Reserves
             for i in 0..2 {
                 for (_index, reserve) in &self.reserve_boxes[i] {
-                    if left_button && reserve.contains(mouse_pos) {
+                    if left_button && reserve.contains_phys_pos(mouse_pos) {
                         self.tx.send(ViewGameMessage::ReserveSelected(i)).expect("ViewGame message send error.");
                     }
                 }
@@ -372,7 +363,6 @@ impl ViewGame {
             self.unselect_piece();
         }
         if let Some(piece) = self.piece_for_id(id) {
-            //piece.highlighted = true;
             piece.use_alt_color = true;
             self.selected_piece = Some(id);
         }
@@ -381,7 +371,6 @@ impl ViewGame {
     pub fn unselect_piece(&mut self) {
         if let Some(id) = self.selected_piece {
             if let Some(piece) = self.piece_for_id(id) {
-                //piece.highlighted = false;
                 piece.use_alt_color = false;
             }
             self.selected_piece = None;
@@ -390,7 +379,6 @@ impl ViewGame {
 
     pub fn set_move_indicies(&mut self, indicies:Vec<usize>) {
         for (index, square) in &mut self.squares {
-            //square.highlighted = indicies.contains(index);
             square.use_alt_color = indicies.contains(index);
         }
         self.move_indices = indicies;
@@ -403,7 +391,6 @@ impl ViewGame {
     /// Does what is says on the tin.
     pub fn unhighlight_all_squares(&mut self) {
         for square in &mut self.squares.values_mut() {
-            //square.highlighted = false;
             square.use_alt_color = false;
         }
     }

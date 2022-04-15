@@ -12,13 +12,12 @@ use crate::asset_loader::AssetLoader;
 
 use crate::controller::Player;
 use crate::controller::PlayerKind::*;
-
 use crate::text::Text;
+use crate::View;
 use crate::widget_button::{Button, ButtonMode};
 use crate::widget_message::WidgetMessage;
 use crate::widget_slider::*;
 
-const TITLE_CORNER: (f32, f32) = (0., 0.);
 const START_CORNER: (f32, f32) = (680., 745.);
 const START_ID: usize = 0;
 const EXIT_CORNER: (f32, f32) = (20., 745.);
@@ -296,7 +295,6 @@ impl ViewIntro {
                         if self.player_0.kind == AIMonteCarlo {
                             self.player_0.search_rounds = val as usize;
                         }
-                        //self.set_player_controls(0);
                     }
                     if id == self.slider_1.id {
                         if self.player_1.kind == AIMinimax {
@@ -305,7 +303,6 @@ impl ViewIntro {
                         if self.player_1.kind == AIMonteCarlo {
                             self.player_1.search_rounds = val as usize;
                         }
-                        //self.set_player_controls(1);
                     }
                 },
             }
@@ -316,11 +313,12 @@ impl ViewIntro {
         // Background
         clear_background(Color::from_rgba(222, 222, 193, 255));
         
-        draw_texture(self.background_tex, TITLE_CORNER.0, TITLE_CORNER.1, WHITE);
-
-        // let mut params = DrawTextureParams::default();
-        // params.dest_size = Some(Vec2::new(800., 800.));
-        // draw_texture_ex(self.background_tex, TITLE_CORNER.0, TITLE_CORNER.1, WHITE, params);
+        // Draw background. Could use a Sprite, but keeping this 
+        let mut params = DrawTextureParams::default();
+        let size_x = self.background_tex.width() * View::adj_scale();
+        let size_y = self.background_tex.height() * View::adj_scale();
+        params.dest_size = Some(Vec2::new(size_x, size_y));
+        draw_texture_ex(self.background_tex, 0., 0., WHITE, params);
 
         // Widgets
         for button in self.buttons.values_mut() {

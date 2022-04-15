@@ -8,21 +8,12 @@ use std::time::Duration;
 
 use macroquad::prelude::*;
 
-use crate::View;
 use crate::lerp::Lerp;
 
-pub struct Sprite {
-    /// Position in physical pixels.
-    /// Use set_logi_position for logical pixel positioning.
-    pub phys_position: (f32, f32),
-    /// Rotation in radians clockwise
-    pub rotation: f32,
-
-    /// The displayed size of the texture in physical pixels. The initial size is automatically
-    /// scaled by the window dpi scale.
-    /// Use set_logi_size for logical pixel sizing.
+pub struct Sprite1 {
+    pub position: (f32, f32),
+    pub rotation: f32, // radians clockwise
     pub size: (f32, f32),
-
     //pub pivot: Option<(f32, f32)>, // Implementing this would require changes to 'contains' logic.
 
     pub texture: Texture2D,
@@ -38,12 +29,11 @@ pub struct Sprite {
     pub id: Option<usize>,
 
     // Private
-    params: DrawTextureParams,
     position_lerp: Option<Lerp>, // created automatically for animation
     // rotation_lerp, fade_lerp...
 }
 
-impl Sprite {
+impl Sprite1 {
     #[allow(dead_code)]
     // Use AssetLoader instead.
     async fn load_texture(name: &str) -> Texture2D {
@@ -52,14 +42,11 @@ impl Sprite {
         load_texture(&path).await.unwrap()
     }
 
-    /// Creates a new Sprite with the given logical position and texture. The texture will
-    /// be automatically scaled, if needed, for the dpi scale. In view.rs, see
-    /// IMAGE_ASSETS_SCALE.
-    pub fn new(logi_position: (f32, f32), texture: Texture2D) -> Self {
+    pub fn new(position: (f32, f32), texture: Texture2D) -> Self {
         Self {
-            phys_position: View::phys_pos(logi_position),
+            position,
             rotation: 0.0,
-            size: (texture.width() * View::adj_scale(), texture.height() * View::adj_scale()),
+            size: (texture.width(), texture.height()),
 
             /// See note above.
             /// Rotate around this point.
@@ -79,56 +66,22 @@ impl Sprite {
             z_order: 0,
             is_visible: true,
             id: None,
-            params: DrawTextureParams::default(),
             position_lerp: None,
         }
     }
 
     #[allow(dead_code)]
-    /// Get the logical position of the sprite.
-    pub fn get_logi_position(&self) -> (f32, f32) {
-        View::logi_pos(self.phys_position)
-    }
-
-    #[allow(dead_code)]
-    /// Set the logical position of the sprite.
-    pub fn set_logi_position(&mut self, logi_position: (f32, f32)) {
-        self.phys_position = View::phys_pos(logi_position);
-    }
-
-    #[allow(dead_code)]
-    /// Get the size of the diplayed texture in logical pixels.
-    pub fn get_logi_size(&self) -> (f32, f32) {
-        (self.size.0 / View::dpi_scale(), self.size.1 / View::dpi_scale())
-    }
-
-    #[allow(dead_code)]
-    /// Set the size of the displayed texture using logical pixel size.
-    pub fn set_logi_size(&mut self, logi_size: (f32, f32)) {
-        self.size.0 = logi_size.0 * View::adj_scale();
-        self.size.1 = logi_size.1 * View::adj_scale();
-    }
-
-    #[allow(dead_code)]
-    /// Set the texture size using the given scale. Considers dpi scale.
     pub fn scale_by(&mut self, scale: (f32, f32)) {
-        self.size.0 = self.texture.width() * View::adj_scale() * scale.0;
-        self.size.1 = self.texture.height() * View::adj_scale() * scale.1;
+        self.size.0 = self.texture.width() * scale.0;
+        self.size.1 = self.texture.height() * scale.1;
     }
 
     #[allow(dead_code)]
-    /// Test whether the logical position lies in texture rectange, considering rotation.
-    pub fn contains_logi_pos(&self, logi_pos: (f32, f32)) -> bool {
-        self.contains_phys_pos(View::phys_pos(logi_pos))
-    }
-
-    #[allow(dead_code)]
-    /// Test whether the physical point lies in the texture rectangle, considering rotation.
-    /// Note: Macroquad's mouse_position() gives the physical location of the mouse.
-    pub fn contains_phys_pos(&self, phys_pos: (f32, f32)) -> bool {
+    /// Test whether the given point lies in the texture rectangle, considering rotation.
+    pub fn contains(&self, point: (f32, f32)) -> bool {
         // Get the net test point relative to the sprite's position.
-        let net_x = phys_pos.0 - self.phys_position.0;
-        let net_y = phys_pos.1 - self.phys_position.1;
+        let net_x = point.0 - self.position.0;
+        let net_y = point.1 - self.position.1;
         // Rotate the point clockwise (the same direction as Macroquad's rotation). This is a
         // little different than the standard rotation formulas.
         let theta = self.rotation;
@@ -139,10 +92,10 @@ impl Sprite {
         f32::abs(rot_x) < w / 2.0 && f32::abs(rot_y) < h / 2.0
     }
 
-    /// Returns the position at which the texture should be drawn, effectively centering
-    /// at self.position.
+    /// Returns the position at which the texture should be drawn,
+    /// effectively centering at self.position.
     fn centered_position(&self) -> (f32, f32) {
-        let (x, y) = self.phys_position;
+        let (x, y) = self.position;
         let (w, h) = self.size;
         (x - w / 2.0, y - h / 2.0)
     }
@@ -153,7 +106,7 @@ impl Sprite {
         // Lerp animation
         if let Some(lerp) = &mut self.position_lerp {
             let results = lerp.update(time_delta);
-            self.phys_position = (results.0, results.1);
+            self.position = (results.0, results.1);
             if !results.2 {
                 self.position_lerp = None;
             }
@@ -164,11 +117,9 @@ impl Sprite {
 
     /// Use the Lerp struct to move the sprite.
     pub fn animate_move(&mut self, to: (f32, f32), duration: Duration) {
-        let end = View::phys_pos(to);
-        self.position_lerp = Some(Lerp::new(self.phys_position, end, duration));
+        self.position_lerp = Some(Lerp::new(self.position, to, duration));
     }
 
-    /// Draw the sprite.
     pub fn draw(&mut self) {
         if !self.is_visible { return; }
 
@@ -179,18 +130,18 @@ impl Sprite {
             draw_color = self.alt_color.unwrap();
         }
 
-        self.params.dest_size = Some(Vec2::new(self.size.0, self.size.1));
-        self.params.rotation = self.rotation;
-
+        let mut params = DrawTextureParams::default();
+        params.dest_size = Some(Vec2::new(self.size.0, self.size.1));
+        params.rotation = self.rotation;
         // if let Some(piv) = self.pivot {
         //     params.pivot = Some(Vec2::new(piv.0, piv.1));
         // }
         // params source, flip_x, etc. =
 
         if !self.use_alt_texture {
-            draw_texture_ex(self.texture, x, y, draw_color, self.params.clone());
+            draw_texture_ex(self.texture, x, y, draw_color, params);
         } else {
-            draw_texture_ex(self.alt_texture.unwrap(), x, y, draw_color, self.params.clone());
+            draw_texture_ex(self.alt_texture.unwrap(), x, y, draw_color, params);
         }
     }
 }

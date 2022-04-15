@@ -9,6 +9,7 @@
 
 use macroquad::prelude::*;
 
+use crate::View;
 use crate::asset_loader::AssetLoader;
 
 pub struct Text {
@@ -25,19 +26,19 @@ impl Text {
         text: String, 
         font_size: u16, 
         font_name: Option<&str>) -> Self {
-        
-        let mut slf =
+
+        let mut params = TextParams::default();
+        params.font_size = (font_size as f32 * View::dpi_scale()) as u16;
+        if let Some(name) = font_name {
+            params.font = AssetLoader::get_font(name);
+        }
+
         Self {
             position, text,
-            text_params: TextParams { font_size, ..Default::default() },
+            text_params: params,
             centered: false,
             is_visible: true,
-        };
-        
-        if let Some(name) = font_name {
-            slf.text_params.font = AssetLoader::get_font(name);
         }
-        slf
     }
 
     #[allow(dead_code)]
@@ -56,7 +57,8 @@ impl Text {
 
     /// Returns the position at which the text should be drawn, considering centering.
     fn draw_position(&self) -> (f32, f32) {
-        let (x, y) = self.position;
+        let (x, y) = View::phys_pos(self.position);
+        //let (x, y) = self.position;
         let (w, h) = self.draw_size();
         if self.centered {
             (x - w / 2.0, y - h / 2.0)
