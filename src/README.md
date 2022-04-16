@@ -23,9 +23,9 @@ There are two AI opponents:
  
 - Add forward/back move functionality.
 
-- Add rule about no checkmate by parachuting pawn? Doesn't seem particularly crucial.
+- Add rule about no checkmate by parachuting pawn? Doesn't seem particularly crucial though.
 
-- For reserve pieces, keep AI from evaluating identical reserve pieces.
+- Prevent AI from evaluating identical reserve pieces.
 
 - Revisit MonteCarloTree implementation.
 
