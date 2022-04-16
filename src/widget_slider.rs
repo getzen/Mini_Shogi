@@ -1,12 +1,20 @@
 // Slider
 
-use std::sync::mpsc::Sender;
+//use std::sync::mpsc::Sender;
 
 use macroquad::prelude::*;
 
 use crate::View;
-use crate::widget_message::WidgetMessage;
-use crate::widget_message::WidgetMessage::*;
+//use crate::widget_message::WidgetMessage;
+//use crate::widget_message::WidgetMessage::*;
+
+#[derive(Debug)]
+pub enum SliderEvent {
+    /// Mouse is over slider. (id)
+    Hovering(usize),
+    /// Slider value changed. (id, value)
+    ValueChanged(usize, f32), // i
+}
 
 pub struct Slider {
     /// Position in physical pixels of the left-center.
@@ -39,8 +47,8 @@ pub struct Slider {
 
     pub is_visible: bool,
     pub id: usize,
-    pub tx: Option<Sender<WidgetMessage>>,
-    
+    //pub tx: Option<Sender<WidgetMessage>>,
+
     // Private
     is_tracking: bool, // the mouse position
 }
@@ -71,7 +79,7 @@ impl Slider {
 
             is_visible: true,
             id,
-            tx: None,
+            //tx: None,
             is_tracking: false,
         }
     }
@@ -98,7 +106,9 @@ impl Slider {
         val.clamp(self.min_value, self.max_value)
     }
 
-    fn snap_to_nearest_value(&mut self,) {
+    /// Returns the value the slider would snap to if the mouse is/were released.
+    /// Useful for live value tracking to update labels, etc.
+    pub fn nearest_snap_value(&mut self) -> f32 {
         let mut nearest_distance = f32::MAX;
         let mut nearest_value = self.min_value;
         let mut test_value = self.min_value;
@@ -111,7 +121,11 @@ impl Slider {
             }
             test_value += (self.max_value - self.min_value) / (self.tick_divisions + 1) as f32;
         }
-        self.value = nearest_value;
+        nearest_value
+    }
+
+    pub fn snap_to_nearest_value(&mut self) {
+        self.value = self.nearest_snap_value();
     }
 
     /// Test whether the physical point lies in the slider's area.
@@ -122,30 +136,39 @@ impl Slider {
         && phys_position.1 <= self.phys_position.1 + self.phys_value_marker_radius
     }
 
-    pub fn process_events(&mut self) {
+    pub fn process_events(&mut self) -> Option<SliderEvent> {
+        let mut event = None;
+        if !self.is_visible { return event; };
+        
         let mouse_pos = mouse_position();
         let old_value = self.value;
-        let mut send_message = false;
+        let mut value_changed = false;
+
+        let hovering = self.contains_phys_position(mouse_pos);
+        if hovering {
+            event = Some(SliderEvent::Hovering(self.id));
+        }
+
         if is_mouse_button_down(MouseButton::Left) {
-            if !self.is_tracking && self.contains_phys_position(mouse_pos) {
+            if !self.is_tracking && hovering {
                 self.is_tracking = true;
             }
             if self.is_tracking {
                 self.value = self.mouse_position_to_value(mouse_pos);
-                send_message = self.value != old_value && !self.snap_to_tick;
+                value_changed = self.value != old_value && !self.snap_to_tick;
             }
         } else if self.is_tracking {
             self.is_tracking = false;
             if self.snap_to_tick {
                 self.snap_to_nearest_value();
-                send_message = self.value != old_value;
+                value_changed = self.value != old_value;
             }
         }
-        if send_message {
-            if let Some(sender) = &self.tx {
-                sender.send(ValueChanged(self.id, self.value)).expect("Button message send error.");
-            }
+
+        if value_changed {
+            event = Some(SliderEvent::ValueChanged(self.id, self.value));
         }
+        event
     }
 
     pub fn draw(&self) {

@@ -135,11 +135,11 @@ impl ViewIntro {
             button.tx = Some(self.widget_tx.clone());
         }
 
-        self.slider_0.tx = Some(self.widget_tx.clone());
+        //self.slider_0.tx = Some(self.widget_tx.clone());
         self.slider_0_text.set_color(BLACK);
         self.slider_0_text.centered = true;
 
-        self.slider_1.tx = Some(self.widget_tx.clone());
+        //self.slider_1.tx = Some(self.widget_tx.clone());
         self.slider_1_text.set_color(BLACK);
         self.slider_1_text.centered = true;
 
@@ -235,8 +235,34 @@ impl ViewIntro {
         for button in self.buttons.values_mut() {
             button.process_events();
         }
-        self.slider_0.process_events();
-        self.slider_1.process_events();
+        // Slider 0
+        if let Some(event) = self.slider_0.process_events() {
+            match event {
+                SliderEvent::Hovering(_id) => {},
+                SliderEvent::ValueChanged(_id, val) => {
+                    if self.player_0.kind == AIMinimax {
+                        self.player_0.search_depth = val as usize;
+                    }
+                    if self.player_0.kind == AIMonteCarlo {
+                        self.player_0.search_rounds = val as usize;
+                    }
+                },
+            }
+        }
+        // Slider 1
+        if let Some(event) = self.slider_1.process_events() {
+            match event {
+                SliderEvent::Hovering(_id) => {},
+                SliderEvent::ValueChanged(_id, val) => {
+                    if self.player_1.kind == AIMinimax {
+                        self.player_1.search_depth = val as usize;
+                    }
+                    if self.player_1.kind == AIMonteCarlo {
+                        self.player_1.search_rounds = val as usize;
+                    }
+                },
+            }
+        }
     }
 
     pub fn check_messages(&mut self) {
@@ -287,24 +313,25 @@ impl ViewIntro {
                         _ => {},
                     }
                 }
-                WidgetMessage::ValueChanged(id, val) => {
-                    if id == self.slider_0.id {
-                        if self.player_0.kind == AIMinimax {
-                            self.player_0.search_depth = val as usize;
-                        }
-                        if self.player_0.kind == AIMonteCarlo {
-                            self.player_0.search_rounds = val as usize;
-                        }
-                    }
-                    if id == self.slider_1.id {
-                        if self.player_1.kind == AIMinimax {
-                            self.player_1.search_depth = val as usize;
-                        }
-                        if self.player_1.kind == AIMonteCarlo {
-                            self.player_1.search_rounds = val as usize;
-                        }
-                    }
-                },
+               
+                // WidgetMessage::ValueChanged(id, val) => {
+                //     if id == self.slider_0.id {
+                //         if self.player_0.kind == AIMinimax {
+                //             self.player_0.search_depth = val as usize;
+                //         }
+                //         if self.player_0.kind == AIMonteCarlo {
+                //             self.player_0.search_rounds = val as usize;
+                //         }
+                //     }
+                //     if id == self.slider_1.id {
+                //         if self.player_1.kind == AIMinimax {
+                //             self.player_1.search_depth = val as usize;
+                //         }
+                //         if self.player_1.kind == AIMonteCarlo {
+                //             self.player_1.search_rounds = val as usize;
+                //         }
+                //     }
+                // },
             }
         }
     }
@@ -329,8 +356,8 @@ impl ViewIntro {
         // Use live values here so user sees the values change when dragging.
         self.slider_0_text.text = match self.player_0.kind {
             Human => "".to_string(),
-            AIMinimax => format!("{} move look-ahead", (self.slider_0.value + 0.5) as usize),
-            AIMonteCarlo => format!("{} play outs", (self.slider_0.value) as usize),
+            AIMinimax => format!("{} move look-ahead", self.slider_0.nearest_snap_value()),
+            AIMonteCarlo => format!("{} play outs", self.slider_0.value as usize),
             _ => "".to_string(),
         };
         self.slider_0_text.draw();
@@ -339,8 +366,8 @@ impl ViewIntro {
         // Use live values here so user sees the values change when dragging.
         self.slider_1_text.text = match self.player_1.kind {
             Human => "".to_string(),
-            AIMinimax => format!("{} move look-ahead", (self.slider_1.value + 0.5) as usize),
-            AIMonteCarlo => format!("{} play outs", (self.slider_1.value) as usize),
+            AIMinimax => format!("{} move look-ahead", self.slider_1.nearest_snap_value() as usize),
+            AIMonteCarlo => format!("{} play outs", self.slider_1.value as usize),
             _ => "".to_string(),
         };
         self.slider_1_text.draw();

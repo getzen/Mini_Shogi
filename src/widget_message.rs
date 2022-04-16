@@ -6,5 +6,5 @@ pub enum WidgetMessage {
     Pushed(usize),
     Toggled(usize),
     Selected(usize),
-    ValueChanged(usize, f32),
+    //ValueChanged(usize, f32),
 }
