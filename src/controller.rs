@@ -100,12 +100,11 @@ impl Controller {
             // Event and state management
             match self.state {
                 Intro => {
-                    self.view_intro.handle_events();
-                    self.view_intro.check_messages();
+                    self.view_intro.process_events();
                     self.check_messages().await;
                 },
                 HumanTurn | AIThinking | WaitingOnAnimation | Player0Won | Player1Won | Draw => {
-                    self.view_game.handle_events();
+                    self.view_game.process_events();
                     self.check_messages().await;
                 },
                 AITurnBegin => {

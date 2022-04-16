@@ -251,7 +251,7 @@ impl ViewGame {
         }
     }
 
-    pub fn handle_events(&mut self) {
+    pub fn process_events(&mut self) {
         // Key presses.
         if is_key_down(KeyCode::Escape) {
             self.tx.send(ViewGameMessage::ShouldExit).expect("ViewGame message send error.");

@@ -19,7 +19,6 @@ mod view;
 mod view_game;
 mod view_intro;
 mod widget_button;
-mod widget_message;
 mod widget_slider;
 
 use crate::controller::Controller;

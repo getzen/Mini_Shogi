@@ -2,8 +2,6 @@
 // The intro/title view.
 
 use std::collections::HashMap;
-use std::sync::mpsc;
-use std::sync::mpsc::Receiver;
 use std::sync::mpsc::Sender;
 
 use macroquad::prelude::*;
@@ -14,8 +12,7 @@ use crate::controller::Player;
 use crate::controller::PlayerKind::*;
 use crate::text::Text;
 use crate::View;
-use crate::widget_button::{Button, ButtonMode};
-use crate::widget_message::WidgetMessage;
+use crate::widget_button::*;
 use crate::widget_slider::*;
 
 const START_CORNER: (f32, f32) = (680., 745.);
@@ -47,11 +44,8 @@ pub enum ViewIntroMessage {
 }
 
 pub struct ViewIntro {
-    // Sends messages to controller.
+    /// Sends messages to controller.
     tx: Sender<ViewIntroMessage>, 
-    // Receive messages from view's widgets.
-    widget_tx: Sender<WidgetMessage>, // copy given to widgets
-    widget_rx: Receiver<WidgetMessage>,
 
     background_tex: Texture2D,
     buttons: HashMap<usize, Button>,
@@ -65,11 +59,9 @@ pub struct ViewIntro {
 }
 
 impl ViewIntro {
-    pub async fn new(tx: Sender<ViewIntroMessage>) -> Self {
-        let (widget_tx, widget_rx) = mpsc::channel();
-        
+    pub async fn new(tx: Sender<ViewIntroMessage>) -> Self {        
         Self {
-            tx, widget_tx, widget_rx,
+            tx,
             background_tex: AssetLoader::get_texture("title"),
             buttons: HashMap::new(),
 
@@ -132,7 +124,6 @@ impl ViewIntro {
         for button in self.buttons.values_mut() {
             button.color = LIGHTGRAY;
             button.selected_color = Some(Color::from_rgba(246, 194, 81, 255));
-            button.tx = Some(self.widget_tx.clone());
         }
 
         //self.slider_0.tx = Some(self.widget_tx.clone());
@@ -226,16 +217,77 @@ impl ViewIntro {
         }
     }
 
-    pub fn handle_events(&mut self) {
+    pub fn process_events(&mut self) {
         // Key presses.
         if is_key_down(KeyCode::Escape) {
             self.tx.send(ViewIntroMessage::ShouldExit).expect("Intro message send error.");
         }
-        // Widgets. They may send messages.
+
+        // Track which player controls to update, if any.
+        let mut player = None;
+
+        // Buttons. They return Option<ButtonEvent>.
         for button in self.buttons.values_mut() {
-            button.process_events();
+            if let Some(event) = button.process_events() {
+                match event {
+                    ButtonEvent::Hovering(_id) => {},
+                    ButtonEvent::Pushed(id) => {
+                        // Start and Exit buttons
+                        match id {
+                            START_ID => {
+                                let players = vec![self.player_0, self.player_1];
+                                self.tx.send(ViewIntroMessage::ShouldStart(players)).expect("Intro message send error.");
+                            },
+                            EXIT_ID => {
+                                self.tx.send(ViewIntroMessage::ShouldExit).expect("Intro message send error.");
+                            }
+                            _ => {},
+                        }
+                    },
+                    ButtonEvent::Toggled(_id) => {},
+                    ButtonEvent::Selected(id) => {
+                        
+                        let kind = match id {
+                            HUMAN_0_ID => {
+                                player = Some(0);
+                                Human
+                            },
+                            MINIMAX_0_ID => {
+                                player = Some(0);
+                                AIMinimax
+                            },
+                            MONTE_0_ID => {
+                                player = Some(0);
+                                AIMonteCarlo
+                            },
+                            HUMAN_1_ID => {
+                                player = Some(1);
+                                Human
+                            },
+                            MINIMAX_1_ID => {
+                                player = Some(1);
+                                AIMinimax
+                            },
+                            MONTE_1_ID => {
+                                player = Some(1);
+                                AIMonteCarlo
+                            }
+                            _ => {panic!()},
+                        };
+                        if player.is_some() && player.unwrap() == 0 {
+                            self.player_0.kind = kind;
+                        } else if player.is_some() && player.unwrap() == 1 {
+                            self.player_1.kind = kind;
+                        }
+                    },
+                }
+            }
         }
-        // Slider 0
+        if let Some(player) = player {
+            self.set_player_controls(player);
+        }
+                
+        // Slider 0. Sliders return Option<SliderEvent>.
         if let Some(event) = self.slider_0.process_events() {
             match event {
                 SliderEvent::Hovering(_id) => {},
@@ -265,77 +317,6 @@ impl ViewIntro {
         }
     }
 
-    pub fn check_messages(&mut self) {
-        let received = self.widget_rx.try_recv();
-        if received.is_ok() {
-            match received.unwrap() {
-                WidgetMessage::Pushed(id) => {
-                    match id {
-                        START_ID => {
-                            let players = vec![self.player_0, self.player_1];
-                            self.tx.send(ViewIntroMessage::ShouldStart(players)).expect("Intro message send error.");
-                        },
-                        EXIT_ID => {
-                            self.tx.send(ViewIntroMessage::ShouldExit).expect("Intro message send error.");
-                        }
-                        _ => {},
-                    }
-                },
-                WidgetMessage::Toggled(id) => {
-                    println!("toggled id: {}", id);
-                }
-                WidgetMessage::Selected(id) => { // radio-style groupings
-                    match id {
-                        HUMAN_0_ID => {
-                            self.player_0.kind = Human;
-                            self.set_player_controls(0);
-                        },
-                        MINIMAX_0_ID => {
-                            self.player_0.kind = AIMinimax;
-                            self.set_player_controls(0);
-                        },
-                        MONTE_0_ID => {
-                            self.player_0.kind = AIMonteCarlo;
-                            self.set_player_controls(0);
-                        },
-                        HUMAN_1_ID => {
-                            self.player_1.kind = Human;
-                            self.set_player_controls(1);
-                        },
-                        MINIMAX_1_ID => {
-                            self.player_1.kind = AIMinimax;
-                            self.set_player_controls(1);
-                        },
-                        MONTE_1_ID => {
-                            self.player_1.kind = AIMonteCarlo;
-                            self.set_player_controls(1);
-                        }
-                        _ => {},
-                    }
-                }
-               
-                // WidgetMessage::ValueChanged(id, val) => {
-                //     if id == self.slider_0.id {
-                //         if self.player_0.kind == AIMinimax {
-                //             self.player_0.search_depth = val as usize;
-                //         }
-                //         if self.player_0.kind == AIMonteCarlo {
-                //             self.player_0.search_rounds = val as usize;
-                //         }
-                //     }
-                //     if id == self.slider_1.id {
-                //         if self.player_1.kind == AIMinimax {
-                //             self.player_1.search_depth = val as usize;
-                //         }
-                //         if self.player_1.kind == AIMonteCarlo {
-                //             self.player_1.search_rounds = val as usize;
-                //         }
-                //     }
-                // },
-            }
-        }
-    }
-
     pub fn draw(&mut self) {
         // Background
         clear_background(Color::from_rgba(222, 222, 193, 255));
@@ -357,6 +338,7 @@ impl ViewIntro {
         self.slider_0_text.text = match self.player_0.kind {
             Human => "".to_string(),
             AIMinimax => format!("{} move look-ahead", self.slider_0.nearest_snap_value()),
+            //AIMinimax => format!("{} move look-ahead", self.slider_0.value as usize),
             AIMonteCarlo => format!("{} play outs", self.slider_0.value as usize),
             _ => "".to_string(),
         };

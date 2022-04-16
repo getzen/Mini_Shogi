@@ -3,13 +3,9 @@
 // Also, the position refers to the top-left corner of the texture instead
 // of the center.
 
-use std::sync::mpsc::Sender;
-
 use macroquad::prelude::*;
 
 use crate::View;
-use crate::widget_message::WidgetMessage;
-use crate::widget_message::WidgetMessage::*;
 
 #[allow(dead_code)]
 #[derive(PartialEq)]
@@ -17,6 +13,18 @@ pub enum ButtonMode {
     Push,
     Toggle,
     Radio,
+}
+
+#[derive(Debug)]
+pub enum ButtonEvent {
+    /// Mouse is over button. (id)
+    Hovering(usize),
+    /// Normal push-button behavior.
+    Pushed(usize),
+    /// Toggle on or off.
+    Toggled(usize),
+    /// As with a radio button.
+    Selected(usize),
 }
 
 pub struct Button {
@@ -44,7 +52,6 @@ pub struct Button {
 
     pub id: usize,
     pub group_id: usize, // for radio-style groups
-    pub tx: Option<Sender<WidgetMessage>>,
     
     // Private
     draw_params: DrawTextureParams,
@@ -83,7 +90,6 @@ impl Button {
             is_mouse_over: false,
             is_selected: false,
             group_id: 0,
-            tx: None,
         }
     }
 
@@ -127,9 +133,14 @@ impl Button {
         (size.x / View::dpi_scale(), size.y / View::dpi_scale())
     }
 
-    pub fn process_events(&mut self) {
-        if !self.is_visible || !self.is_enabled { return; }
+    pub fn process_events(&mut self) -> Option<ButtonEvent> {
+        let mut event = None;
+        if !self.is_visible || !self.is_enabled { return event }
+
         self.is_mouse_over = self.contains_phys_position(mouse_position());
+        if self.is_mouse_over {
+            event = Some(ButtonEvent::Hovering(self.id));
+        }
         let button_pressed = is_mouse_button_down(MouseButton::Left);
         // See if button was released *this frame*.
         let button_released = is_mouse_button_released(MouseButton::Left);
@@ -138,31 +149,26 @@ impl Button {
             ButtonMode::Push => {
                 self.is_selected = self.is_mouse_over && button_pressed;
                 if self.is_mouse_over && button_released {
-                    if let Some(sender) = &self.tx {
-                        sender.send(Pushed(self.id)).expect("Button message send error.");
-                    }
+                    event = Some(ButtonEvent::Pushed(self.id));
                     self.is_selected = false;
                 }
             },
             ButtonMode::Toggle => {
                 if self.is_mouse_over && button_released {
                     self.is_selected = !self.is_selected;
-                    if let Some(sender) = &self.tx {
-                        sender.send(Toggled(self.id)).expect("Button message send error.");
-                    }
+                    event = Some(ButtonEvent::Toggled(self.id));
                 }
             },
             ButtonMode::Radio => {
                 if self.is_mouse_over && button_released {
                     if !self.is_selected {
-                        if let Some(sender) = &self.tx {
-                            sender.send(Selected(self.id)).expect("Button message send error.");
-                        }
+                        event = Some(ButtonEvent::Selected(self.id));
                     }
                     self.is_selected = true;
                 }
             },
         }
+        event
     }
 
     pub fn draw(&mut self) {
