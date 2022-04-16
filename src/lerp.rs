@@ -31,8 +31,8 @@ impl Lerp {
             x = self.start.0 + (self.end.0 - self.start.0) * percentage;
             y = self.start.1 + (self.end.1 - self.start.1) * percentage;
         } else { // ease out
-            x = self.start.0 + (self.end.0 - self.start.0) * f32::sin(3.14159 * 0.5 * percentage);
-            y = self.start.1 + (self.end.1 - self.start.1) * f32::sin(3.14159 * 0.5 * percentage);
+            x = self.start.0 + (self.end.0 - self.start.0) * f32::sin(std::f32::consts::PI * 0.5 * percentage);
+            y = self.start.1 + (self.end.1 - self.start.1) * f32::sin(std::f32::consts::PI * 0.5 * percentage);
         }
         (x, y, true)
     }

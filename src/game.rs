@@ -317,7 +317,7 @@ impl Game {
     }
 
     /// Simple verion. If opponent's piece is captured, it's a win.
-    fn is_win(&mut self, player: usize) -> bool {
+    fn is_win(&self, player: usize) -> bool {
         let king_id = self.king_id_(1 - player);
         if king_id.is_some() {return false;}
         true

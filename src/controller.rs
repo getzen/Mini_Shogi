@@ -118,15 +118,12 @@ impl Controller {
                 },
             }
             // Animation updates
-            match  self.state {
-                WaitingOnAnimation => {
-                    let time_delta = Duration::from_secs_f32(get_frame_time());
-                    let active = self.view_game.update(time_delta);
-                    if !active && self.state == WaitingOnAnimation {
-                        self.state = NextPlayer;
-                    }
-                },
-                _ => {},
+            if self.state == WaitingOnAnimation {
+                let time_delta = Duration::from_secs_f32(get_frame_time());
+                let active = self.view_game.update(time_delta);
+                if !active && self.state == WaitingOnAnimation {
+                    self.state = NextPlayer;
+                }
             }
             // Drawing
             match self.state {

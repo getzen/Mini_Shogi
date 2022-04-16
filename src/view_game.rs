@@ -284,7 +284,7 @@ impl ViewGame {
         if !clicked_handled {
             // Reserves
             for i in 0..2 {
-                for (_index, reserve) in &self.reserve_boxes[i] {
+                for reserve in self.reserve_boxes[i].values() {
                     if left_button && reserve.contains_phys_position(mouse_pos) {
                         self.tx.send(ViewGameMessage::ReserveSelected(i)).expect("ViewGame message send error.");
                     }
