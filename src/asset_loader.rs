@@ -63,7 +63,7 @@ impl AssetLoader {
 
     #[allow(dead_code)]
     /// Given the corner position, returns the center of the given texture.
-    pub fn corner_position(texture: &Texture2D, corner: (f32, f32)) -> (f32, f32) {
+    pub fn center_position(texture: &Texture2D, corner: (f32, f32)) -> (f32, f32) {
         (corner.0 + texture.width() / 2.0, corner.1 + texture.height() / 2.0)
     }
 
