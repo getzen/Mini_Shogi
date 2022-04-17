@@ -76,6 +76,10 @@ impl ViewIntro {
         button = Button::new((20., 745.), texture, ButtonMode::Push, EXIT_ID);
         self.buttons.insert(EXIT_ID, button);
 
+        texture = AssetLoader::get_texture("rules");
+        button = Button::new((350., 745.), texture, ButtonMode::Push, RULES_ID);
+        self.buttons.insert(RULES_ID, button);
+
         // Player 0
         texture = AssetLoader::get_texture("human");
         button = Button::new((295., 340.), texture, ButtonMode::Radio, HUMAN_0_ID);
@@ -114,11 +118,9 @@ impl ViewIntro {
             button.selected_color = Some(Color::from_rgba(246, 194, 81, 255));
         }
 
-        //self.slider_0.tx = Some(self.widget_tx.clone());
         self.slider_0_text.set_color(BLACK);
         self.slider_0_text.centered = true;
 
-        //self.slider_1.tx = Some(self.widget_tx.clone());
         self.slider_1_text.set_color(BLACK);
         self.slider_1_text.centered = true;
 
@@ -167,7 +169,6 @@ impl ViewIntro {
                 },
                 _ => {},
             }
-
         }
 
         if player_id == 1 {
@@ -228,6 +229,9 @@ impl ViewIntro {
                             },
                             EXIT_ID => {
                                 self.tx.send(ViewIntroMessage::ShouldExit).expect("Intro message send error.");
+                            }
+                            RULES_ID => {
+                                println!("rules");
                             }
                             _ => {},
                         }
