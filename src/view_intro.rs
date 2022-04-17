@@ -15,28 +15,16 @@ use crate::View;
 use crate::widget_button::*;
 use crate::widget_slider::*;
 
-const START_CORNER: (f32, f32) = (680., 745.);
+// Widget IDs
 const START_ID: usize = 0;
-const EXIT_CORNER: (f32, f32) = (20., 745.);
 const EXIT_ID: usize = 1;
-
-const HUMAN_0_CORNER: (f32, f32) = (295., 340.);
-const HUMAN_0_ID: usize = 2;
-const MINIMAX_0_CORNER: (f32, f32) = (395., 340.);
-const MINIMAX_0_ID: usize = 3;
-const MONTE_0_CORNER: (f32, f32) = (515., 340.);
-const MONTE_0_ID: usize = 4;
-const DIFFICULTY_SLIDER_0_CORNER: (f32, f32) = (295., 410.);
-const SLIDER_0_TEXT_CENTER: (f32, f32) = (445., 447.);
-
-const HUMAN_1_CORNER: (f32, f32) = (295., 535.);
-const HUMAN_1_ID: usize = 5;
-const MINIMAX_1_CORNER: (f32, f32) = (395., 535.);
-const MINIMAX_1_ID: usize = 6;
-const MONTE_1_CORNER: (f32, f32) = (515., 535.);
-const MONTE_1_ID: usize = 7;
-const DIFFICULTY_SLIDER_1_CORNER: (f32, f32) = (295., 600.);
-const SLIDER_1_TEXT_CENTER: (f32, f32) = (445., 637.);
+const RULES_ID: usize = 2;
+const HUMAN_0_ID: usize = 3;
+const MINIMAX_0_ID: usize = 4;
+const MONTE_0_ID: usize = 5;
+const HUMAN_1_ID: usize = 6;
+const MINIMAX_1_ID: usize = 7;
+const MONTE_1_ID: usize = 8;
 
 pub enum ViewIntroMessage {
     ShouldStart(Vec<Player>),
@@ -65,11 +53,11 @@ impl ViewIntro {
             background_tex: AssetLoader::get_texture("title"),
             buttons: HashMap::new(),
 
-            slider_0: Slider::new(DIFFICULTY_SLIDER_0_CORNER, 360., 1., 1., 1., 0),
-            slider_0_text: Text::new(SLIDER_0_TEXT_CENTER, "hello".to_string(), 18, Some("Menlo")).await,
+            slider_0: Slider::new((295., 410.), 360., 1., 1., 1., 0),
+            slider_0_text: Text::new((445., 447.), "hello".to_string(), 18, Some("Menlo")).await,
 
-            slider_1: Slider::new(DIFFICULTY_SLIDER_1_CORNER, 360., 1., 1., 1., 1),
-            slider_1_text: Text::new(SLIDER_1_TEXT_CENTER, "world".to_string(), 18, Some("Menlo")).await,
+            slider_1: Slider::new((295., 600.), 360., 1., 1., 1., 1),
+            slider_1_text: Text::new((445., 637.), "world".to_string(), 18, Some("Menlo")).await,
 
             player_0: Player { id: 0, kind: Human, search_depth: 3, search_rounds: 500 },
             player_1: Player { id: 1, kind: AIMinimax, search_depth: 3, search_rounds: 500 },
@@ -81,42 +69,42 @@ impl ViewIntro {
         let mut button;
 
         texture = AssetLoader::get_texture("start");
-        button = Button::new(START_CORNER, texture, ButtonMode::Push, START_ID);
+        button = Button::new((680., 745.), texture, ButtonMode::Push, START_ID);
         self.buttons.insert(START_ID, button);
 
         texture = AssetLoader::get_texture("exit");
-        button = Button::new(EXIT_CORNER, texture, ButtonMode::Push, EXIT_ID);
+        button = Button::new((20., 745.), texture, ButtonMode::Push, EXIT_ID);
         self.buttons.insert(EXIT_ID, button);
 
         // Player 0
         texture = AssetLoader::get_texture("human");
-        button = Button::new(HUMAN_0_CORNER, texture, ButtonMode::Radio, HUMAN_0_ID);
+        button = Button::new((295., 340.), texture, ButtonMode::Radio, HUMAN_0_ID);
         button.group_id = 0;
         self.buttons.insert(HUMAN_0_ID, button);
 
         texture = AssetLoader::get_texture("minimax");
-        button = Button::new(MINIMAX_0_CORNER, texture, ButtonMode::Radio, MINIMAX_0_ID);
+        button = Button::new((395., 340.), texture, ButtonMode::Radio, MINIMAX_0_ID);
         button.group_id = 0;
         self.buttons.insert(MINIMAX_0_ID, button);
 
         texture = AssetLoader::get_texture("monte_carlo");
-        button = Button::new(MONTE_0_CORNER, texture, ButtonMode::Radio, MONTE_0_ID);
+        button = Button::new((515., 340.), texture, ButtonMode::Radio, MONTE_0_ID);
         button.group_id = 0;
         self.buttons.insert(MONTE_0_ID, button);
 
         // Player 1
         texture = AssetLoader::get_texture("human");
-        button = Button::new(HUMAN_1_CORNER, texture, ButtonMode::Radio, HUMAN_1_ID);
+        button = Button::new((295., 535.), texture, ButtonMode::Radio, HUMAN_1_ID);
         button.group_id = 1;
         self.buttons.insert(HUMAN_1_ID, button);
 
         texture = AssetLoader::get_texture("minimax");
-        button = Button::new(MINIMAX_1_CORNER, texture, ButtonMode::Radio, MINIMAX_1_ID);
+        button = Button::new((395., 535.), texture, ButtonMode::Radio, MINIMAX_1_ID);
         button.group_id = 1;
         self.buttons.insert(MINIMAX_1_ID, button);
 
         texture = AssetLoader::get_texture("monte_carlo");
-        button = Button::new(MONTE_1_CORNER, texture, ButtonMode::Radio, MONTE_1_ID);
+        button = Button::new((515., 535.), texture, ButtonMode::Radio, MONTE_1_ID);
         button.group_id = 1;
         self.buttons.insert(MONTE_1_ID, button);
 
