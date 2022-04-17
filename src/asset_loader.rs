@@ -57,6 +57,9 @@ impl AssetLoader {
             "silver_pro" => Texture2D::from_file_with_format(include_bytes!("../assets/silver_pro_2x.png"),None,),
             "pawn" => Texture2D::from_file_with_format(include_bytes!("../assets/pawn_2x.png"),None,),
             "pawn_pro" => Texture2D::from_file_with_format(include_bytes!("../assets/pawn_pro_2x.png"),None,),
+            // view rules
+            "close" => Texture2D::from_file_with_format(include_bytes!("../assets/close_2x.png"),None,),
+            "rules_view" => Texture2D::from_file_with_format(include_bytes!("../assets/rules_view_2x.png"),None,),
             _ => panic!("No texture by that name."),
         }
     }

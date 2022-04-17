@@ -15,7 +15,7 @@ pub enum ButtonMode {
     Radio,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ButtonEvent {
     /// Mouse is over button. (id)
     Hovering(usize),

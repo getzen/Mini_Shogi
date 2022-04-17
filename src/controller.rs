@@ -16,6 +16,8 @@ use crate::controller::AppState::*;
 use crate::controller::PlayerKind::*;
 use crate::view_game::{ViewGame, ViewGameMessage};
 use crate::view_intro::{ViewIntro, ViewIntroMessage};
+use crate::view_rules::ViewRules;
+use crate::view_rules::ViewRulesMessage;
 
 #[derive(Clone, Copy)]
 pub struct Player {
@@ -28,6 +30,7 @@ pub struct Player {
 #[derive(PartialEq, Clone, Copy)]
 pub enum AppState {
     Intro,
+    Rules,
     HumanTurn,
     AITurnBegin,
     AIThinking,
@@ -53,10 +56,13 @@ pub struct Controller {
     players: Vec<Player>,
     game: Game,
     view_intro: ViewIntro,
+    view_rules: ViewRules,
     view_game: ViewGame,
     pub state: AppState,
+    previous_state: Option<AppState>,
     node_history: Vec<Game>,
     view_intro_rx: Receiver<ViewIntroMessage>,
+    view_rules_rx: Receiver<ViewRulesMessage>,
     view_game_rx: Receiver<ViewGameMessage>,
     ai_tx: Sender<AIMessage>,
     ai_rx: Receiver<AIMessage>,
@@ -66,6 +72,7 @@ pub struct Controller {
 impl Controller {
     pub async fn new() -> Self {
         let (view_intro_tx, view_intro_rx) = mpsc::channel();
+        let (view_rules_tx, view_rules_rx) = mpsc::channel();
         let (view_game_tx, view_game_rx) = mpsc::channel();
         let (ai_tx, ai_rx) = mpsc::channel();
 
@@ -73,10 +80,13 @@ impl Controller {
             players: Vec::new(), // supplied by view_intro
             game: Game::new(),
             view_intro: ViewIntro::new(view_intro_tx).await,
+            view_rules: ViewRules::new(view_rules_tx).await,
+            previous_state: None,
             view_game: ViewGame::new(view_game_tx, COLS, ROWS).await,
             state: Intro,
             node_history: Vec::new(),
             view_intro_rx,
+            view_rules_rx,
             view_game_rx,
             ai_tx, ai_rx,
             pv_text: String::from(""),
@@ -103,6 +113,10 @@ impl Controller {
                     self.view_intro.process_events();
                     self.check_messages().await;
                 },
+                Rules => {
+                    self.view_rules.process_events();
+                    self.check_messages().await;
+                }
                 HumanTurn | AIThinking | WaitingOnAnimation | Player0Won | Player1Won | Draw => {
                     self.view_game.process_events();
                     self.check_messages().await;
@@ -131,6 +145,10 @@ impl Controller {
                      self.view_intro.draw();
                      self.view_intro.end_frame().await;
                 },
+                Rules => {
+                    self.view_rules.draw();
+                    self.view_rules.end_frame().await;
+                }
                 HumanTurn | AIThinking | Player0Won | Player1Won | Draw | WaitingOnAnimation => {
                     self.view_game.draw_board();
                     self.view_game.draw_ui(&self.state, &self.pv_text);
@@ -151,9 +169,24 @@ impl Controller {
                     self.players = players;
                     self.next_player();
                 },
+                ViewIntroMessage::ShowRules => {
+                    self.previous_state = Some(self.state);
+                    self.state = Rules;
+                },
                 ViewIntroMessage::ShouldExit => self.state = Exit,
             }
         }
+
+        // From ViewRules
+        let received = self.view_rules_rx.try_recv();
+        if received.is_ok() {
+            match received.unwrap() {
+                ViewRulesMessage::ShouldClose => {
+                    self.state = self.previous_state.unwrap();
+                },
+            }
+        }
+
         // From ViewGame
         let received = self.view_game_rx.try_recv();
         if received.is_ok() {

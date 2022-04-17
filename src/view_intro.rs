@@ -28,6 +28,7 @@ const MONTE_1_ID: usize = 8;
 
 pub enum ViewIntroMessage {
     ShouldStart(Vec<Player>),
+    ShowRules,
     ShouldExit,
 }
 
@@ -208,7 +209,7 @@ impl ViewIntro {
 
     pub fn process_events(&mut self) {
         // Key presses.
-        if is_key_down(KeyCode::Escape) {
+        if is_key_released(KeyCode::Escape) {
             self.tx.send(ViewIntroMessage::ShouldExit).expect("Intro message send error.");
         }
 
@@ -231,7 +232,7 @@ impl ViewIntro {
                                 self.tx.send(ViewIntroMessage::ShouldExit).expect("Intro message send error.");
                             }
                             RULES_ID => {
-                                println!("rules");
+                                self.tx.send(ViewIntroMessage::ShowRules).expect("Intro message send error.");
                             }
                             _ => {},
                         }
