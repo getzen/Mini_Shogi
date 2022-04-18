@@ -39,8 +39,9 @@ pub struct Sprite {
 
     // Private
     params: DrawTextureParams,
-    position_lerp: Option<Lerp>, // created automatically for animation
-    // rotation_lerp, fade_lerp...
+    position_lerp: Option<Lerp>, // created when needed
+    fade_lerp: Option<Lerp>, // created when needed
+    // rotation_lerp...
 }
 
 impl Sprite {
@@ -81,6 +82,7 @@ impl Sprite {
             id: None,
             params: DrawTextureParams::default(),
             position_lerp: None,
+            fade_lerp: None,
         }
     }
 
@@ -150,12 +152,22 @@ impl Sprite {
     /// Perform animation updates and the like with the time_delta.
     /// If update did something, return true, otherwise false.
     pub fn update(&mut self, time_delta: Duration) -> bool {
-        // Lerp animation
+        // Position animation
         if let Some(lerp) = &mut self.position_lerp {
             let results = lerp.update(time_delta);
             self.phys_position = (results.0, results.1);
             if !results.2 {
                 self.position_lerp = None;
+            }
+            return true;
+        }
+
+        // Fade animation
+        if let Some(lerp) = &mut self.fade_lerp {
+            let results = lerp.update(time_delta);
+            self.color.a = results.0;
+            if !results.2 {
+                self.fade_lerp = None;
             }
             return true;
         }
@@ -166,6 +178,12 @@ impl Sprite {
     pub fn animate_move(&mut self, to: (f32, f32), duration: Duration) {
         let end = View::phys_pos(to);
         self.position_lerp = Some(Lerp::new(self.phys_position, end, duration));
+    }
+
+
+    /// Use the Lerp struct to fade out the sprite.
+    pub fn animate_fade_out(&mut self, duration: Duration) {
+        self.fade_lerp = Some(Lerp::new((1.0, 0.0), (0.0, 0.0), duration));
     }
 
     /// Draw the sprite.
