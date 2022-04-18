@@ -15,8 +15,6 @@ There are two AI opponents:
 
 ## To-Do:
 
-- Add rules view.
-
 - Add sounds: welcome, promotion, win/loss
 
 - Add ability to restart game.
