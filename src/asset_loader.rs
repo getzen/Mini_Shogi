@@ -40,6 +40,8 @@ impl AssetLoader {
     pub fn get_texture(name: &str) -> Texture2D {
         match name {
             // view_intro
+            "intro" => Texture2D::from_file_with_format(include_bytes!("../assets/intro_2x.png"),None,),
+            // view_settings
             "title" => Texture2D::from_file_with_format(include_bytes!("../assets/title_2x.png"),None,),
             "start" => Texture2D::from_file_with_format(include_bytes!("../assets/start_2x.png"),None,),
             "rules" => Texture2D::from_file_with_format(include_bytes!("../assets/rules_2x.png"),None,),
