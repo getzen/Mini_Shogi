@@ -37,7 +37,7 @@ impl ViewIntro {
         } else {
             // Start fade if it's time.
             self.elapsed_time += time_delta;
-            if self.elapsed_time > Duration::from_secs(3) {
+            if self.elapsed_time > Duration::from_secs(2) {
                 self.sprite.animate_fade_out(Duration::from_secs(3));
                 self.fade_active = true;
             }
