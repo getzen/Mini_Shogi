@@ -5,7 +5,6 @@ use std::sync::mpsc::Sender;
 use macroquad::prelude::*;
 
 use crate::asset_loader::AssetLoader;
-
 use crate::sprite::Sprite;
 use crate::widget_button::*;
 
@@ -16,8 +15,7 @@ pub enum ViewRulesMessage {
 pub struct ViewRules {
     /// Sends messages to controller.
     tx: Sender<ViewRulesMessage>, 
-
-    rules_sprite: Sprite,
+    sprite: Sprite,
     close_button: Button,
 }
 
@@ -32,7 +30,7 @@ impl ViewRules {
 
         Self {
             tx,
-            rules_sprite: Sprite::new((400., 400.), rules_texture),
+            sprite: Sprite::new((400., 400.), rules_texture),
             close_button: button,
         }
     }
@@ -50,7 +48,7 @@ impl ViewRules {
     }
 
     pub fn draw(&mut self) {
-        self.rules_sprite.draw();
+        self.sprite.draw();
         self.close_button.draw();
     }
 }

@@ -42,9 +42,7 @@ pub struct ViewSettings {
     slider_0_text: Text,
     slider_1: Slider,
     slider_1_text: Text,
-
-    player_0: Player,
-    player_1: Player,
+    players: Vec<Player>,
 }
 
 impl ViewSettings {
@@ -60,12 +58,12 @@ impl ViewSettings {
             slider_1: Slider::new((295., 600.), 360., 1., 1., 1., 1),
             slider_1_text: Text::new((445., 637.), "world".to_string(), 18, Some("Menlo")).await,
 
-            player_0: Player { id: 0, kind: Human, search_depth: 3, search_rounds: 500 },
-            player_1: Player { id: 1, kind: AIMinimax, search_depth: 3, search_rounds: 500 },
+            players: Vec::new(),
         }
     }
 
-    pub fn prepare(&mut self) {
+    pub fn prepare(&mut self, players: Vec<Player>) {
+        self.players = players;
         let mut texture;
         let mut button;
 
@@ -139,7 +137,7 @@ impl ViewSettings {
 
     fn set_player_controls(&mut self, player_id: usize) {
         if player_id == 0 {
-            let button_id = match self.player_0.kind {
+            let button_id = match self.players[0].kind {
                 Human => HUMAN_0_ID,
                 AIMinimax => MINIMAX_0_ID,
                 AIMonteCarlo => MONTE_0_ID,
@@ -147,7 +145,7 @@ impl ViewSettings {
             };
             self.select_button(0, button_id);
 
-            match self.player_0.kind {
+            match self.players[0].kind {
                 Human => {
                     self.slider_0.is_visible = false;
                     self.slider_0_text.is_visible = false;
@@ -155,7 +153,7 @@ impl ViewSettings {
                 AIMinimax => {
                     self.slider_0.is_visible = true;
                     self.slider_0_text.is_visible = true;
-                    self.slider_0.value = self.player_0.search_depth as f32;
+                    self.slider_0.value = self.players[0].search_depth as f32;
                     self.slider_0.max_value = 9.;
                     self.slider_0.tick_divisions = 7;
                     self.slider_0.snap_to_tick = true;
@@ -163,7 +161,7 @@ impl ViewSettings {
                 AIMonteCarlo => {
                     self.slider_0.is_visible = true;
                     self.slider_0_text.is_visible = true;
-                    self.slider_0.value = self.player_0.search_rounds as f32;
+                    self.slider_0.value = self.players[0].search_rounds as f32;
                     self.slider_0.max_value = 1_000.;
                     self.slider_0.tick_divisions = 0;
                     self.slider_0.snap_to_tick = false;
@@ -173,7 +171,7 @@ impl ViewSettings {
         }
 
         if player_id == 1 {
-            let button_id = match self.player_1.kind {
+            let button_id = match self.players[1].kind {
                 Human => HUMAN_1_ID,
                 AIMinimax => MINIMAX_1_ID,
                 AIMonteCarlo => MONTE_1_ID,
@@ -181,7 +179,7 @@ impl ViewSettings {
             };
             self.select_button(1, button_id);
     
-            match self.player_1.kind {
+            match self.players[1].kind {
                 Human => {
                     self.slider_1.is_visible = false;
                     self.slider_1_text.is_visible = false;
@@ -189,7 +187,7 @@ impl ViewSettings {
                 AIMinimax => {
                     self.slider_1.is_visible = true;
                     self.slider_1_text.is_visible = true;
-                    self.slider_1.value = self.player_1.search_depth as f32;
+                    self.slider_1.value = self.players[1].search_depth as f32;
                     self.slider_1.max_value = 9.;
                     self.slider_1.tick_divisions = 7;
                     self.slider_1.snap_to_tick = true;
@@ -197,7 +195,7 @@ impl ViewSettings {
                 AIMonteCarlo => {
                     self.slider_1.is_visible = true;
                     self.slider_1_text.is_visible = true;
-                    self.slider_1.value = self.player_1.search_rounds as f32;
+                    self.slider_1.value = self.players[1].search_rounds as f32;
                     self.slider_1.max_value = 1_000.;
                     self.slider_1.tick_divisions = 0;
                     self.slider_1.snap_to_tick = false;
@@ -225,8 +223,7 @@ impl ViewSettings {
                         // Start and Exit buttons
                         match id {
                             START_ID => {
-                                let players = vec![self.player_0, self.player_1];
-                                self.tx.send(ViewSettingsMessage::ShouldStart(players)).expect("Intro message send error.");
+                                self.tx.send(ViewSettingsMessage::ShouldStart(self.players.clone())).expect("Intro message send error.");
                             },
                             EXIT_ID => {
                                 self.tx.send(ViewSettingsMessage::ShouldExit).expect("Intro message send error.");
@@ -268,9 +265,9 @@ impl ViewSettings {
                             _ => {panic!()},
                         };
                         if player.is_some() && player.unwrap() == 0 {
-                            self.player_0.kind = kind;
+                            self.players[0].kind = kind;
                         } else if player.is_some() && player.unwrap() == 1 {
-                            self.player_1.kind = kind;
+                            self.players[1].kind = kind;
                         }
                     },
                 }
@@ -285,11 +282,11 @@ impl ViewSettings {
             match event {
                 SliderEvent::Hovering(_id) => {},
                 SliderEvent::ValueChanged(_id, val) => {
-                    if self.player_0.kind == AIMinimax {
-                        self.player_0.search_depth = val as usize;
+                    if self.players[0].kind == AIMinimax {
+                        self.players[0].search_depth = val as usize;
                     }
-                    if self.player_0.kind == AIMonteCarlo {
-                        self.player_0.search_rounds = val as usize;
+                    if self.players[0].kind == AIMonteCarlo {
+                        self.players[0].search_rounds = val as usize;
                     }
                 },
             }
@@ -299,11 +296,11 @@ impl ViewSettings {
             match event {
                 SliderEvent::Hovering(_id) => {},
                 SliderEvent::ValueChanged(_id, val) => {
-                    if self.player_1.kind == AIMinimax {
-                        self.player_1.search_depth = val as usize;
+                    if self.players[1].kind == AIMinimax {
+                        self.players[1].search_depth = val as usize;
                     }
-                    if self.player_1.kind == AIMonteCarlo {
-                        self.player_1.search_rounds = val as usize;
+                    if self.players[1].kind == AIMonteCarlo {
+                        self.players[1].search_rounds = val as usize;
                     }
                 },
             }
@@ -328,7 +325,7 @@ impl ViewSettings {
 
         self.slider_0.draw();
         // Use live values here so user sees the values change when dragging.
-        self.slider_0_text.text = match self.player_0.kind {
+        self.slider_0_text.text = match self.players[0].kind {
             Human => "".to_string(),
             AIMinimax => format!("{} move look-ahead", self.slider_0.nearest_snap_value()),
             //AIMinimax => format!("{} move look-ahead", self.slider_0.value as usize),
@@ -339,7 +336,7 @@ impl ViewSettings {
 
         self.slider_1.draw();
         // Use live values here so user sees the values change when dragging.
-        self.slider_1_text.text = match self.player_1.kind {
+        self.slider_1_text.text = match self.players[1].kind {
             Human => "".to_string(),
             AIMinimax => format!("{} move look-ahead", self.slider_1.nearest_snap_value() as usize),
             AIMonteCarlo => format!("{} play outs", self.slider_1.value as usize),

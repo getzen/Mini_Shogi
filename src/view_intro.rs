@@ -3,13 +3,11 @@
 
 use std::time::Duration;
 
-//use macroquad::prelude::*;
-
 use crate::asset_loader::AssetLoader;
 use crate::sprite::Sprite;
 
 pub struct ViewIntro {
-    /// True when the this view should be drawn.
+    /// When true, this view should be update and drawn.
     pub visible: bool,
     // Private
     sprite: Sprite,
@@ -23,7 +21,7 @@ impl ViewIntro {
 
         Self {
             visible: true,
-            sprite: Sprite::new((400., 250.), texture),
+            sprite: Sprite::new((400., 380.), texture),
             elapsed_time: Duration::ZERO,
             fade_active: false,
         }

@@ -80,14 +80,14 @@ impl Controller {
         let (ai_tx, ai_rx) = mpsc::channel();
 
         Self {
-            players: Vec::new(), // supplied by view_intro
+            players: Vec::new(),
             game: Game::new(),
             view_settings: ViewSettings::new(view_intro_tx).await,
             view_rules: ViewRules::new(view_rules_tx).await,
             previous_state: None,
             view_intro: ViewIntro::new().await,
             view_game: ViewGame::new(view_game_tx, COLS, ROWS).await,
-            state: Settings,
+            state: NextPlayer,
             node_history: Vec::new(),
             view_intro_rx,
             view_rules_rx,
@@ -98,8 +98,10 @@ impl Controller {
     }
 
     pub async fn prepare(&mut self) {
+        self.players.push( Player {id: 0, kind: Human, search_depth: 3, search_rounds: 500} );
+        self.players.push( Player {id: 1, kind: AIMinimax, search_depth: 3, search_rounds: 500} );
         self.game.prepare();
-        self.view_settings.prepare();
+        self.view_settings.prepare(self.players.clone());
         self.view_game.prepare().await;
 
         // Add the game's pieces to the view.
@@ -166,7 +168,12 @@ impl Controller {
             if self.view_intro.visible {
                 self.view_intro.draw();
             }
-            next_frame().await;
+
+            // Call next_frame for non-transitional states.
+            match self.state {
+                NextPlayer | AITurnBegin => {},
+                _ => next_frame().await,
+            }
         }
     }
 
