@@ -5,7 +5,7 @@ use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::time::Duration;
 
-use macroquad::prelude::get_frame_time;
+use macroquad::prelude::*;
 use num_format::{Locale, ToFormattedString};
 
 use crate::ai::{AI, AIProgress};
@@ -15,7 +15,8 @@ use crate::game::{Game, GameState};
 use crate::controller::AppState::*;
 use crate::controller::PlayerKind::*;
 use crate::view_game::{ViewGame, ViewGameMessage};
-use crate::view_intro::{ViewIntro, ViewIntroMessage};
+use crate::view_intro::ViewIntro;
+use crate::view_settings::{ViewSettings, ViewSettingsMessage};
 use crate::view_rules::ViewRules;
 use crate::view_rules::ViewRulesMessage;
 
@@ -30,6 +31,7 @@ pub struct Player {
 #[derive(PartialEq, Clone, Copy)]
 pub enum AppState {
     Intro,
+    Settings,
     Rules,
     HumanTurn,
     AITurnBegin,
@@ -56,12 +58,13 @@ pub struct Controller {
     players: Vec<Player>,
     game: Game,
     view_intro: ViewIntro,
+    view_settings: ViewSettings,
     view_rules: ViewRules,
     view_game: ViewGame,
     pub state: AppState,
     previous_state: Option<AppState>,
     node_history: Vec<Game>,
-    view_intro_rx: Receiver<ViewIntroMessage>,
+    view_intro_rx: Receiver<ViewSettingsMessage>,
     view_rules_rx: Receiver<ViewRulesMessage>,
     view_game_rx: Receiver<ViewGameMessage>,
     ai_tx: Sender<AIMessage>,
@@ -79,11 +82,12 @@ impl Controller {
         Self {
             players: Vec::new(), // supplied by view_intro
             game: Game::new(),
-            view_intro: ViewIntro::new(view_intro_tx).await,
+            view_settings: ViewSettings::new(view_intro_tx).await,
             view_rules: ViewRules::new(view_rules_tx).await,
             previous_state: None,
+            view_intro: ViewIntro::new().await,
             view_game: ViewGame::new(view_game_tx, COLS, ROWS).await,
-            state: Intro,
+            state: Settings,
             node_history: Vec::new(),
             view_intro_rx,
             view_rules_rx,
@@ -95,7 +99,7 @@ impl Controller {
 
     pub async fn prepare(&mut self) {
         self.game.prepare();
-        self.view_intro.prepare();
+        self.view_settings.prepare();
         self.view_game.prepare().await;
 
         // Add the game's pieces to the view.
@@ -110,7 +114,9 @@ impl Controller {
             // Event and state management
             match self.state {
                 Intro => {
-                    self.view_intro.process_events();
+                },
+                Settings => {
+                    self.view_settings.process_events();
                     self.check_messages().await;
                 },
                 Rules => {
@@ -132,8 +138,11 @@ impl Controller {
                 },
             }
             // Animation updates
+            let time_delta = Duration::from_secs_f32(get_frame_time());
+            if self.view_intro.visible {
+                self.view_intro.update(time_delta);
+            }
             if self.state == WaitingOnAnimation {
-                let time_delta = Duration::from_secs_f32(get_frame_time());
                 let active = self.view_game.update(time_delta);
                 if !active && self.state == WaitingOnAnimation {
                     self.state = NextPlayer;
@@ -141,21 +150,23 @@ impl Controller {
             }
             // Drawing
             match self.state {
-                Intro => {
-                     self.view_intro.draw();
-                     self.view_intro.end_frame().await;
+                Settings => {
+                     self.view_settings.draw();
                 },
                 Rules => {
                     self.view_rules.draw();
-                    self.view_rules.end_frame().await;
                 }
                 HumanTurn | AIThinking | Player0Won | Player1Won | Draw | WaitingOnAnimation => {
                     self.view_game.draw_board();
                     self.view_game.draw_ui(&self.state, &self.pv_text);
-                    self.view_game.end_frame().await;
                 },
                 _ => {},
             }
+            // Intro draws last since it is on top of other views.
+            if self.view_intro.visible {
+                self.view_intro.draw();
+            }
+            next_frame().await;
         }
     }
 
@@ -164,16 +175,16 @@ impl Controller {
         let received = self.view_intro_rx.try_recv();
         if received.is_ok() {
             match received.unwrap() {
-                ViewIntroMessage::ShouldStart(players) => {
+                ViewSettingsMessage::ShouldStart(players) => {
                     //dbg!(players[1].search_depth);
                     self.players = players;
                     self.next_player();
                 },
-                ViewIntroMessage::ShowRules => {
+                ViewSettingsMessage::ShowRules => {
                     self.previous_state = Some(self.state);
                     self.state = Rules;
                 },
-                ViewIntroMessage::ShouldExit => self.state = Exit,
+                ViewSettingsMessage::ShouldExit => self.state = Exit,
             }
         }
 

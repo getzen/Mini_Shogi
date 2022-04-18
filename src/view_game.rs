@@ -347,10 +347,6 @@ impl ViewGame {
         self.ai_progress_text.draw();
     }
 
-    pub async fn end_frame(&self) {
-        next_frame().await;
-    }
-
     pub fn selected_piece_id(&self) -> Option<usize> {
         self.selected_piece
     }

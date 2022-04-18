@@ -26,15 +26,15 @@ const HUMAN_1_ID: usize = 6;
 const MINIMAX_1_ID: usize = 7;
 const MONTE_1_ID: usize = 8;
 
-pub enum ViewIntroMessage {
+pub enum ViewSettingsMessage {
     ShouldStart(Vec<Player>),
     ShowRules,
     ShouldExit,
 }
 
-pub struct ViewIntro {
+pub struct ViewSettings {
     /// Sends messages to controller.
-    tx: Sender<ViewIntroMessage>, 
+    tx: Sender<ViewSettingsMessage>, 
 
     background_tex: Texture2D,
     buttons: HashMap<usize, Button>,
@@ -47,8 +47,8 @@ pub struct ViewIntro {
     player_1: Player,
 }
 
-impl ViewIntro {
-    pub async fn new(tx: Sender<ViewIntroMessage>) -> Self {        
+impl ViewSettings {
+    pub async fn new(tx: Sender<ViewSettingsMessage>) -> Self {        
         Self {
             tx,
             background_tex: AssetLoader::get_texture("title"),
@@ -210,7 +210,7 @@ impl ViewIntro {
     pub fn process_events(&mut self) {
         // Key presses.
         if is_key_released(KeyCode::Escape) {
-            self.tx.send(ViewIntroMessage::ShouldExit).expect("Intro message send error.");
+            self.tx.send(ViewSettingsMessage::ShouldExit).expect("Intro message send error.");
         }
 
         // Track which player controls to update, if any.
@@ -226,13 +226,13 @@ impl ViewIntro {
                         match id {
                             START_ID => {
                                 let players = vec![self.player_0, self.player_1];
-                                self.tx.send(ViewIntroMessage::ShouldStart(players)).expect("Intro message send error.");
+                                self.tx.send(ViewSettingsMessage::ShouldStart(players)).expect("Intro message send error.");
                             },
                             EXIT_ID => {
-                                self.tx.send(ViewIntroMessage::ShouldExit).expect("Intro message send error.");
+                                self.tx.send(ViewSettingsMessage::ShouldExit).expect("Intro message send error.");
                             }
                             RULES_ID => {
-                                self.tx.send(ViewIntroMessage::ShowRules).expect("Intro message send error.");
+                                self.tx.send(ViewSettingsMessage::ShowRules).expect("Intro message send error.");
                             }
                             _ => {},
                         }
@@ -346,9 +346,5 @@ impl ViewIntro {
             _ => "".to_string(),
         };
         self.slider_1_text.draw();
-    }
-
-    pub async fn end_frame(&self) {
-        next_frame().await;
     }
 }

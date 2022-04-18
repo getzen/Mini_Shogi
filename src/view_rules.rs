@@ -53,8 +53,4 @@ impl ViewRules {
         self.rules_sprite.draw();
         self.close_button.draw();
     }
-
-    pub async fn end_frame(&self) {
-        next_frame().await;
-    }
 }
