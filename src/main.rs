@@ -16,6 +16,7 @@ mod piece;
 mod sprite;
 mod text;
 mod view;
+mod widget_button_bar;
 mod view_game;
 mod view_intro;
 mod view_settings;
