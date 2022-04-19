@@ -10,6 +10,7 @@ pub struct AIRandom {
 }
 
 impl AIRandom {
+    #[allow(dead_code)]
     pub fn new(game: Game, message_sender: AISender) -> Self {
         Self {
             game, message_sender,

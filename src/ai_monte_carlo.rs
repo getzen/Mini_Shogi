@@ -20,6 +20,7 @@ impl Think for AIMonteCarlo {
 }
 
 impl AIMonteCarlo {
+    #[allow(dead_code)]
     pub fn new(game: Game, rounds: usize, message_sender: AISender) -> Self {
         Self {
             game, rounds, message_sender,

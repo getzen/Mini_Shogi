@@ -3,9 +3,9 @@
 
 use std::time::Duration;
 
-use crate::ai_random::AIRandom;
+//use crate::ai_random::AIRandom;
 use crate::ai_minimax::AIMinimax;
-use crate::ai_monte_carlo::AIMonteCarlo;
+//use crate::ai_monte_carlo::AIMonteCarlo;
 //use crate::ai_monte_carlo_tree::AIMonteCarloTree;
 use crate::ai_sender::{AISender, AIMessage};
 
@@ -49,20 +49,21 @@ impl AI {
         let mut sender_clone = message_sender.clone();
         
         let progress: AIProgress = match player.kind {
-            AIRandom => {
-                let mut ai = AIRandom::new(game, sender_clone);
-                ai.think()
-            },
-            AIMinimax => {
+            
+            AI => {
                 sender_clone.min_time_between = Some(Duration::from_millis(100));
                 let mut ai = AIMinimax::new(game, player.search_depth, sender_clone);
                 ai.think()
             },
-            AIMonteCarlo => {
-                sender_clone.min_time_between = Some(Duration::from_millis(100));
-                let mut ai = AIMonteCarlo::new(game, player.search_rounds, sender_clone);
-                ai.think()
-            },
+            // AIRandom => {
+            //     let mut ai = AIRandom::new(game, sender_clone);
+            //     ai.think()
+            // },
+            // AIMonteCarlo => {
+            //     sender_clone.min_time_between = Some(Duration::from_millis(100));
+            //     let mut ai = AIMonteCarlo::new(game, player.search_rounds, sender_clone);
+            //     ai.think()
+            // },
             // AIMonteCarloTree => {
             //     sender_clone.min_time_between = Some(Duration::from_millis(100));
             //     let mut ai = AIMonteCarloTree::new(game, Duration::from_millis(1000), sender_clone);

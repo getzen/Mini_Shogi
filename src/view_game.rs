@@ -117,6 +117,9 @@ impl ViewGame {
             reserve = Sprite::new((pos_x, pos_y), texture);
             self.reserve_boxes[1].insert(i, reserve);
         }
+
+        // ButtonBar
+
     }
 
     fn texture_for(&self, piece_kind: PieceKind) -> Texture2D {

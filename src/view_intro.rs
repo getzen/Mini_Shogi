@@ -4,24 +4,24 @@
 use std::time::Duration;
 
 use crate::asset_loader::AssetLoader;
-use crate::sprite::Sprite;
+use crate::image::Image;
 
 pub struct ViewIntro {
     /// When true, this view should be update and drawn.
     pub visible: bool,
     // Private
-    sprite: Sprite,
+    image: Image,
     elapsed_time: Duration,
     fade_active: bool,
 }
 
 impl ViewIntro {
     pub async fn new() -> Self {       
-        let texture = AssetLoader::get_texture("intro");
+        let texture = AssetLoader::get_texture("view_intro");
 
         Self {
             visible: true,
-            sprite: Sprite::new((400., 380.), texture),
+            image: Image::new((200., 210.), texture),
             elapsed_time: Duration::ZERO,
             fade_active: false,
         }
@@ -32,13 +32,13 @@ impl ViewIntro {
 
         if self.fade_active {
             // Update fade.
-            self.fade_active = self.sprite.update(time_delta);
+            self.fade_active = self.image.update(time_delta);
             self.visible = self.fade_active;
         } else {
             // Start fade if it's time.
             self.elapsed_time += time_delta;
             if self.elapsed_time > Duration::from_secs(2) {
-                self.sprite.animate_fade_out(Duration::from_secs(3));
+                self.image.animate_fade_out(Duration::from_secs(3));
                 self.fade_active = true;
             }
         }
@@ -47,6 +47,6 @@ impl ViewIntro {
 
     pub fn draw(&mut self) {
         if !self.visible { return }
-        self.sprite.draw();
+        self.image.draw();
     }
 }

@@ -39,16 +39,22 @@ impl AssetLoader {
 
     pub fn get_texture(name: &str) -> Texture2D {
         match name {
+            // controller
+            "bar_about" => Texture2D::from_file_with_format(include_bytes!("../assets/bar_about_2x.png"),None,),
+            "bar_rules" => Texture2D::from_file_with_format(include_bytes!("../assets/bar_rules_2x.png"),None,),
+            "bar_settings" => Texture2D::from_file_with_format(include_bytes!("../assets/bar_settings_2x.png"),None,),
+            "bar_quit" => Texture2D::from_file_with_format(include_bytes!("../assets/bar_quit_2x.png"),None,),
+
             // view_intro
-            "intro" => Texture2D::from_file_with_format(include_bytes!("../assets/intro_2x.png"),None,),
+            "view_intro" => Texture2D::from_file_with_format(include_bytes!("../assets/view_intro_2x.png"),None,),
+
             // view_settings
-            "title" => Texture2D::from_file_with_format(include_bytes!("../assets/title_2x.png"),None,),
-            "start" => Texture2D::from_file_with_format(include_bytes!("../assets/start_2x.png"),None,),
-            "rules" => Texture2D::from_file_with_format(include_bytes!("../assets/rules_2x.png"),None,),
-            "exit" => Texture2D::from_file_with_format(include_bytes!("../assets/exit_2x.png"),None,),
-            "human" => Texture2D::from_file_with_format(include_bytes!("../assets/human_2x.png"),None,),
-            "minimax" => Texture2D::from_file_with_format(include_bytes!("../assets/minimax_2x.png"),None,),
-            "monte_carlo" => Texture2D::from_file_with_format(include_bytes!("../assets/monte_carlo_2x.png"),None,),
+            "view_settings" => Texture2D::from_file_with_format(include_bytes!("../assets/view_settings_2x.png"),None,),
+            "okay" => Texture2D::from_file_with_format(include_bytes!("../assets/okay_2x.png"),None,),
+            "button_human" => Texture2D::from_file_with_format(include_bytes!("../assets/button_human_2x.png"),None,),
+            "button_ai" => Texture2D::from_file_with_format(include_bytes!("../assets/button_ai_2x.png"),None,),
+            //"monte_carlo" => Texture2D::from_file_with_format(include_bytes!("../assets/monte_carlo_2x.png"),None,),
+
             // view board
             "square" => Texture2D::from_file_with_format(include_bytes!("../assets/square_2x.png"),None,),
             "line" => Texture2D::from_file_with_format(include_bytes!("../assets/line_2x.png"),None,),
@@ -62,7 +68,7 @@ impl AssetLoader {
             // view rules
             "close" => Texture2D::from_file_with_format(include_bytes!("../assets/close_2x.png"),None,),
             "rules_view" => Texture2D::from_file_with_format(include_bytes!("../assets/rules_view_2x.png"),None,),
-            _ => panic!("No texture by that name."),
+            _ => panic!("No texture by that name: {}", name),
         }
     }
 

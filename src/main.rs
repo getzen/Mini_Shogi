@@ -11,6 +11,7 @@ mod ai_sender;
 mod asset_loader;
 mod controller;
 mod game;
+mod image;
 mod lerp;
 mod piece;
 mod sprite;

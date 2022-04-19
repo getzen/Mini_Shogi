@@ -174,13 +174,14 @@ impl Sprite {
         false
     }
 
+    #[allow(dead_code)]
     /// Use the Lerp struct to move the sprite.
     pub fn animate_move(&mut self, to: (f32, f32), duration: Duration) {
         let end = View::phys_pos(to);
         self.position_lerp = Some(Lerp::new(self.phys_position, end, duration));
     }
 
-
+    #[allow(dead_code)]
     /// Use the Lerp struct to fade out the sprite.
     pub fn animate_fade_out(&mut self, duration: Duration) {
         self.fade_lerp = Some(Lerp::new((1.0, 0.0), (0.0, 0.0), duration));

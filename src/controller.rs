@@ -10,6 +10,7 @@ use num_format::{Locale, ToFormattedString};
 
 use crate::ai::{AI, AIProgress};
 use crate::ai_sender::{AIMessage, AISender};
+use crate::asset_loader::AssetLoader;
 use crate::game::*;
 use crate::game::{Game, GameState};
 use crate::controller::AppState::*;
@@ -19,6 +20,8 @@ use crate::view_intro::ViewIntro;
 use crate::view_settings::{ViewSettings, ViewSettingsMessage};
 use crate::view_rules::ViewRules;
 use crate::view_rules::ViewRulesMessage;
+use crate::widget_button::*;
+use crate::widget_button_bar::ButtonBar;
 
 #[derive(Clone, Copy)]
 pub struct Player {
@@ -48,15 +51,21 @@ pub enum AppState {
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum PlayerKind {
     Human,
-    AIRandom,
-    AIMinimax,
-    AIMonteCarlo,
-    AIMonteCarloTree,
+    AI,
 }
+
+// The button bar at top
+const BAR_ABOUT_ID: usize = 0;
+const BAR_RULES_ID: usize = 1;
+const BAR_SETTINGS_ID: usize = 2;
+const BAR_QUIT_ID: usize = 3;
 
 pub struct Controller {
     players: Vec<Player>,
     game: Game,
+
+    button_bar: ButtonBar, // the command bar at top
+
     view_intro: ViewIntro,
     view_settings: ViewSettings,
     view_rules: ViewRules,
@@ -82,6 +91,7 @@ impl Controller {
         Self {
             players: Vec::new(),
             game: Game::new(),
+            button_bar: ButtonBar::new((0., 0.), false),
             view_settings: ViewSettings::new(view_intro_tx).await,
             view_rules: ViewRules::new(view_rules_tx).await,
             previous_state: None,
@@ -98,8 +108,29 @@ impl Controller {
     }
 
     pub async fn prepare(&mut self) {
+        // Construct ButtonBar (menu bar)
+        let mut texture = AssetLoader::get_texture("bar_about");
+        let mut button = Button::new((0.,0.), texture, ButtonMode::Push, BAR_ABOUT_ID);
+        self.button_bar.add_button(button);
+
+        texture = AssetLoader::get_texture("bar_rules");
+        button = Button::new((0.,0.), texture, ButtonMode::Push, BAR_RULES_ID);
+        self.button_bar.add_button(button);
+
+        texture = AssetLoader::get_texture("bar_settings");
+        button = Button::new((0.,0.), texture, ButtonMode::Push, BAR_SETTINGS_ID);
+        self.button_bar.add_button(button);
+
+        texture = AssetLoader::get_texture("bar_quit");
+        button = Button::new((0.,0.), texture, ButtonMode::Push, BAR_QUIT_ID);
+        self.button_bar.add_button(button);
+
+        // Must do after buttons are added.
+        self.button_bar.set_color(Color::from_rgba(125, 125, 125, 125));
+        self.button_bar.set_selected_color(Color::from_rgba(246, 194, 81, 125));
+
         self.players.push( Player {id: 0, kind: Human, search_depth: 3, search_rounds: 500} );
-        self.players.push( Player {id: 1, kind: AIMinimax, search_depth: 3, search_rounds: 500} );
+        self.players.push( Player {id: 1, kind: AI, search_depth: 3, search_rounds: 500} );
         self.game.prepare();
         self.view_settings.prepare(self.players.clone());
         self.view_game.prepare().await;
@@ -114,6 +145,18 @@ impl Controller {
     pub async fn go(&mut self) {
         loop {
             // Event and state management
+
+            // Check own events first.
+            if let Some(button_id) = self.button_bar.process_events() {
+                match button_id {
+                    BAR_ABOUT_ID => {},
+                    BAR_RULES_ID => self.state = Rules,
+                    BAR_SETTINGS_ID => self.state = Settings,
+                    BAR_QUIT_ID => self.state = Exit,
+                    _ => panic!(),
+                }
+            }
+            // View events
             match self.state {
                 Intro => {
                 },
@@ -151,6 +194,8 @@ impl Controller {
                 }
             }
             // Drawing
+            self.view_game.draw_board();
+            self.view_game.draw_ui(&self.state, &self.pv_text);
             match self.state {
                 Settings => {
                      self.view_settings.draw();
@@ -159,11 +204,13 @@ impl Controller {
                     self.view_rules.draw();
                 }
                 HumanTurn | AIThinking | Player0Won | Player1Won | Draw | WaitingOnAnimation => {
-                    self.view_game.draw_board();
-                    self.view_game.draw_ui(&self.state, &self.pv_text);
+                    
                 },
                 _ => {},
             }
+            // ButtonBar (menu)
+            self.button_bar.draw();
+
             // Intro draws last since it is on top of other views.
             if self.view_intro.visible {
                 self.view_intro.draw();
@@ -187,11 +234,6 @@ impl Controller {
                     self.players = players;
                     self.next_player();
                 },
-                ViewSettingsMessage::ShowRules => {
-                    self.previous_state = Some(self.state);
-                    self.state = Rules;
-                },
-                ViewSettingsMessage::ShouldExit => self.state = Exit,
             }
         }
 
