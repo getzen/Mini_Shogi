@@ -38,7 +38,7 @@ impl ViewIntro {
             // Start fade if it's time.
             self.elapsed_time += time_delta;
             if self.elapsed_time > Duration::from_secs(2) {
-                self.image.drawable.animate_fade_out(Duration::from_secs(3));
+                self.image.fade_out(Duration::from_secs(3));
                 self.fade_active = true;
             }
         }

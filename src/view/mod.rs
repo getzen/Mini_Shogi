@@ -1,8 +1,10 @@
+// Mod.rs
 
+mod animators;
+mod button;
 mod drawable;
 mod eventable;
 mod image;
-mod lerp;
 mod sprite;
 mod transform;
 

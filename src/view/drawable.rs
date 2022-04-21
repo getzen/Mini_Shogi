@@ -1,9 +1,8 @@
 /// Drawable
 
-use std::time::Duration;
 use macroquad::prelude::*;
+
 use crate::view::*;
-use crate::view::lerp::Lerp;
 use crate::view::transform::Transform;
 
 pub struct Drawable {
@@ -11,13 +10,10 @@ pub struct Drawable {
     pub centered: bool,
     pub texture: Texture2D,
     pub size: (f32, f32),
-    pub color: Color,
     pub z_order: usize,
 
     // Private
     params: DrawTextureParams,
-    fade_lerp: Option<Lerp>, // set vis to false at end?
-    // size, color
 }
 
 impl Drawable {
@@ -26,10 +22,8 @@ impl Drawable {
             visible: true,
             centered, texture,
             size: (texture.width() * adj_scale(), texture.height() * adj_scale()),
-            color: WHITE,
             z_order: 0,
             params: DrawTextureParams::default(),
-            fade_lerp: None,
         }
     }
 
@@ -46,29 +40,7 @@ impl Drawable {
         self.size.1 = logi_size.1 * adj_scale();
     }
 
-    #[allow(dead_code)]
-    /// Perform animation updates and the like with the time_delta.
-    /// If update did something, return true, otherwise false.
-    pub fn update(&mut self, time_delta: Duration) -> bool {
-        // Fade animation
-        if let Some(lerp) = &mut self.fade_lerp {
-            let results = lerp.update(time_delta);
-            self.color.a = results.0;
-            if !results.2 {
-                self.fade_lerp = None;
-            }
-            return true;
-        }
-        false
-    }
-
-    #[allow(dead_code)]
-    /// Use the Lerp struct to fade out the sprite.
-    pub fn animate_fade_out(&mut self, duration: Duration) {
-        self.fade_lerp = Some(Lerp::new((1.0, 0.0), (0.0, 0.0), duration));
-    }
-
-    pub fn draw(&mut self, transform: &Transform) {
+    pub fn draw(&mut self, transform: &Transform, color: Option<Color>) {
         if !self.visible { return }
 
         let (x, y) = match self.centered {
@@ -81,7 +53,8 @@ impl Drawable {
 
         self.params.rotation = transform.rotation;
         self.params.dest_size = Some(Vec2::new(self.size.0, self.size.1));
-        
-        draw_texture_ex(self.texture, x, y, self.color, self.params.clone());
+
+        let draw_color = if color.is_some() { color.unwrap() } else { WHITE };
+        draw_texture_ex(self.texture, x, y, draw_color, self.params.clone());
     }
 }

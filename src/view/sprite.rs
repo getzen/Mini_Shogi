@@ -16,6 +16,8 @@ use crate::view::transform::Transform;
 
 use crate::view::*;
 
+use super::animators::PositionAnimator;
+
 pub struct Sprite {
     pub id: Option<usize>,
     pub transform: Transform,
@@ -23,6 +25,8 @@ pub struct Sprite {
     pub eventable: Eventable,
 
     // This app
+    mover: Option<PositionAnimator>,
+
     pub alt_texture: Option<Texture2D>,
     pub use_alt_texture: bool,
 
@@ -40,6 +44,8 @@ impl Sprite {
             transform: Transform::new(phys_position, 0.0),
             drawable: Drawable::new(texture, true),
             eventable: Eventable::new(),
+
+            mover: None,
             alt_texture: None,
             use_alt_texture: false,
             alt_color: None,
@@ -47,15 +53,27 @@ impl Sprite {
         }
     }
 
+    pub fn move_to(&mut self, logi_end_pos: (f32, f32), duration: Duration) {
+        let phys_end_pos = phys_pos(logi_end_pos);
+        self.mover = Some(PositionAnimator::new(self.transform.phys_position, phys_end_pos, duration));
+    }
+
     pub fn update(&mut self, time_delta: Duration) -> bool {
-        let mut updated = false;
-        if self.transform.update(time_delta) {
-            updated = true;
+        if let Some(mover) = self.mover {
+            mover.update(time_delta);
+            self.transform.phys_position = mover.position;
+            if mover.complete {
+                self.mover = None;
+            }
+            return true;
         }
-        if self.drawable.update(time_delta) {
-            updated = true;
-        }
-        updated
+        false
+    }
+
+    // Convenience methods
+
+    pub fn contains_phys_position(&self, phy_position: (f32, f32)) -> bool {
+        self.eventable.contains_phys_position(phy_position, &self.transform, &self.drawable)
     }
 
     pub fn process_events(&self) -> Option<Event> {
@@ -63,7 +81,12 @@ impl Sprite {
     }
 
     pub fn draw(&self) {
-        self.drawable.draw(&self.transform);
+        if self.use_alt_color {
+            self.drawable.draw(&self.transform, self.alt_color);
+        } else {
+            self.drawable.draw(&self.transform, None);
+        }
+        
     }
 
 }

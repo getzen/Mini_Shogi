@@ -1,33 +1,144 @@
 // Button
-// The code is similar to Sprite, but with button-specific features.
-// Also, the position refers to the top-left corner of the texture instead
-// of the center.
 
-use macroquad::prelude::*;
-
-use crate::View;
 
 #[allow(dead_code)]
 #[derive(PartialEq)]
 pub enum ButtonMode {
     Push,
     Toggle,
-    Radio,
+    //Radio,
 }
 
 #[derive(Debug, PartialEq)]
 pub enum ButtonEvent {
-    /// Mouse is over button. (id)
-    Hovering(usize),
+    // Mouse is over button. (id)
+    //Hovering(Option<usize>),
     /// Normal push-button behavior.
-    Pushed(usize),
+    Pushed(Option<usize>),
     /// Toggle on or off.
-    Toggled(usize),
-    /// As with a radio button.
-    Selected(usize),
+    Toggled(Option<usize>),
+    // As with a radio button.
+    //Selected(usize),
 }
 
+use macroquad::prelude::Color;
+use macroquad::prelude::Texture2D;
+
+use crate::view::drawable::Drawable;
+use crate::view::eventable::Event;
+use crate::view::eventable::Eventable;
+use crate::view::transform::Transform;
+
+use crate::view::*;
+
 pub struct Button {
+    pub id: Option<usize>,
+    pub transform: Transform,
+    pub drawable: Drawable,
+    pub eventable: Eventable,
+
+    /// Default is Push.
+    pub mode: ButtonMode,
+
+    pub color: Color,
+    pub disabled: bool,
+    pub disabled_color: Option<Color>,
+    pub selected: bool,
+    pub selected_color: Option<Color>,
+}
+
+impl Button {
+    pub fn new(logi_position: (f32, f32), texture: Texture2D, id: Option<usize>) -> Self {
+        let phys_position = phys_pos(logi_position);
+
+        Self {
+            id,
+            transform: Transform::new(phys_position, 0.0),
+            drawable: Drawable::new(texture, false),
+            eventable: Eventable::new(),
+            mode: ButtonMode::Push,
+            disabled: false,
+            disabled_color: None,
+            selected: false,
+            selected_color: None,
+        }
+    }
+
+    // Convenience methods
+
+    pub fn contains_phys_position(&self, phy_position: (f32, f32)) -> bool {
+        self.eventable.contains_phys_position(phy_position, &self.transform, &self.drawable)
+    }
+
+    pub fn process_events(&self) -> Option<ButtonEvent> {
+        if !self.drawable.visible { return None }
+        let event = self.eventable.process_events(&self.transform, &self.drawable);
+        if event.is_none() { return None }
+
+        match event.unwrap() {
+            Event::MouseEntered => todo!(),
+            Event::MouseExited => todo!(),
+            Event::LeftMouseDown => todo!(),
+            Event::LeftMouseReleased => {
+                match self.mode {
+                    ButtonMode::Push => Some(ButtonEvent::Pushed(self.id)),
+                    ButtonMode::Toggle => {
+                        self.selected = !self.selected;
+                        Some(ButtonEvent::Toggled(self.id))
+                    },
+                    ButtonMode::Radio => todo!(),
+                }
+            },
+        }
+
+    }
+
+    // pub fn process_events(&mut self) -> Option<ButtonEvent> {
+    //     let mut event = None;
+    //     if !self.is_visible || !self.is_enabled { return event }
+
+    //     self.is_mouse_over = self.contains_phys_position(mouse_position());
+    //     if self.is_mouse_over {
+    //         event = Some(ButtonEvent::Hovering(self.id));
+    //     }
+    //     let button_pressed = is_mouse_button_down(MouseButton::Left);
+    //     // See if button was released *this frame*.
+    //     let button_released = is_mouse_button_released(MouseButton::Left);
+
+    //     match &self.mode {
+    //         ButtonMode::Push => {
+    //             self.is_selected = self.is_mouse_over && button_pressed;
+    //             if self.is_mouse_over && button_released {
+    //                 event = Some(ButtonEvent::Pushed(self.id));
+    //                 self.is_selected = false;
+    //             }
+    //         },
+    //         ButtonMode::Toggle => {
+    //             if self.is_mouse_over && button_released {
+    //                 self.is_selected = !self.is_selected;
+    //                 event = Some(ButtonEvent::Toggled(self.id));
+    //             }
+    //         },
+    //         ButtonMode::Radio => {
+    //             if self.is_mouse_over && button_released {
+    //                 if !self.is_selected {
+    //                     event = Some(ButtonEvent::Selected(self.id));
+    //                 }
+    //                 self.is_selected = true;
+    //             }
+    //         },
+    //     }
+    //     event
+    // }
+
+    pub fn draw(&self) {
+        
+        self.drawable.draw(&self.transform);
+    }
+
+}
+
+pub struct Button2 {
     /// Position in physical pixels of the top-left corner.
     /// Use set_logi_position for logical pixel positioning.
     pub phys_position: (f32, f32),
@@ -61,7 +172,7 @@ pub struct Button {
 /// Creates a new Button with the given logical position, texture, mode, and id.
 /// The texture will be automatically scaled, if needed, for the dpi scale.
 /// In view.rs, see IMAGE_ASSETS_SCALE.
-impl Button {
+impl Button2 {
     pub fn new(
         logi_position: (f32, f32), 
         texture: Texture2D, 

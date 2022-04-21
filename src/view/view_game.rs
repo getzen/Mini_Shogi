@@ -165,10 +165,10 @@ impl ViewGame {
     }
 
     pub fn move_piece_on_grid(&mut self, id: usize, to_index: usize) {
-        let to_logi_position = self.center_position_for(to_index);
+        let logi_end_position = self.center_position_for(to_index);
         if let Some(piece) = self.piece_for_id(id) {
-            if to_logi_position != piece.transform.get_logi_position() {
-                piece.transform.animate_position(to_logi_position, Duration::from_secs_f32(MOVE_DURATION));
+            if logi_end_position != piece.transform.get_logi_position() {
+                piece.move_to(logi_end_position, Duration::from_secs_f32(MOVE_DURATION));
                 play_sound_once(self.piece_move);
             }
         }
@@ -177,19 +177,19 @@ impl ViewGame {
     fn move_piece_to_reserve(&mut self, player: usize, id: usize, reserve_index: usize, count_index: usize) {
         let reserve_pos = self.reserve_boxes[player].get(&reserve_index).unwrap().transform.get_logi_position();
         if let Some(piece) = self.piece_for_id(id) {
-                let mut to_logi_position = reserve_pos;
+                let mut logi_end_position = reserve_pos;
                 if player == 0 {
-                    to_logi_position.1 -= RESERVE_PIECE_OFFSET * count_index as f32;
+                    logi_end_position.1 -= RESERVE_PIECE_OFFSET * count_index as f32;
                 } else {
-                    to_logi_position.1 += RESERVE_PIECE_OFFSET * count_index as f32;
+                    logi_end_position.1 += RESERVE_PIECE_OFFSET * count_index as f32;
                 }
                 let mut theta: f32 = 0.0;
                 if player == 1 {
                     theta = std::f32::consts::PI
                 }
                 piece.transform.rotation = theta;
-                if to_logi_position != piece.transform.get_logi_position() {
-                    piece.transform.animate_position(to_logi_position, Duration::from_secs_f32(MOVE_DURATION));
+                if logi_end_position != piece.transform.get_logi_position() {
+                    piece.move_to(logi_end_position, Duration::from_secs_f32(MOVE_DURATION));
                     play_sound_once(self.piece_capture);
                 }
         }
