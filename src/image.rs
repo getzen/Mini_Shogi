@@ -6,7 +6,7 @@ use std::time::Duration;
 use macroquad::prelude::*;
 
 use crate::lerp::Lerp;
-use crate::View;
+use crate::view::*;
 
 pub struct Image {
     /// Position in physical pixels of the center.
@@ -45,9 +45,9 @@ impl Image {
     /// IMAGE_ASSETS_SCALE.
     pub fn new(logi_position: (f32, f32), texture: Texture2D) -> Self {
         Self {
-            phys_position: View::phys_pos(logi_position),
+            phys_position: phys_pos(logi_position),
             rotation: 0.0,
-            size: (texture.width() * View::adj_scale(), texture.height() * View::adj_scale()),
+            size: (texture.width() * adj_scale(), texture.height() * adj_scale()),
             texture,
             color: WHITE,
             z_order: 0,
@@ -83,7 +83,6 @@ impl Image {
         self.size.1 = logi_size.1 * View::adj_scale();
     }
 
-    #[allow(dead_code)]
     /// Set the texture size using the given scale. Considers dpi scale.
     pub fn scale_by(&mut self, scale: (f32, f32)) {
         self.size.0 = self.texture.width() * View::adj_scale() * scale.0;

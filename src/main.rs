@@ -18,15 +18,17 @@ mod sprite;
 mod text;
 mod view;
 mod widget_button_bar;
-mod view_game;
-mod view_intro;
-mod view_settings;
-mod view_rules;
+// mod widget_components;
+// mod view_game;
+// mod view_intro;
+// mod view_settings;
+// mod view_rules;
 mod widget_button;
+mod widget_container;
 mod widget_slider;
 
 use crate::controller::Controller;
-use crate::view::View;
+//use crate::view::View;
 
 fn conf() -> Conf {
     Conf {
@@ -44,7 +46,7 @@ fn conf() -> Conf {
 
 #[macroquad::main(conf)]
 async fn main() {
-    println!("dpi_scale: {}", View::dpi_scale());
+    println!("dpi_scale: {}", crate::view::dpi_scale());
     let mut controller = Controller::new().await;
     controller.prepare().await;
     controller.go().await;
