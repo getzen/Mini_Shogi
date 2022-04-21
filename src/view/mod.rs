@@ -1,12 +1,14 @@
 // Mod.rs
 
-mod animators;
-mod button;
-mod drawable;
-mod eventable;
-mod image;
-mod sprite;
-mod transform;
+pub mod animators;
+pub mod button;
+pub mod draw_text;
+pub mod draw_texture;
+pub mod eventable;
+pub mod image;
+pub mod sprite;
+pub mod label;
+pub mod transform;
 
 // mods for this app
 pub mod view_game;

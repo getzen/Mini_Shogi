@@ -13,8 +13,9 @@ use crate::view::image::Image;
 
 use crate::controller::Player;
 use crate::controller::PlayerKind::*;
-use crate::text::Text;
-use crate::widget_button::*;
+use crate::view::button::Button;
+use crate::view::button::ButtonEvent;
+use crate::view::label::Label;
 use crate::widget_slider::*;
 
 // Widget IDs
@@ -35,9 +36,9 @@ pub struct ViewSettings {
     background_image: Image,
     buttons: HashMap<usize, Button>,
     slider_0: Slider,
-    slider_0_text: Text,
+    slider_0_text: Label,
     slider_1: Slider,
-    slider_1_text: Text,
+    slider_1_text: Label,
     players: Vec<Player>,
 }
 
@@ -50,10 +51,10 @@ impl ViewSettings {
             buttons: HashMap::new(),
 
             slider_0: Slider::new((300., 200.), 200., 1., 1., 1., 0),
-            slider_0_text: Text::new((400., 242.), "hello".to_string(), 18, Some("Menlo")).await,
+            slider_0_text: Label::new((400., 242.), true, "hello".to_string(), 18, Some("Menlo")),
 
             slider_1: Slider::new((300., 345.), 200., 1., 1., 1., 1),
-            slider_1_text: Text::new((400., 387.), "world".to_string(), 18, Some("Menlo")).await,
+            slider_1_text: Label::new((400., 387.), true, "world".to_string(), 18, Some("Menlo")),
 
             players: Vec::new(),
         }
@@ -65,29 +66,29 @@ impl ViewSettings {
         let mut button;
 
         texture = AssetLoader::get_texture("okay");
-        button = Button::new((365., 410.), texture, ButtonMode::Push, OKAY_ID);
+        button = Button::new((365., 410.), texture, Some(OKAY_ID));
         self.buttons.insert(OKAY_ID, button);
 
         // Player 0
         texture = AssetLoader::get_texture("button_human");
-        button = Button::new((385., 140.), texture, ButtonMode::Radio, HUMAN_0_ID);
-        button.group_id = 0;
+        button = Button::new((385., 140.), texture, Some(HUMAN_0_ID));
+        //button.group_id = 0;
         self.buttons.insert(HUMAN_0_ID, button);
 
         texture = AssetLoader::get_texture("button_ai");
-        button = Button::new((480., 140.), texture, ButtonMode::Radio, AI_0_ID);
-        button.group_id = 0;
+        button = Button::new((480., 140.), texture, Some(AI_0_ID));
+        //button.group_id = 0;
         self.buttons.insert(AI_0_ID, button);
 
         // Player 1
         texture = AssetLoader::get_texture("button_human");
-        button = Button::new((400., 290.), texture, ButtonMode::Radio, HUMAN_1_ID);
-        button.group_id = 1;
+        button = Button::new((400., 290.), texture, Some(HUMAN_1_ID));
+        //button.group_id = 1;
         self.buttons.insert(HUMAN_1_ID, button);
 
         texture = AssetLoader::get_texture("button_ai");
-        button = Button::new((495., 290.), texture, ButtonMode::Radio, AI_1_ID);
-        button.group_id = 1;
+        button = Button::new((495., 290.), texture, Some(AI_1_ID));
+        //button.group_id = 1;
         self.buttons.insert(AI_1_ID, button);
 
         // Set common elements
@@ -97,10 +98,7 @@ impl ViewSettings {
         }
 
         self.slider_0_text.set_color(BLACK);
-        self.slider_0_text.centered = true;
-
         self.slider_1_text.set_color(BLACK);
-        self.slider_1_text.centered = true;
 
         self.set_player_controls(0);
         self.set_player_controls(1);
@@ -109,8 +107,8 @@ impl ViewSettings {
     /// Selects the given button and deselects all others in the group.
     fn select_button(&mut self, group_id: usize, button_id: usize) {
         for button in self.buttons.values_mut() {
-            if button.group_id != group_id { continue; }
-            button.is_selected = button.id == button_id;
+            //if button.group_id != group_id { continue; }
+            button.selected = button.id.unwrap() == button_id;
         }
     }
 
@@ -125,11 +123,11 @@ impl ViewSettings {
             match self.players[0].kind {
                 Human => {
                     self.slider_0.is_visible = false;
-                    self.slider_0_text.is_visible = false;
+                    self.slider_0_text.draw_text.visible = false;
                 },
                 AI => {
                     self.slider_0.is_visible = true;
-                    self.slider_0_text.is_visible = true;
+                    self.slider_0_text.draw_text.visible = true;
                     self.slider_0.value = self.players[0].search_depth as f32;
                     self.slider_0.max_value = 9.;
                     self.slider_0.tick_divisions = 7;
@@ -148,11 +146,11 @@ impl ViewSettings {
             match self.players[1].kind {
                 Human => {
                     self.slider_1.is_visible = false;
-                    self.slider_1_text.is_visible = false;
+                    self.slider_1_text.draw_text.visible = false;
                 },
                 AI => {
                     self.slider_1.is_visible = true;
-                    self.slider_1_text.is_visible = true;
+                    self.slider_1_text.draw_text.visible = true;
                     self.slider_1.value = self.players[1].search_depth as f32;
                     self.slider_1.max_value = 9.;
                     self.slider_1.tick_divisions = 7;
@@ -163,58 +161,40 @@ impl ViewSettings {
     }
 
     pub fn process_events(&mut self) {
-        // Track which player controls to update, if any.
-        let mut player = None;
-
         // Buttons. They return Option<ButtonEvent>.
         for button in self.buttons.values_mut() {
             if let Some(event) = button.process_events() {
                 match event {
-                    ButtonEvent::Hovering(_id) => {},
                     ButtonEvent::Pushed(id) => {
                         // Start and Exit buttons
                         match id {
-                            OKAY_ID => {
+                            Some(OKAY_ID) => {
                                 self.tx.send(
                                     ViewSettingsMessage::ShouldStart(self.players.clone()))
                                     .expect("Intro message send error.");
                             },
+                            Some(HUMAN_0_ID) => {
+                                self.players[0].kind = Human;
+                                self.set_player_controls(0);
+                            }
+                            Some(AI_0_ID) => {
+                                self.players[0].kind = AI;
+                                self.set_player_controls(0);
+                            }
+                            Some(HUMAN_1_ID) => {
+                                self.players[1].kind = Human;
+                                self.set_player_controls(1);
+                            }
+                            Some(AI_1_ID) => {
+                                self.players[1].kind = AI;
+                                self.set_player_controls(1);
+                            }
                             _ => {},
                         }
                     },
-                    ButtonEvent::Toggled(_id) => {},
-                    ButtonEvent::Selected(id) => {
-                        
-                        let kind = match id {
-                            HUMAN_0_ID => {
-                                player = Some(0);
-                                Human
-                            },
-                            AI_0_ID => {
-                                player = Some(0);
-                                AI
-                            },
-                            HUMAN_1_ID => {
-                                player = Some(1);
-                                Human
-                            },
-                            AI_1_ID => {
-                                player = Some(1);
-                                AI
-                            }
-                            _ => {panic!()},
-                        };
-                        if player.is_some() && player.unwrap() == 0 {
-                            self.players[0].kind = kind;
-                        } else if player.is_some() && player.unwrap() == 1 {
-                            self.players[1].kind = kind;
-                        }
-                    },
+                    _ => {},
                 }
             }
-        }
-        if let Some(player) = player {
-            self.set_player_controls(player);
         }
                 
         // Slider 0. Sliders return Option<SliderEvent>.
@@ -250,19 +230,23 @@ impl ViewSettings {
         }
 
         self.slider_0.draw();
+
         // Use live values here so user sees the values change when dragging.
-        self.slider_0_text.text = match self.players[0].kind {
+        let text_0 = match self.players[0].kind {
             Human => "".to_string(),
             AI => format!("{} move look-ahead", self.slider_0.nearest_snap_value()),
         };
+        self.slider_0_text.set_text(text_0);
         self.slider_0_text.draw();
 
         self.slider_1.draw();
+
         // Use live values here so user sees the values change when dragging.
-        self.slider_1_text.text = match self.players[1].kind {
+        let text_1 = match self.players[1].kind {
             Human => "".to_string(),
             AI => format!("{} move look-ahead", self.slider_1.nearest_snap_value() as usize),
         };
+        self.slider_1_text.set_text(text_1);
         self.slider_1_text.draw();
     }
 }

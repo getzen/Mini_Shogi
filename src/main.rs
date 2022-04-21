@@ -13,10 +13,8 @@ mod controller;
 mod game;
 
 mod piece;
-mod text;
 mod view;
 mod widget_button_bar;
-mod widget_button;
 mod widget_container;
 mod widget_slider;
 

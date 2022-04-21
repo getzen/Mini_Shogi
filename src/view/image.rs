@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use macroquad::prelude::{Texture2D, Color, WHITE};
 
-use crate::view::drawable::Drawable;
+use crate::view::draw_texture::DrawTexture;
 use crate::view::transform::Transform;
 
 use crate::view::*;
@@ -15,7 +15,7 @@ use super::animators::ColorAnimator;
 pub struct Image {
     pub id: Option<usize>,
     pub transform: Transform,
-    pub drawable: Drawable,
+    pub drawable: DrawTexture,
 
     fader: Option<ColorAnimator>,
 }
@@ -27,7 +27,7 @@ impl Image {
         Self {
             id,
             transform: Transform::new(phys_position, 0.0),
-            drawable: Drawable::new(texture, centered),
+            drawable: DrawTexture::new(texture, centered),
             fader: None,
         }
     }

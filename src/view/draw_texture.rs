@@ -5,7 +5,7 @@ use macroquad::prelude::*;
 use crate::view::*;
 use crate::view::transform::Transform;
 
-pub struct Drawable {
+pub struct DrawTexture {
     pub visible: bool,
     pub centered: bool,
     pub texture: Texture2D,
@@ -16,7 +16,7 @@ pub struct Drawable {
     params: DrawTextureParams,
 }
 
-impl Drawable {
+impl DrawTexture {
     pub fn new(texture: Texture2D, centered: bool) -> Self {
         Self {
             visible: true,

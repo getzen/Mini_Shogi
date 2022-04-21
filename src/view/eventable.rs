@@ -3,7 +3,7 @@
 use macroquad::prelude::*;
 
 use crate::view::transform::Transform;
-use crate::view::drawable::Drawable;
+use crate::view::draw_texture::DrawTexture;
 
 pub enum Event {
     MouseEntered,
@@ -26,10 +26,10 @@ impl Eventable {
             left_mouse_down: false,
         }
     }
-    
+
     /// Test whether the physical point lies in the texture rectangle, considering rotation.
     /// Note: Macroquad's mouse_position() gives the physical location of the mouse.
-    pub fn contains_phys_position(&self, phy_position: (f32, f32), transform: &Transform, draw: &Drawable) -> bool {
+    pub fn contains_phys_position(&self, phy_position: (f32, f32), transform: &Transform, draw: &DrawTexture) -> bool {
         // Get the net test point relative to the sprite's position.
         let net_x = phy_position.0 - transform.phys_position.0;
         let net_y = phy_position.1 - transform.phys_position.1;
@@ -43,7 +43,7 @@ impl Eventable {
         f32::abs(rot_x) < w / 2.0 && f32::abs(rot_y) < h / 2.0
     }
 
-    pub fn process_events(&mut self, transform: &Transform, draw: &Drawable) -> Option<Event> {
+    pub fn process_events(&mut self, transform: &Transform, draw: &DrawTexture) -> Option<Event> {
         if !self.enabled { return None }
 
         let mouse_over = self.contains_phys_position(mouse_position(), transform, draw);

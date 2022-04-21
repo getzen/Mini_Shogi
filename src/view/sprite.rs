@@ -9,7 +9,7 @@ use std::time::Duration;
 use macroquad::prelude::Color;
 use macroquad::prelude::Texture2D;
 
-use crate::view::drawable::Drawable;
+use crate::view::draw_texture::DrawTexture;
 use crate::view::eventable::Event;
 use crate::view::eventable::Eventable;
 use crate::view::transform::Transform;
@@ -21,7 +21,7 @@ use super::animators::PositionAnimator;
 pub struct Sprite {
     pub id: Option<usize>,
     pub transform: Transform,
-    pub drawable: Drawable,
+    pub drawable: DrawTexture,
     pub eventable: Eventable,
 
     // This app
@@ -42,7 +42,7 @@ impl Sprite {
         Self {
             id,
             transform: Transform::new(phys_position, 0.0),
-            drawable: Drawable::new(texture, true),
+            drawable: DrawTexture::new(texture, true),
             eventable: Eventable::new(),
 
             mover: None,

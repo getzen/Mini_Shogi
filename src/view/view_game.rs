@@ -14,7 +14,7 @@ use crate::controller::AppState;
 use crate::controller::AppState::*;
 use crate::piece::Piece;
 use crate::piece::PieceKind::{self, *};
-use crate::text::Text;
+use crate::view::label::Label;
 use crate::view::sprite::Sprite;
 
 const BACKGROUND_COLOR: (u8, u8, u8) = (144, 144, 137);
@@ -48,8 +48,8 @@ pub struct ViewGame {
     pieces: Vec<Sprite>, // a vec so it can be sorted by z_order
     pub selected_piece: Option<usize>,
     pub move_indices: Vec<usize>, // all the spots the currently selected piece can move to
-    status_text: Text,
-    ai_progress_text: Text,
+    status_text: Label,
+    ai_progress_text: Label,
     piece_move: Sound,
     piece_capture: Sound,
 }
@@ -64,26 +64,26 @@ impl ViewGame {
             pieces: Vec::new(),
             selected_piece: None,
             move_indices: Vec::new(),
-            status_text: Text::new(
+            status_text: Label::new(
                 TEXT_STATUS_CENTER,
+                true,
                 "Welcome!".to_owned(),
                 18,
                 Some("Menlo"),
-            ).await,
-            ai_progress_text: Text::new(
+            ),
+            ai_progress_text: Label::new(
                 AI_PROGRESS_CORNER,
+                false,
                 "".to_owned(), 
                 12,
                 Some("Menlo"),
-            ).await,
+            ),
             piece_move: AssetLoader::get_sound("piece_move").await,
             piece_capture: AssetLoader::get_sound("piece_capture").await,
         }
     }
 
     pub async fn prepare(&mut self) {
-        self.status_text.centered = true;
-
         // Board
         let mut texture = AssetLoader::get_texture("square");
         for c in 0..self.columns {
@@ -342,10 +342,10 @@ impl ViewGame {
             _ => {""},
         };
 
-        self.status_text.text = text.to_owned();
+        self.status_text.set_text(text.to_owned());
         self.status_text.draw();
 
-        self.ai_progress_text.text = other_text.to_owned();
+        self.ai_progress_text.set_text(other_text.to_owned());
         self.ai_progress_text.draw();
     }
 

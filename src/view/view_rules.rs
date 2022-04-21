@@ -5,8 +5,9 @@ use std::sync::mpsc::Sender;
 use macroquad::prelude::*;
 
 use crate::asset_loader::AssetLoader;
+use crate::view::button::Button;
+use crate::view::button::ButtonEvent;
 use crate::view::image::Image;
-use crate::widget_button::*;
 
 pub enum ViewRulesMessage {
     ShouldClose,
@@ -22,7 +23,7 @@ pub struct ViewRules {
 impl ViewRules {
     pub async fn new(tx: Sender<ViewRulesMessage>) -> Self {       
         let close_texture = AssetLoader::get_texture("close");
-        let mut button = Button::new((680., 745.), close_texture, ButtonMode::Push, 0);
+        let mut button = Button::new((680., 745.), close_texture, None);
         button.color = LIGHTGRAY;
         button.selected_color = Some(Color::from_rgba(246, 194, 81, 255));
 
@@ -42,7 +43,7 @@ impl ViewRules {
         }
         // Close button
         let event_opt = self.close_button.process_events();
-        if event_opt == Some(ButtonEvent::Pushed(0)) {
+        if event_opt == Some(ButtonEvent::Pushed(None)) {
             self.tx.send(ViewRulesMessage::ShouldClose).expect("Rules message send error.");
         }
     }

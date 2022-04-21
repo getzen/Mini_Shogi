@@ -15,12 +15,12 @@ use crate::game::*;
 use crate::game::{Game, GameState};
 use crate::controller::AppState::*;
 use crate::controller::PlayerKind::*;
+use crate::view::button::Button;
 use crate::view::view_game::{ViewGame, ViewGameMessage};
 use crate::view::view_intro::ViewIntro;
 use crate::view::view_settings::{ViewSettings, ViewSettingsMessage};
 use crate::view::view_rules::ViewRules;
 use crate::view::view_rules::ViewRulesMessage;
-use crate::widget_button::*;
 use crate::widget_button_bar::ButtonBar;
 
 #[derive(Clone, Copy)]
@@ -110,19 +110,19 @@ impl Controller {
     pub async fn prepare(&mut self) {
         // Construct ButtonBar (menu bar)
         let mut texture = AssetLoader::get_texture("bar_about");
-        let mut button = Button::new((0.,0.), texture, ButtonMode::Push, BAR_ABOUT_ID);
+        let mut button = Button::new((0.,0.), texture, Some(BAR_ABOUT_ID));
         self.button_bar.add_button(button);
 
         texture = AssetLoader::get_texture("bar_rules");
-        button = Button::new((0.,0.), texture, ButtonMode::Push, BAR_RULES_ID);
+        button = Button::new((0.,0.), texture, Some(BAR_RULES_ID));
         self.button_bar.add_button(button);
 
         texture = AssetLoader::get_texture("bar_settings");
-        button = Button::new((0.,0.), texture, ButtonMode::Push, BAR_SETTINGS_ID);
+        button = Button::new((0.,0.), texture, Some(BAR_SETTINGS_ID));
         self.button_bar.add_button(button);
 
         texture = AssetLoader::get_texture("bar_quit");
-        button = Button::new((0.,0.), texture, ButtonMode::Push, BAR_QUIT_ID);
+        button = Button::new((0.,0.), texture, Some(BAR_QUIT_ID));
         self.button_bar.add_button(button);
 
         // Must do after buttons are added.
