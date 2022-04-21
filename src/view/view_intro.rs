@@ -4,7 +4,7 @@
 use std::time::Duration;
 
 use crate::asset_loader::AssetLoader;
-use crate::image::Image;
+use crate::view::image::Image;
 
 pub struct ViewIntro {
     /// When true, this view should be update and drawn.
@@ -21,7 +21,7 @@ impl ViewIntro {
 
         Self {
             visible: true,
-            image: Image::new((200., 210.), texture),
+            image: Image::new((200., 210.), texture, false, None),
             elapsed_time: Duration::ZERO,
             fade_active: false,
         }
@@ -38,7 +38,7 @@ impl ViewIntro {
             // Start fade if it's time.
             self.elapsed_time += time_delta;
             if self.elapsed_time > Duration::from_secs(2) {
-                self.image.animate_fade_out(Duration::from_secs(3));
+                self.image.drawable.animate_fade_out(Duration::from_secs(3));
                 self.fade_active = true;
             }
         }

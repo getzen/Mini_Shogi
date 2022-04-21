@@ -1,18 +1,17 @@
 
 mod drawable;
 mod eventable;
+mod image;
 mod lerp;
 mod transform;
 
+// mods for this app
 mod view_game;
 mod view_intro;
 mod view_rules;
 mod view_settings;
 
-// View
 // Utility methods related to high-resolution image display.
-
-use macroquad::prelude::get_internal_gl;
 
 /// The ratio of the image actual size versus the intended display size.
 /// For example, it should be 2.0 if images are twice their intended display
@@ -23,7 +22,7 @@ const IMAGE_ASSETS_SCALE: f32 = 2.0;
 /// Returns the number of physical pixels per logical pixel.
 pub fn dpi_scale() -> f32 {
     unsafe {
-        get_internal_gl().quad_context.dpi_scale()
+        macroquad::prelude::get_internal_gl().quad_context.dpi_scale()
     }
 }
 

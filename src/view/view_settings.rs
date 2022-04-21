@@ -4,13 +4,15 @@
 use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 
-use macroquad::prelude::*;
+use macroquad::prelude::Color;
+use macroquad::prelude::LIGHTGRAY;
+
 
 use crate::asset_loader::AssetLoader;
+use crate::view::image::Image;
 
 use crate::controller::Player;
 use crate::controller::PlayerKind::*;
-use crate::image::Image;
 use crate::text::Text;
 use crate::widget_button::*;
 use crate::widget_slider::*;
@@ -44,7 +46,7 @@ impl ViewSettings {
         let texture = AssetLoader::get_texture("view_settings"); 
         Self {
             tx,
-            background_image: Image::new((200., 100.), texture),
+            background_image: Image::new((200., 100.), texture, false, None),
             buttons: HashMap::new(),
 
             slider_0: Slider::new((300., 200.), 200., 1., 1., 1., 0),
