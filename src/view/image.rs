@@ -1,8 +1,6 @@
 /// Image
 /// Draws a non-centered texture with a position and rotation.
 
-
-
 use std::time::Duration;
 
 use macroquad::prelude::Texture2D;
@@ -23,13 +21,12 @@ impl Image {
     /// be automatically scaled, if needed, for the dpi scale. In view.rs, see
     /// IMAGE_ASSETS_SCALE.
     pub fn new(logi_position: (f32, f32), texture: Texture2D, centered: bool, id: Option<usize>) -> Self {
-        
         let phys_position = phys_pos(logi_position);
-        let transform = Transform::new(phys_position, 0.0);
-        let drawable = Drawable::new(texture, centered);
 
         Self {
-            transform, drawable, id,
+            id,
+            transform: Transform::new(phys_position, 0.0),
+            drawable: Drawable::new(texture, centered),
         }
     }
 

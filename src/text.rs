@@ -9,7 +9,6 @@
 
 use macroquad::prelude::*;
 
-use crate::View;
 use crate::asset_loader::AssetLoader;
 
 pub struct Text {

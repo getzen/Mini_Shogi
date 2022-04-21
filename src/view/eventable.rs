@@ -13,12 +13,20 @@ pub enum Event {
 }
 
 pub struct Eventable {
-    enabled: bool,
-    mouse_over: bool,
-    left_mouse_down: bool,
+    pub enabled: bool,
+    pub mouse_over: bool,
+    pub left_mouse_down: bool,
 }
 
 impl Eventable {
+    pub fn new() -> Self {
+        Self {
+            enabled: true,
+            mouse_over: false,
+            left_mouse_down: false,
+        }
+    }
+    
     /// Test whether the physical point lies in the texture rectangle, considering rotation.
     /// Note: Macroquad's mouse_position() gives the physical location of the mouse.
     pub fn contains_phys_position(&self, phy_position: (f32, f32), transform: &Transform, draw: &Drawable) -> bool {

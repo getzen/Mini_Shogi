@@ -13,15 +13,9 @@ mod controller;
 mod game;
 
 mod piece;
-mod sprite;
 mod text;
 mod view;
 mod widget_button_bar;
-// mod widget_components;
-// mod view_game;
-// mod view_intro;
-// mod view_settings;
-// mod view_rules;
 mod widget_button;
 mod widget_container;
 mod widget_slider;

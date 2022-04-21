@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 
 use macroquad::prelude::Color;
-use macroquad::prelude::LIGHTGRAY;
+use macroquad::prelude::{BLACK, LIGHTGRAY};
 
 
 use crate::asset_loader::AssetLoader;

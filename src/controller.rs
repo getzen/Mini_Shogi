@@ -15,11 +15,11 @@ use crate::game::*;
 use crate::game::{Game, GameState};
 use crate::controller::AppState::*;
 use crate::controller::PlayerKind::*;
-use crate::view_game::{ViewGame, ViewGameMessage};
-use crate::view_intro::ViewIntro;
-use crate::view_settings::{ViewSettings, ViewSettingsMessage};
-use crate::view_rules::ViewRules;
-use crate::view_rules::ViewRulesMessage;
+use crate::view::view_game::{ViewGame, ViewGameMessage};
+use crate::view::view_intro::ViewIntro;
+use crate::view::view_settings::{ViewSettings, ViewSettingsMessage};
+use crate::view::view_rules::ViewRules;
+use crate::view::view_rules::ViewRulesMessage;
 use crate::widget_button::*;
 use crate::widget_button_bar::ButtonBar;
 

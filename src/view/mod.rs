@@ -3,21 +3,23 @@ mod drawable;
 mod eventable;
 mod image;
 mod lerp;
+mod sprite;
 mod transform;
 
 // mods for this app
-mod view_game;
-mod view_intro;
-mod view_rules;
-mod view_settings;
+pub mod view_game;
+pub mod view_intro;
+pub mod view_rules;
+pub mod view_settings;
 
-// Utility methods related to high-resolution image display.
 
 /// The ratio of the image actual size versus the intended display size.
 /// For example, it should be 2.0 if images are twice their intended display
 /// size for sharpness with Retina displays. Consider ending assets names with
 /// "_2x" as a reminder.
 const IMAGE_ASSETS_SCALE: f32 = 2.0;
+
+// Utility methods related to high-resolution image display.
 
 /// Returns the number of physical pixels per logical pixel.
 pub fn dpi_scale() -> f32 {

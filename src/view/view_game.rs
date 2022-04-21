@@ -14,8 +14,8 @@ use crate::controller::AppState;
 use crate::controller::AppState::*;
 use crate::piece::Piece;
 use crate::piece::PieceKind::{self, *};
-use crate::sprite::*;
 use crate::text::Text;
+use crate::view::sprite::Sprite;
 
 const BACKGROUND_COLOR: (u8, u8, u8) = (144, 144, 137);
 const BOARD_CORNER: (f32, f32) = (165.0, 95.0);
@@ -90,7 +90,7 @@ impl ViewGame {
             for r in 0..self.rows {
                 let index = Game::column_row_to_index(c, r);
                 let position = self.center_position_for(index);
-                let mut square = Sprite::new(position, texture);
+                let mut square = Sprite::new(position, texture, None);
                 square.alt_color = Some(LIGHTGRAY);
                 self.squares.insert(index, square);
             }
@@ -98,9 +98,9 @@ impl ViewGame {
 
         // Promotion lines
         texture = AssetLoader::get_texture("line");
-        let line_top = Sprite::new(PROMO_LINE_TOP, texture);
+        let line_top = Sprite::new(PROMO_LINE_TOP, texture, None);
         self.promotion_lines.push(line_top);
-        let line_bottom = Sprite::new(PROMO_LINE_BOTTOM, texture);
+        let line_bottom = Sprite::new(PROMO_LINE_BOTTOM, texture, None);
         self.promotion_lines.push(line_bottom);
 
         // Reserves
@@ -109,12 +109,12 @@ impl ViewGame {
             // Reserve, player 0
             let mut pos_x = RESERVE_0_CENTER.0;
             let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET); 
-            let mut reserve = Sprite::new((pos_x, pos_y), texture);
+            let mut reserve = Sprite::new((pos_x, pos_y), texture, None);
             self.reserve_boxes[0].insert(i, reserve);
             // Reserve, player 1
             pos_x = RESERVE_1_CENTER.0;
             pos_y = RESERVE_1_CENTER.1 + i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET);
-            reserve = Sprite::new((pos_x, pos_y), texture);
+            reserve = Sprite::new((pos_x, pos_y), texture, None);
             self.reserve_boxes[1].insert(i, reserve);
         }
 
@@ -140,12 +140,11 @@ impl ViewGame {
     pub fn add_piece(&mut self, piece: &Piece) {
         let texture = self.texture_for(piece.kind);
         let position = self.center_position_for(piece.location_index);
-        let mut sprite = Sprite::new(position, texture);
+        let mut sprite = Sprite::new(position, texture, Some(piece.id));
         if piece.player == 1 {
-            sprite.rotation = std::f32::consts::PI;
+            sprite.transform.rotation = std::f32::consts::PI;
         }
         sprite.alt_color = Some(LIGHTGRAY);
-        sprite.id = Some(piece.id);
         self.pieces.insert(piece.id, sprite);
     }
 
@@ -166,31 +165,31 @@ impl ViewGame {
     }
 
     pub fn move_piece_on_grid(&mut self, id: usize, to_index: usize) {
-        let to_position = self.center_position_for(to_index);
+        let to_logi_position = self.center_position_for(to_index);
         if let Some(piece) = self.piece_for_id(id) {
-            if to_position != piece.get_logi_position() {
-                piece.animate_move(to_position, Duration::from_secs_f32(MOVE_DURATION));
+            if to_logi_position != piece.transform.get_logi_position() {
+                piece.transform.animate_position(to_logi_position, Duration::from_secs_f32(MOVE_DURATION));
                 play_sound_once(self.piece_move);
             }
         }
     }
 
     fn move_piece_to_reserve(&mut self, player: usize, id: usize, reserve_index: usize, count_index: usize) {
-        let reserve_pos = self.reserve_boxes[player].get(&reserve_index).unwrap().get_logi_position();
+        let reserve_pos = self.reserve_boxes[player].get(&reserve_index).unwrap().transform.get_logi_position();
         if let Some(piece) = self.piece_for_id(id) {
-                let mut to_position = reserve_pos;
+                let mut to_logi_position = reserve_pos;
                 if player == 0 {
-                    to_position.1 -= RESERVE_PIECE_OFFSET * count_index as f32;
+                    to_logi_position.1 -= RESERVE_PIECE_OFFSET * count_index as f32;
                 } else {
-                    to_position.1 += RESERVE_PIECE_OFFSET * count_index as f32;
+                    to_logi_position.1 += RESERVE_PIECE_OFFSET * count_index as f32;
                 }
                 let mut theta: f32 = 0.0;
                 if player == 1 {
                     theta = std::f32::consts::PI
                 }
-                piece.rotation = theta;
-                if to_position != piece.get_logi_position() {
-                    piece.animate_move(to_position, Duration::from_secs_f32(MOVE_DURATION));
+                piece.transform.rotation = theta;
+                if to_logi_position != piece.transform.get_logi_position() {
+                    piece.transform.animate_position(to_logi_position, Duration::from_secs_f32(MOVE_DURATION));
                     play_sound_once(self.piece_capture);
                 }
         }
@@ -224,13 +223,13 @@ impl ViewGame {
             };
             for (count_index, id) in id_vec.iter().enumerate() {
                 if let Some(piece) = self.piece_for_id(*id) {
-                    piece.z_order = count_index; // position on top of previous pieces
+                    piece.drawable.z_order = count_index; // position on top of previous pieces
                 }
                 self.move_piece_to_reserve(player, *id, reserve_index, count_index);
             }
         }
         // Sort by z_order so the overlap is correct.
-        self.pieces.sort_by(|a, b| a.z_order.cmp(&b.z_order));
+        self.pieces.sort_by(|a, b| a.drawable.z_order.cmp(&b.drawable.z_order));
     }
 
     pub fn update_with_game(&mut self, game: &Game) {
@@ -250,7 +249,7 @@ impl ViewGame {
     fn update_piece_kind(&mut self, id: usize, new_kind: PieceKind) {
         let texture = self.texture_for(new_kind);
         if let Some(sprite) = self.piece_for_id(id) {
-            sprite.texture = texture;
+            sprite.drawable.texture = texture;
         }
     }
 
