@@ -44,8 +44,9 @@ impl Image {
             fader.update(time_delta);
             if fader.complete {
                 self.fader = None;
+            } else {
+                return true;
             }
-            return true;
         }
         false
     }

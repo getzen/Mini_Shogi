@@ -37,11 +37,12 @@ impl ColorAnimator {
         if percentage >= 1.0 {
             self.complete = true;
             self.color = self.end_color;
+            return;
         }
-        self.color.r += self.start_color.a + (self.end_color.r - self.start_color.r) * percentage;
-        self.color.g += self.start_color.a + (self.end_color.g - self.start_color.g) * percentage;
-        self.color.b += self.start_color.a + (self.end_color.b - self.start_color.b) * percentage;
-        self.color.a += self.start_color.a + (self.end_color.a - self.start_color.a) * percentage;
+        self.color.r = self.start_color.r + (self.end_color.r - self.start_color.r) * percentage;
+        self.color.g = self.start_color.g + (self.end_color.g - self.start_color.g) * percentage;
+        self.color.b = self.start_color.b + (self.end_color.b - self.start_color.b) * percentage;
+        self.color.a = self.start_color.a + (self.end_color.a - self.start_color.a) * percentage;
     }
 }
 
@@ -79,6 +80,7 @@ impl PositionAnimator {
         if percentage >= 1.0 {
             self.complete = true;
             self.position = self.end_position;
+            return;
         }
         self.calc_ease_out(percentage)
     }
@@ -89,7 +91,7 @@ impl PositionAnimator {
     }
 
     pub fn calc_ease_out(&mut self, percentage: f32) {
-        self.position.0 = self.start_position.0 + (self.start_position.0 - self.start_position.0) * f32::sin(std::f32::consts::PI * 0.5 * percentage);
-        self.position.1 = self.start_position.1 + (self.start_position.1 - self.start_position.1) * f32::sin(std::f32::consts::PI * 0.5 * percentage);
+        self.position.0 = self.start_position.0 + (self.end_position.0 - self.start_position.0) * f32::sin(std::f32::consts::PI * 0.5 * percentage);
+        self.position.1 = self.start_position.1 + (self.end_position.1 - self.start_position.1) * f32::sin(std::f32::consts::PI * 0.5 * percentage);
     }
 }
