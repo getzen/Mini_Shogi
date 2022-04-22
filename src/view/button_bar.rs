@@ -1,12 +1,13 @@
-use macroquad::prelude::Color;
-
 /// ButtonBar
 /// Displays a row of buttons side-by-side, similar to a menu bar,
 /// but without drop-down, sub-menu capability. Only one button may
 /// be active at a time.
 
-use crate::View;
-use crate::widget_button::{Button, ButtonEvent};
+use macroquad::prelude::Color;
+
+use crate::view::*;
+use crate::view::button::Button;
+use crate::view::button::ButtonEvent;
 
 // pub enum ButtonBarMessage {
 //     Pushed(usize), // button index/id
@@ -33,7 +34,7 @@ impl ButtonBar {
 
     pub fn new(logi_position: (f32, f32), radio_behavior: bool) -> Self {       
         Self {
-            phys_position: View::phys_pos(logi_position),
+            phys_position: phys_pos(logi_position),
             buttons: Vec::new(),
             margin: 0.0,
             selected_id: None,
@@ -59,14 +60,14 @@ impl ButtonBar {
 
     pub fn add_button(&mut self, mut button: Button) -> usize {
         let index = self.buttons.len();
-        button.id = index;
+        button.id = Some(index);
         self.buttons.push(button);
         index
     }
 
     pub fn unselect_all(&mut self) {
         for button in &mut self.buttons {
-            button.is_selected = false;
+            button.selected = false;
         }
         self.selected_id = None;
     }
@@ -74,10 +75,10 @@ impl ButtonBar {
     pub fn set_enabled(&mut self, enabled: bool) {
         self.enabled = enabled;
         for button in &mut self.buttons {
-            button.is_enabled = enabled;
+            button.eventable.enabled = enabled;
         }
         if enabled && self.selected_id.is_some() {
-            self.buttons[self.selected_id.unwrap()].is_selected = true;
+            self.buttons[self.selected_id.unwrap()].selected = true;
         }
     }
 
@@ -89,19 +90,20 @@ impl ButtonBar {
                 match event {
                     ButtonEvent::Pushed(id) => {
                         if let Some(old_id) = self.selected_id {
-                            if old_id != id {
-                                self.buttons[old_id].is_selected = false;
-                                self.selected_id = Some(id);
-                                return Some(id);
+                            if old_id != id.unwrap() {
+                                self.buttons[old_id].selected = false;
+                                self.selected_id = id;
+                                return id;
                             }
                         }
                         //
-                        self.selected_id = Some(id);
-                        return Some(id);
+                        self.selected_id = id;
+                        button.selected = true;
+                        return id;
                     },
-                    ButtonEvent::Hovering(_) => {},
+                    //ButtonEvent::Hovering(_) => {},
                     ButtonEvent::Toggled(_) => {},
-                    ButtonEvent::Selected(_) => {},
+                    //ButtonEvent::Selected(_) => {},
                 }
             }
         }
@@ -114,10 +116,10 @@ impl ButtonBar {
         let (mut x, y) = self.phys_position;
 
         for button in &mut self.buttons {
-            button.set_logi_position((x, y));
+            button.transform.phys_position = (x, y);
             button.draw();
 
-            let tex_width = button.texture.width() / View::dpi_scale();
+            let tex_width = button.drawable.texture.width();
             x += tex_width + self.margin;
         }
     }

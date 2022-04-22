@@ -1,12 +1,9 @@
 // Slider
 
-//use std::sync::mpsc::Sender;
-
 use macroquad::prelude::*;
 
-use crate::View;
-//use crate::widget_message::WidgetMessage;
-//use crate::widget_message::WidgetMessage::*;
+use crate::view::*;
+
 
 #[derive(Debug)]
 pub enum SliderEvent {
@@ -64,11 +61,11 @@ impl Slider {
         id: usize) -> Self {
 
         Self {
-            phys_position: View::phys_pos(logi_position),
-            phys_width: width * View::dpi_scale(),
-            phys_line_thickness: 1.0 * View::dpi_scale(),
-            phys_tick_height: 10.0 * View::dpi_scale(),
-            phys_value_marker_radius: 10.0 * View::dpi_scale(),
+            phys_position: phys_pos(logi_position),
+            phys_width: width * dpi_scale(),
+            phys_line_thickness: 1.0 * dpi_scale(),
+            phys_tick_height: 10.0 * dpi_scale(),
+            phys_value_marker_radius: 10.0 * dpi_scale(),
             is_value_marker_solid: true,
             tick_divisions: 0,
             show_ticks: true,
@@ -87,13 +84,13 @@ impl Slider {
     #[allow(dead_code)]
     /// Get the logical position of the sprite.
     pub fn get_logi_position(&self) -> (f32, f32) {
-        View::logi_pos(self.phys_position)
+        logi_pos(self.phys_position)
     }
 
     #[allow(dead_code)]
     /// Set the logical position of the sprite.
     pub fn set_logi_position(&mut self, logi_position: (f32, f32)) {
-        self.phys_position = View::phys_pos(logi_position);
+        self.phys_position = phys_pos(logi_position);
     }
 
     fn division_width(&self) -> f32 {

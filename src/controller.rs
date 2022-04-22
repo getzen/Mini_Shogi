@@ -21,7 +21,7 @@ use crate::view::view_intro::ViewIntro;
 use crate::view::view_settings::{ViewSettings, ViewSettingsMessage};
 use crate::view::view_rules::ViewRules;
 use crate::view::view_rules::ViewRulesMessage;
-use crate::widget_button_bar::ButtonBar;
+use crate::view::button_bar::ButtonBar;
 
 #[derive(Clone, Copy)]
 pub struct Player {

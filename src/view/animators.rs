@@ -83,12 +83,12 @@ impl PositionAnimator {
         self.calc_ease_out(percentage)
     }
 
-    pub fn calc_linear(&self, percentage: f32) {
+    pub fn calc_linear(&mut self, percentage: f32) {
         self.position.0 = self.start_position.0 + (self.end_position.0 - self.start_position.0) * percentage;
         self.position.1 = self.start_position.1 + (self.end_position.1 - self.start_position.1) * percentage;
     }
 
-    pub fn calc_ease_out(&self, percentage: f32) {
+    pub fn calc_ease_out(&mut self, percentage: f32) {
         self.position.0 = self.start_position.0 + (self.start_position.0 - self.start_position.0) * f32::sin(std::f32::consts::PI * 0.5 * percentage);
         self.position.1 = self.start_position.1 + (self.start_position.1 - self.start_position.1) * f32::sin(std::f32::consts::PI * 0.5 * percentage);
     }

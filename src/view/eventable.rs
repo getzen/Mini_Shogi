@@ -40,7 +40,11 @@ impl Eventable {
         let rot_y = -net_x * f32::sin(theta) + net_y * f32::cos(theta);
         // See if the rotated point is in the unrotated sprite rectangle.
         let (w, h) = draw.size;
-        f32::abs(rot_x) < w / 2.0 && f32::abs(rot_y) < h / 2.0
+        if draw.centered {
+            f32::abs(rot_x) < w / 2.0 && f32::abs(rot_y) < h / 2.0
+        } else {
+            f32::abs(rot_x) < w && f32::abs(rot_y) < h
+        }        
     }
 
     pub fn process_events(&mut self, transform: &Transform, draw: &DrawTexture) -> Option<Event> {

@@ -55,13 +55,13 @@ impl Label {
         self.draw_text.text_params.color = color;
     }
 
-    pub fn fade_out(&self, duration: Duration) {
+    pub fn fade_out(&mut self, duration: Duration) {
         let end_color = Color::from_rgba(255, 255, 255, 0);
         self.fader = Some(ColorAnimator::new(WHITE, end_color, duration));
     }
 
     pub fn update(&mut self, time_delta: Duration) -> bool {
-        if let Some(fader) = self.fader {
+        if let Some(fader) = &mut self.fader {
             fader.update(time_delta);
             if fader.complete {
                 self.fader = None;
@@ -71,8 +71,8 @@ impl Label {
         false
     }
 
-    pub fn draw(&self) {
-        if let Some(fader) = self.fader {
+    pub fn draw(&mut self) {
+        if let Some(fader) = &self.fader {
             self.draw_text.draw(&self.transform, Some(fader.color));
         } else {
             self.draw_text.draw(&self.transform, None);

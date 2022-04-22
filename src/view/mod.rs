@@ -2,10 +2,12 @@
 
 pub mod animators;
 pub mod button;
+pub mod button_bar;
 pub mod draw_text;
 pub mod draw_texture;
 pub mod eventable;
 pub mod image;
+pub mod slider;
 pub mod sprite;
 pub mod label;
 pub mod transform;

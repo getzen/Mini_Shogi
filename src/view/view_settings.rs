@@ -16,7 +16,8 @@ use crate::controller::PlayerKind::*;
 use crate::view::button::Button;
 use crate::view::button::ButtonEvent;
 use crate::view::label::Label;
-use crate::widget_slider::*;
+use crate::view::slider::Slider;
+use crate::view::slider::SliderEvent;
 
 // Widget IDs
 const OKAY_ID: usize = 0;
@@ -107,7 +108,7 @@ impl ViewSettings {
     /// Selects the given button and deselects all others in the group.
     fn select_button(&mut self, group_id: usize, button_id: usize) {
         for button in self.buttons.values_mut() {
-            //if button.group_id != group_id { continue; }
+            if button.group_id != Some(group_id) { continue; }
             button.selected = button.id.unwrap() == button_id;
         }
     }
@@ -161,40 +162,50 @@ impl ViewSettings {
     }
 
     pub fn process_events(&mut self) {
+        let mut p_0_dirty = false;
+        let mut p_1_dirty = false;
+
         // Buttons. They return Option<ButtonEvent>.
         for button in self.buttons.values_mut() {
-            if let Some(event) = button.process_events() {
-                match event {
-                    ButtonEvent::Pushed(id) => {
-                        // Start and Exit buttons
-                        match id {
-                            Some(OKAY_ID) => {
-                                self.tx.send(
-                                    ViewSettingsMessage::ShouldStart(self.players.clone()))
-                                    .expect("Intro message send error.");
-                            },
-                            Some(HUMAN_0_ID) => {
-                                self.players[0].kind = Human;
-                                self.set_player_controls(0);
-                            }
-                            Some(AI_0_ID) => {
-                                self.players[0].kind = AI;
-                                self.set_player_controls(0);
-                            }
-                            Some(HUMAN_1_ID) => {
-                                self.players[1].kind = Human;
-                                self.set_player_controls(1);
-                            }
-                            Some(AI_1_ID) => {
-                                self.players[1].kind = AI;
-                                self.set_player_controls(1);
-                            }
-                            _ => {},
+            let event_opt = button.process_events();
+            if event_opt.is_none() { continue }
+
+            match event_opt.unwrap() {
+                ButtonEvent::Pushed(id) => {
+                    // Start and Exit buttons
+                    match id {
+                        Some(OKAY_ID) => {
+                            self.tx.send(
+                                ViewSettingsMessage::ShouldStart(self.players.clone()))
+                                .expect("Intro message send error.");
+                        },
+                        Some(HUMAN_0_ID) => {
+                            self.players[0].kind = Human;
+                            p_0_dirty = true;
                         }
-                    },
-                    _ => {},
-                }
+                        Some(AI_0_ID) => {
+                            self.players[0].kind = AI;
+                            p_0_dirty = true;
+                        }
+                        Some(HUMAN_1_ID) => {
+                            self.players[1].kind = Human;
+                            p_1_dirty = true;
+                        }
+                        Some(AI_1_ID) => {
+                            self.players[1].kind = AI;
+                            p_1_dirty = true;
+                        }
+                        _ => {},
+                    }
+                },
+                _ => {},
             }
+        }
+        if p_0_dirty {
+            self.set_player_controls(0);
+        }
+        if p_1_dirty {
+            self.set_player_controls(1);
         }
                 
         // Slider 0. Sliders return Option<SliderEvent>.

@@ -59,7 +59,7 @@ impl Sprite {
     }
 
     pub fn update(&mut self, time_delta: Duration) -> bool {
-        if let Some(mover) = self.mover {
+        if let Some(mover) = &mut self.mover {
             mover.update(time_delta);
             self.transform.phys_position = mover.position;
             if mover.complete {
@@ -76,11 +76,11 @@ impl Sprite {
         self.eventable.contains_phys_position(phy_position, &self.transform, &self.drawable)
     }
 
-    pub fn process_events(&self) -> Option<Event> {
+    pub fn process_events(&mut self) -> Option<Event> {
         self.eventable.process_events(&self.transform, &self.drawable)
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&mut self) {
         if self.use_alt_color {
             self.drawable.draw(&self.transform, self.alt_color);
         } else {

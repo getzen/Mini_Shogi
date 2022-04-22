@@ -11,12 +11,9 @@ mod ai_sender;
 mod asset_loader;
 mod controller;
 mod game;
-
 mod piece;
 mod view;
-mod widget_button_bar;
-mod widget_container;
-mod widget_slider;
+
 
 use crate::controller::Controller;
 //use crate::view::View;
