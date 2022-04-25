@@ -33,7 +33,7 @@ pub struct Player {
 
 #[derive(PartialEq, Clone, Copy)]
 pub enum AppState {
-    Intro,
+    About,
     Settings,
     Rules,
     HumanTurn,
@@ -73,7 +73,7 @@ pub struct Controller {
     pub state: AppState,
     previous_state: Option<AppState>,
     node_history: Vec<Game>,
-    view_intro_rx: Receiver<ViewSettingsMessage>,
+    view_settings_rx: Receiver<ViewSettingsMessage>,
     view_rules_rx: Receiver<ViewRulesMessage>,
     view_game_rx: Receiver<ViewGameMessage>,
     ai_tx: Sender<AIMessage>,
@@ -83,7 +83,7 @@ pub struct Controller {
 
 impl Controller {
     pub async fn new() -> Self {
-        let (view_intro_tx, view_intro_rx) = mpsc::channel();
+        let (view_settings_tx, view_settings_rx) = mpsc::channel();
         let (view_rules_tx, view_rules_rx) = mpsc::channel();
         let (view_game_tx, view_game_rx) = mpsc::channel();
         let (ai_tx, ai_rx) = mpsc::channel();
@@ -92,14 +92,14 @@ impl Controller {
             players: Vec::new(),
             game: Game::new(),
             button_bar: ButtonBar::new((0., 0.), false),
-            view_settings: ViewSettings::new(view_intro_tx).await,
+            view_settings: ViewSettings::new(view_settings_tx).await,
             view_rules: ViewRules::new(view_rules_tx).await,
             previous_state: None,
             view_intro: ViewIntro::new().await,
             view_game: ViewGame::new(view_game_tx, COLS, ROWS).await,
             state: NextPlayer,
             node_history: Vec::new(),
-            view_intro_rx,
+            view_settings_rx,
             view_rules_rx,
             view_game_rx,
             ai_tx, ai_rx,
@@ -149,16 +149,25 @@ impl Controller {
             // Check own events first.
             if let Some(button_id) = self.button_bar.process_events() {
                 match button_id {
-                    BAR_ABOUT_ID => {},
-                    BAR_RULES_ID => self.state = Rules,
-                    BAR_SETTINGS_ID => self.state = Settings,
+                    BAR_ABOUT_ID => {
+                        self.previous_state = Some(self.state);
+                        self.state = About;
+                    },
+                    BAR_RULES_ID => {
+                        self.previous_state = Some(self.state);
+                        self.state = Rules;
+                    }
+                    BAR_SETTINGS_ID => {
+                        self.previous_state = Some(self.state);
+                        self.state = Settings;
+                    }
                     BAR_QUIT_ID => self.state = Exit,
                     _ => panic!(),
                 }
             }
             // View events
             match self.state {
-                Intro => {
+                About => {
                 },
                 Settings => {
                     self.view_settings.process_events();
@@ -225,12 +234,11 @@ impl Controller {
     }
 
     async fn check_messages(&mut self) {
-        // From ViewIntro
-        let received = self.view_intro_rx.try_recv();
+        // From ViewSettings
+        let received = self.view_settings_rx.try_recv();
         if received.is_ok() {
             match received.unwrap() {
                 ViewSettingsMessage::ShouldStart(players) => {
-                    //dbg!(players[1].search_depth);
                     self.players = players;
                     self.next_player();
                 },
