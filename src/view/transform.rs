@@ -1,6 +1,6 @@
 /// Transform
 
-use crate::view::*;
+use crate::view::{logi_pos, phys_pos};
 
 pub struct Transform {
     pub phys_position: (f32, f32),
