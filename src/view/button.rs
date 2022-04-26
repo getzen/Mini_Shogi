@@ -40,7 +40,7 @@ pub struct Button {
     pub normal_color: Color,
     pub disabled_color: Color,
     pub mouse_over_color: Color,
-    pub selected: bool,
+    selected: bool,
     pub selected_color: Color,
     draw_color: Color,
 }
@@ -70,6 +70,11 @@ impl Button {
     pub fn set_enabled(&mut self, enabled: bool) {
         self.eventable.enabled = enabled;
         self.draw_color = if enabled { self.normal_color } else { self.disabled_color }
+    }
+
+    pub fn set_selected(&mut self, selected: bool) {
+        self.selected = selected;
+        self.draw_color = if selected { self.selected_color } else { self.normal_color };
     }
 
     // Convenience method
@@ -105,12 +110,12 @@ impl Button {
                 match self.mode {
                     ButtonMode::Push => Some(ButtonEvent::Pushed(self.id)),
                     ButtonMode::Toggle => {
-                        self.selected = !self.selected;
-                        if self.selected {
-                            self.draw_color = self.selected_color;
-                        } else {
-                            self.draw_color = self.mouse_over_color;
-                        }
+                        self.set_selected(!self.selected);
+                        // if self.selected {
+                        //     self.draw_color = self.selected_color;
+                        // } else {
+                        //     self.draw_color = self.mouse_over_color;
+                        // }
                         Some(ButtonEvent::Toggled(self.id))
                     },
                 }

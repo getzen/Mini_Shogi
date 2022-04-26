@@ -11,6 +11,7 @@ use num_format::{Locale, ToFormattedString};
 use crate::ai::{AI, AIProgress};
 use crate::ai_sender::{AIMessage, AISender};
 use crate::asset_loader::AssetLoader;
+use crate::view::button_bar::ButtonBarOrientation::*;
 use crate::game::*;
 use crate::game::{Game, GameState};
 use crate::controller::AppState::*;
@@ -91,7 +92,7 @@ impl Controller {
         Self {
             players: Vec::new(),
             game: Game::new(),
-            button_bar: ButtonBar::new((0., 0.), false),
+            button_bar: ButtonBar::new((0., 0.), Horizontal, 0., false),
             view_settings: ViewSettings::new(view_settings_tx).await,
             view_rules: ViewRules::new(view_rules_tx).await,
             previous_state: None,

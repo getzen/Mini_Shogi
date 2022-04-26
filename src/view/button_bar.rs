@@ -9,14 +9,18 @@ use crate::view::*;
 use crate::view::button::Button;
 use crate::view::button::ButtonEvent;
 
-use super::button::ButtonMode;
+pub enum ButtonBarOrientation {
+    Horizontal,
+    Vertical,
+}
 
 pub struct ButtonBar {
     /// Position in physical pixels of the top-left corner.
     /// Use set_logi_position for logical pixel positioning.
     pub phys_position: (f32, f32),
+    pub orientation: ButtonBarOrientation,
+    pub spacing: f32,
     pub buttons: Vec<Button>,
-    pub margin: f32,
     pub selected_id: Option<usize>,
     /// If true, then at least one button must be selected, like a radio
     /// button grouping. If false, then all buttons may be unselected and
@@ -30,11 +34,12 @@ pub struct ButtonBar {
 
 impl ButtonBar {
 
-    pub fn new(logi_position: (f32, f32), radio_behavior: bool) -> Self {       
+    pub fn new(logi_position: (f32, f32), orientation: ButtonBarOrientation, spacing: f32, radio_behavior: bool) -> Self {       
         Self {
             phys_position: phys_pos(logi_position),
+            orientation,
+            spacing,
             buttons: Vec::new(),
-            margin: 0.0,
             selected_id: None,
             radio_behavior: false,
             visible: true,
@@ -57,16 +62,25 @@ impl ButtonBar {
     }
 
     pub fn add_button(&mut self, mut button: Button) -> usize {
-        let index = self.buttons.len();
-        button.id = Some(index);
-        button.mode = ButtonMode::Push;
+        let mut id = self.buttons.len();
+        if button.id.is_none() {
+            button.id = Some(id);
+        } else {
+            id = button.id.unwrap();
+        }
         self.buttons.push(button);
-        index
+        id
+    }
+
+    pub fn select_only(&mut self, id: usize) {
+        for button in &mut self.buttons {
+            button.set_selected(id == button.id.unwrap());
+        }
     }
 
     pub fn unselect_all(&mut self) {
         for button in &mut self.buttons {
-            button.selected = false;
+            button.set_selected(false);
         }
         self.selected_id = None;
     }
@@ -77,7 +91,7 @@ impl ButtonBar {
             button.set_enabled(enabled);
         }
         if enabled && self.selected_id.is_some() {
-            self.buttons[self.selected_id.unwrap()].selected = true;
+            self.buttons[self.selected_id.unwrap()].set_selected(true);
         }
     }
 
@@ -102,14 +116,16 @@ impl ButtonBar {
     pub fn draw(&mut self) {
         if !self.visible { return }
 
-        let (mut x, y) = self.phys_position;
+        let (mut x, mut y) = self.phys_position;
 
         for button in &mut self.buttons {
             button.transform.phys_position = (x, y);
             button.draw();
 
-            let tex_width = button.drawable.texture.width();
-            x += tex_width + self.margin;
+            match self.orientation {
+                ButtonBarOrientation::Horizontal => x += button.drawable.texture.width() + self.spacing,
+                ButtonBarOrientation::Vertical => y += button.drawable.texture.height() + self.spacing,
+            }
         }
     }
 }
