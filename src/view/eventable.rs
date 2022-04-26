@@ -58,13 +58,11 @@ impl Eventable {
 
         if mouse_over && !self.mouse_over {
             self.mouse_over = true;
-            println!("entered");
             return Some(Event::MouseEntered);
         }
 
         if !mouse_over && self.mouse_over {
             self.mouse_over = false;
-            println!("exited");
             return Some(Event::MouseExited);
         }
        

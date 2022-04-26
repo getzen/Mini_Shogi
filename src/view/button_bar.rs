@@ -85,42 +85,15 @@ impl ButtonBar {
     pub fn process_events(&mut self) -> Option<usize> {
         if !self.visible || !self.enabled { return None }
 
-        if let Some(old_id) = self.selected_id {
-            self.buttons[old_id].selected = false;
-        }
-        
-        let mut button_selected_opt = None;
-
         for button in &mut self.buttons {
             if let Some(event) = button.process_events() {
                 match event {
-                    ButtonEvent::Hovering(id) => {
-                        button_selected_opt = Some(button);
-                        break;
-                    },
-
                     ButtonEvent::Pushed(id) => {
-                        // if let Some(old_id) = self.selected_id {
-                        //     if old_id != id.unwrap() {
-                        //         self.buttons[old_id].selected = false;
-                        //         self.selected_id = id;
-                        //         return id;
-                        //     }
-                        // }
-                        // //
-                        // self.selected_id = id;
-                        // button.selected = true;
-                        //return id;
+                        return id;
                     },
-                    ButtonEvent::Toggled(_) => {},
-                    //ButtonEvent::Selected(_) => {},
+                    _ => {},
                 }
             }
-        }
-        if let Some(button_selected) = button_selected_opt {           
-            button_selected.selected = true;
-            self.selected_id = button_selected.id;
-            return None;
         }
         None
     }
