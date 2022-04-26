@@ -152,14 +152,17 @@ impl Controller {
                     BAR_ABOUT_ID => {
                         self.previous_state = Some(self.state);
                         self.state = About;
+                        self.button_bar.visible = false;
                     },
                     BAR_RULES_ID => {
                         self.previous_state = Some(self.state);
                         self.state = Rules;
+                        self.button_bar.visible = false;
                     }
                     BAR_SETTINGS_ID => {
                         self.previous_state = Some(self.state);
                         self.state = Settings;
+                        self.button_bar.visible = false;
                     }
                     BAR_QUIT_ID => self.state = Exit,
                     _ => panic!(),
@@ -239,6 +242,7 @@ impl Controller {
         if received.is_ok() {
             match received.unwrap() {
                 ViewSettingsMessage::ShouldStart(players) => {
+                    self.button_bar.visible = true;
                     self.players = players;
                     self.next_player();
                 },
@@ -250,6 +254,7 @@ impl Controller {
         if received.is_ok() {
             match received.unwrap() {
                 ViewRulesMessage::ShouldClose => {
+                    self.button_bar.visible = true;
                     self.state = self.previous_state.unwrap();
                 },
             }

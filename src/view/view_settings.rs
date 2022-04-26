@@ -98,8 +98,8 @@ impl ViewSettings {
             //button.selected_color = Some(Color::from_rgba(246, 194, 81, 255));
         }
 
-        self.slider_0_text.set_color(BLACK);
-        self.slider_1_text.set_color(BLACK);
+        //self.slider_0_text.set_color(BLACK);
+        //self.slider_1_text.set_color(BLACK);
 
         self.set_player_controls(0);
         self.set_player_controls(1);

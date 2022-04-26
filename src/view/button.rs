@@ -51,7 +51,7 @@ pub struct Button {
     //pub state: ButtonState,
 
     pub normal_color: Color,
-    pub disabled: bool,
+    //pub disabled: bool,
     pub disabled_color: Color,
     pub mouse_over_color: Color,
     pub selected: bool,
@@ -72,37 +72,19 @@ impl Button {
             mode: ButtonMode::Push,
             //state: ButtonState::Normal,
             normal_color: WHITE,
-            disabled: false,
+            //disabled: false,
             disabled_color: Color::from_rgba(150, 150, 150, 255),
-            mouse_over_color: Color::from_rgba(230, 230, 230, 255),
+            mouse_over_color: Color::from_rgba(235, 235, 235, 255),
             selected: false,
-            selected_color: Color::from_rgba(200, 200, 255, 255),
+            selected_color: Color::from_rgba(200, 225, 255, 255),
             draw_color: WHITE,
         }
     }
 
-    // pub fn set_state(&mut self, state: ButtonState) {
-    //     if self.state == state { return }
-
-    //     match state {
-    //         ButtonState::Normal => {
-    //             self.draw_color = self.normal_color;
-    //         },
-    //         ButtonState::Disabled => {
-    //             self.draw_color = self.disabled_color;
-    //         },
-    //         ButtonState::MouseOver => {
-    //             if self.state == ButtonState::Normal {
-    //                 self.draw_color = self.mouse_over_color;
-    //             }
-    //         },
-    //         ButtonState::Selected => {
-    //             self.draw_color = self.selected_color;
-    //         },
-    //     }
-    //     self.state = state;
-    // }
-
+    pub fn set_enabled(&mut self, enabled: bool) {
+        self.eventable.enabled = enabled;
+        self.draw_color = if enabled { self.normal_color } else { self.disabled_color }
+    }
     // Convenience methods
 
     pub fn contains_phys_position(&self, phy_position: (f32, f32)) -> bool {
@@ -111,7 +93,6 @@ impl Button {
 
     pub fn process_events(&mut self) -> Option<ButtonEvent> {
         if !self.drawable.visible { return None }
-        if self.disabled { return None }
 
         let event = self.eventable.process_events(&self.transform, &self.drawable);
 

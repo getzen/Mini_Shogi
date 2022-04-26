@@ -22,17 +22,13 @@ pub struct ViewRules {
 
 impl ViewRules {
     pub async fn new(tx: Sender<ViewRulesMessage>) -> Self {       
+        let rules_texture = AssetLoader::get_texture("rules_view");
         let close_texture = AssetLoader::get_texture("close");
-        let mut button = Button::new((680., 745.), close_texture, None);
-        //button.normal_color = LIGHTGRAY;
-        //button.selected_color = Some(Color::from_rgba(246, 194, 81, 255));
-
-        let rules_texture = AssetLoader::get_texture("rules_view"); 
 
         Self {
             tx,
             image: Image::new((0., 0.), rules_texture, false, None),
-            close_button: button,
+            close_button: Button::new((680., 745.), close_texture, None),
         }
     }
 

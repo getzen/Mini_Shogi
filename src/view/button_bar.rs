@@ -9,6 +9,8 @@ use crate::view::*;
 use crate::view::button::Button;
 use crate::view::button::ButtonEvent;
 
+use super::button::ButtonMode;
+
 // pub enum ButtonBarMessage {
 //     Pushed(usize), // button index/id
 // }
@@ -61,6 +63,7 @@ impl ButtonBar {
     pub fn add_button(&mut self, mut button: Button) -> usize {
         let index = self.buttons.len();
         button.id = Some(index);
+        button.mode = ButtonMode::Push;
         self.buttons.push(button);
         index
     }
@@ -75,7 +78,7 @@ impl ButtonBar {
     pub fn set_enabled(&mut self, enabled: bool) {
         self.enabled = enabled;
         for button in &mut self.buttons {
-            button.eventable.enabled = enabled;
+            button.set_enabled(enabled);
         }
         if enabled && self.selected_id.is_some() {
             self.buttons[self.selected_id.unwrap()].selected = true;

@@ -10,6 +10,7 @@ pub struct DrawText {
     pub visible: bool,
     pub centered: bool,
     pub text: String,
+    pub color: Color,
     pub text_params: TextParams,
 }
 
@@ -30,6 +31,7 @@ impl DrawText {
             visible: true,
             centered,
             text,
+            color: BLACK,
             text_params,
         }
     }
@@ -55,8 +57,7 @@ impl DrawText {
             false => transform.phys_position
         };
 
-        let draw_color = if color.is_some() { color.unwrap() } else { WHITE };
-        self.text_params.color = draw_color;
+        self.text_params.color = if color.is_some() { color.unwrap() } else { self.color };
         draw_text_ex(&self.text, x, y, self.text_params);
     }
 }
