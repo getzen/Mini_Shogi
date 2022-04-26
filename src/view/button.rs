@@ -40,8 +40,9 @@ pub struct Button {
     pub normal_color: Color,
     pub disabled_color: Color,
     pub mouse_over_color: Color,
-    selected: bool,
     pub selected_color: Color,
+    // Private
+    selected: bool,
     draw_color: Color,
 }
 
@@ -75,6 +76,10 @@ impl Button {
     pub fn set_selected(&mut self, selected: bool) {
         self.selected = selected;
         self.draw_color = if selected { self.selected_color } else { self.normal_color };
+    }
+
+    pub fn selected(&self) -> bool {
+        self.selected
     }
 
     // Convenience method
