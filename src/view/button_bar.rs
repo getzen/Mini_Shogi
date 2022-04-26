@@ -11,10 +11,6 @@ use crate::view::button::ButtonEvent;
 
 use super::button::ButtonMode;
 
-// pub enum ButtonBarMessage {
-//     Pushed(usize), // button index/id
-// }
-
 pub struct ButtonBar {
     /// Position in physical pixels of the top-left corner.
     /// Use set_logi_position for logical pixel positioning.
@@ -94,7 +90,9 @@ impl ButtonBar {
                     ButtonEvent::Pushed(id) => {
                         return id;
                     },
-                    _ => {},
+                    ButtonEvent::Toggled(id) => {
+                        return id;
+                    },
                 }
             }
         }

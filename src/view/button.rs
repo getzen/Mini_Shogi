@@ -11,23 +11,11 @@ pub enum ButtonMode {
 
 #[derive(Debug, PartialEq)]
 pub enum ButtonEvent {
-    // Mouse is over button. (id)
-    Hovering(Option<usize>),
     /// Normal push-button behavior.
     Pushed(Option<usize>),
     /// Toggle on or off.
     Toggled(Option<usize>),
-    // As with a radio button.
-    //Selected(usize),
 }
-
-// #[derive(PartialEq)]
-// pub enum ButtonState {
-//     Normal,
-//     Disabled,
-//     MouseOver,
-//     Selected,
-// }
 
 use macroquad::prelude::{Color, WHITE};
 use macroquad::prelude::Texture2D;
@@ -48,10 +36,8 @@ pub struct Button {
 
     /// Default is Push.
     pub mode: ButtonMode,
-    //pub state: ButtonState,
 
     pub normal_color: Color,
-    //pub disabled: bool,
     pub disabled_color: Color,
     pub mouse_over_color: Color,
     pub selected: bool,
@@ -63,30 +49,30 @@ impl Button {
     pub fn new(logi_position: (f32, f32), texture: Texture2D, id: Option<usize>) -> Self {
         let phys_position = phys_pos(logi_position);
 
-        Self {
+        let mut button = Self {
             id,
             group_id: None,
             transform: Transform::new(phys_position, 0.0),
             drawable: DrawTexture::new(texture, false),
             eventable: Eventable::new(),
             mode: ButtonMode::Push,
-            //state: ButtonState::Normal,
             normal_color: WHITE,
-            //disabled: false,
             disabled_color: Color::from_rgba(150, 150, 150, 255),
             mouse_over_color: Color::from_rgba(235, 235, 235, 255),
             selected: false,
             selected_color: Color::from_rgba(200, 225, 255, 255),
             draw_color: WHITE,
-        }
+        };
+        button.draw_color = button.normal_color;
+        button
     }
 
     pub fn set_enabled(&mut self, enabled: bool) {
         self.eventable.enabled = enabled;
         self.draw_color = if enabled { self.normal_color } else { self.disabled_color }
     }
-    // Convenience methods
 
+    // Convenience method
     pub fn contains_phys_position(&self, phy_position: (f32, f32)) -> bool {
         self.eventable.contains_phys_position(phy_position, &self.transform, &self.drawable)
     }
@@ -127,7 +113,6 @@ impl Button {
                         }
                         Some(ButtonEvent::Toggled(self.id))
                     },
-                    //ButtonMode::Radio => todo!(),
                 }
             },
         }

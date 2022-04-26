@@ -55,6 +55,7 @@ impl Label {
         self.draw_text.text_params.color = color;
     }
 
+    
     pub fn fade_out(&mut self, duration: Duration) {
         let end_color = Color::from_rgba(255, 255, 255, 0);
         self.fader = Some(ColorAnimator::new(WHITE, end_color, duration));
