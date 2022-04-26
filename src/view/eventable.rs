@@ -8,14 +8,18 @@ use crate::view::draw_texture::DrawTexture;
 pub enum Event {
     MouseEntered,
     MouseExited,
-    LeftMouseDown,
+    LeftMousePressed,
     LeftMouseReleased,
+    // Right
+    // DragStarted
 }
 
 pub struct Eventable {
     pub enabled: bool,
     pub mouse_over: bool,
     pub left_mouse_down: bool,
+    // right_
+    // dragging: bool, drag_start_pos, drag_pos_now
 }
 
 impl Eventable {
@@ -41,9 +45,9 @@ impl Eventable {
         // See if the rotated point is in the unrotated sprite rectangle.
         let (w, h) = draw.size;
         if draw.centered {
-            f32::abs(rot_x) < w / 2.0 && f32::abs(rot_y) < h / 2.0
+            f32::abs(rot_x) <= w / 2.0 && f32::abs(rot_y) <= h / 2.0
         } else {
-            f32::abs(rot_x) < w && f32::abs(rot_y) < h
+            rot_x >= 0.0 && rot_x <= w && rot_y >= 0.0 && rot_y <= h
         }        
     }
 
@@ -54,18 +58,22 @@ impl Eventable {
 
         if mouse_over && !self.mouse_over {
             self.mouse_over = true;
+            println!("entered");
             return Some(Event::MouseEntered);
         }
 
         if !mouse_over && self.mouse_over {
             self.mouse_over = false;
+            println!("exited");
             return Some(Event::MouseExited);
         }
        
-        if mouse_over && is_mouse_button_down(MouseButton::Left) {
+        let left_mouse_down = is_mouse_button_down(MouseButton::Left);
+
+        if mouse_over && left_mouse_down {
             if !self.left_mouse_down {
                 self.left_mouse_down = true;
-                return Some(Event::LeftMouseDown);
+                return Some(Event::LeftMousePressed);
             }
         }
         self.left_mouse_down = false;
