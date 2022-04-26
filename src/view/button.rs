@@ -116,11 +116,6 @@ impl Button {
                     ButtonMode::Push => Some(ButtonEvent::Pushed(self.id)),
                     ButtonMode::Toggle => {
                         self.set_selected(!self.selected);
-                        // if self.selected {
-                        //     self.draw_color = self.selected_color;
-                        // } else {
-                        //     self.draw_color = self.mouse_over_color;
-                        // }
                         Some(ButtonEvent::Toggled(self.id))
                     },
                 }
