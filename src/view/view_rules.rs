@@ -24,8 +24,8 @@ impl ViewRules {
     pub async fn new(tx: Sender<ViewRulesMessage>) -> Self {       
         let close_texture = AssetLoader::get_texture("close");
         let mut button = Button::new((680., 745.), close_texture, None);
-        button.color = LIGHTGRAY;
-        button.selected_color = Some(Color::from_rgba(246, 194, 81, 255));
+        //button.normal_color = LIGHTGRAY;
+        //button.selected_color = Some(Color::from_rgba(246, 194, 81, 255));
 
         let rules_texture = AssetLoader::get_texture("rules_view"); 
 

@@ -12,7 +12,7 @@ pub enum ButtonMode {
 #[derive(Debug, PartialEq)]
 pub enum ButtonEvent {
     // Mouse is over button. (id)
-    //Hovering(Option<usize>),
+    Hovering(Option<usize>),
     /// Normal push-button behavior.
     Pushed(Option<usize>),
     /// Toggle on or off.
@@ -21,7 +21,15 @@ pub enum ButtonEvent {
     //Selected(usize),
 }
 
-use macroquad::prelude::{Color, GRAY, WHITE, YELLOW};
+// #[derive(PartialEq)]
+// pub enum ButtonState {
+//     Normal,
+//     Disabled,
+//     MouseOver,
+//     Selected,
+// }
+
+use macroquad::prelude::{Color, WHITE};
 use macroquad::prelude::Texture2D;
 
 use crate::view::draw_texture::DrawTexture;
@@ -40,12 +48,15 @@ pub struct Button {
 
     /// Default is Push.
     pub mode: ButtonMode,
+    //pub state: ButtonState,
 
-    pub color: Color,
+    pub normal_color: Color,
     pub disabled: bool,
-    pub disabled_color: Option<Color>,
+    pub disabled_color: Color,
+    pub mouse_over_color: Color,
     pub selected: bool,
-    pub selected_color: Option<Color>,
+    pub selected_color: Color,
+    draw_color: Color,
 }
 
 impl Button {
@@ -59,14 +70,38 @@ impl Button {
             drawable: DrawTexture::new(texture, false),
             eventable: Eventable::new(),
             mode: ButtonMode::Push,
-
-            color: WHITE,
+            //state: ButtonState::Normal,
+            normal_color: WHITE,
             disabled: false,
-            disabled_color: Some(GRAY),
+            disabled_color: Color::from_rgba(150, 150, 150, 255),
+            mouse_over_color: Color::from_rgba(230, 230, 230, 255),
             selected: false,
-            selected_color: Some(YELLOW),
+            selected_color: Color::from_rgba(200, 200, 255, 255),
+            draw_color: WHITE,
         }
     }
+
+    // pub fn set_state(&mut self, state: ButtonState) {
+    //     if self.state == state { return }
+
+    //     match state {
+    //         ButtonState::Normal => {
+    //             self.draw_color = self.normal_color;
+    //         },
+    //         ButtonState::Disabled => {
+    //             self.draw_color = self.disabled_color;
+    //         },
+    //         ButtonState::MouseOver => {
+    //             if self.state == ButtonState::Normal {
+    //                 self.draw_color = self.mouse_over_color;
+    //             }
+    //         },
+    //         ButtonState::Selected => {
+    //             self.draw_color = self.selected_color;
+    //         },
+    //     }
+    //     self.state = state;
+    // }
 
     // Convenience methods
 
@@ -76,18 +111,39 @@ impl Button {
 
     pub fn process_events(&mut self) -> Option<ButtonEvent> {
         if !self.drawable.visible { return None }
+        if self.disabled { return None }
+
         let event = self.eventable.process_events(&self.transform, &self.drawable);
+
         if event.is_none() { return None }
 
         match event.unwrap() {
-            Event::MouseEntered => None,
-            Event::MouseExited => None,
-            Event::LeftMouseDown => None,
+            Event::MouseEntered => {
+                if !self.selected {
+                    self.draw_color = self.mouse_over_color;
+                }
+                None
+            },
+            Event::MouseExited => {
+                if !self.selected {
+                    self.draw_color = self.normal_color;
+                }
+                None
+            },
+            Event::LeftMousePressed => {
+                self.draw_color = self.selected_color;
+                None
+            },
             Event::LeftMouseReleased => {
                 match self.mode {
                     ButtonMode::Push => Some(ButtonEvent::Pushed(self.id)),
                     ButtonMode::Toggle => {
                         self.selected = !self.selected;
+                        if self.selected {
+                            self.draw_color = self.selected_color;
+                        } else {
+                            self.draw_color = self.mouse_over_color;
+                        }
                         Some(ButtonEvent::Toggled(self.id))
                     },
                     //ButtonMode::Radio => todo!(),
@@ -97,14 +153,6 @@ impl Button {
     }
 
     pub fn draw(&mut self) {
-        let draw_color = 
-        if self.disabled {
-            self.disabled_color
-        } else if self.selected {
-            self.selected_color
-        } else {
-            None
-        };
-        self.drawable.draw(&self.transform, draw_color);
+        self.drawable.draw(&self.transform, Some(self.draw_color));
     }
 }

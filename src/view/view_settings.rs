@@ -94,8 +94,8 @@ impl ViewSettings {
 
         // Set common elements
         for button in self.buttons.values_mut() {
-            button.color = LIGHTGRAY;
-            button.selected_color = Some(Color::from_rgba(246, 194, 81, 255));
+            //button.normal_color = LIGHTGRAY;
+            //button.selected_color = Some(Color::from_rgba(246, 194, 81, 255));
         }
 
         self.slider_0_text.set_color(BLACK);

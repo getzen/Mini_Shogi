@@ -36,7 +36,7 @@ impl ButtonBar {
         Self {
             phys_position: phys_pos(logi_position),
             buttons: Vec::new(),
-            margin: 50.0,
+            margin: 0.0,
             selected_id: None,
             radio_behavior: false,
             visible: true,
@@ -47,14 +47,14 @@ impl ButtonBar {
     /// Convenience method to set the color of all buttons at once.
     pub fn set_color(&mut self, color: Color) {
         for button in &mut self.buttons {
-            button.color = color;
+            button.normal_color = color;
         }
     }
 
     /// Convenience method to set the selected color of all buttons at once.
     pub fn set_selected_color(&mut self, color: Color) {
         for button in &mut self.buttons {
-            button.selected_color = Some(color);
+            button.selected_color = color;
         }
     }
 

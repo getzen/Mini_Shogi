@@ -126,8 +126,8 @@ impl Controller {
         self.button_bar.add_button(button);
 
         // Must do after buttons are added.
-        self.button_bar.set_color(Color::from_rgba(125, 125, 125, 125));
-        self.button_bar.set_selected_color(Color::from_rgba(246, 194, 81, 125));
+        //self.button_bar.set_color(Color::from_rgba(125, 125, 125, 125));
+        //self.button_bar.set_selected_color(Color::from_rgba(246, 194, 81, 125));
 
         self.players.push( Player {id: 0, kind: Human, search_depth: 3, search_rounds: 500} );
         self.players.push( Player {id: 1, kind: AI, search_depth: 3, search_rounds: 500} );
