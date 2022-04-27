@@ -31,7 +31,6 @@ pub struct Button {
     pub id: Option<usize>,
     pub group_id: Option<usize>,
     pub transform: Transform,
-    pub parent_transform: Transform,
     pub drawable: DrawTexture,
     pub eventable: Eventable,
 
@@ -55,7 +54,6 @@ impl Button {
             id,
             group_id: None,
             transform: Transform::new(phys_position, 0.0),
-            parent_transform: Transform::new((0., 0.), 0.),
             drawable: DrawTexture::new(texture, false),
             eventable: Eventable::new(),
             mode: ButtonMode::Push,
@@ -86,16 +84,13 @@ impl Button {
 
     // Convenience method
     pub fn contains_phys_position(&self, phy_position: (f32, f32)) -> bool {
-        let transform = self.transform.add(&self.parent_transform);
-        self.eventable.contains_phys_position(phy_position, &transform, &self.drawable)
+        self.eventable.contains_phys_position(phy_position, &self.transform, &self.drawable)
     }
 
     pub fn process_events(&mut self) -> Option<ButtonEvent> {
         if !self.drawable.visible { return None }
 
-        let transform = self.transform.add(&self.parent_transform);
-        let event = self.eventable.process_events(&transform, &self.drawable);
-
+        let event = self.eventable.process_events(&self.transform, &self.drawable);
         if event.is_none() { return None }
 
         match event.unwrap() {
@@ -128,7 +123,6 @@ impl Button {
     }
 
     pub fn draw(&mut self) {
-        let transform = self.transform.add(&self.parent_transform);
-        self.drawable.draw(&transform, Some(self.draw_color));
+        self.drawable.draw(&self.transform, Some(self.draw_color));
     }
 }

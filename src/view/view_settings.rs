@@ -15,6 +15,8 @@ use crate::view::label::Label;
 use crate::view::slider::Slider;
 use crate::view::slider::SliderEvent;
 
+use super::transform::Transform;
+
 
 
 // Widget IDs
@@ -52,43 +54,43 @@ impl ViewSettings {
 
         Self {
             tx,
-            background_image: Image::new((200., 100.), texture, false, None),
+            background_image: Image::new((200., 200.), texture, false, None),
 
-            okay_button: Button::new((365., 410.), okay_texture, None),
+            okay_button: Button::new((365., 510.), okay_texture, None),
 
-            button_bar_0: ButtonBar::new((400., 290.), ButtonBarOrientation::Horizontal, 25., true),
-            slider_0: Slider::new((300., 345.), 200., 1., 1., 1., 1),
-            slider_0_text: Label::new((400., 387.), true, "world".to_string(), 18, Some("Menlo")),
+            button_bar_0: ButtonBar::new((400., 390.), ButtonBarOrientation::Horizontal, 25., true),
+            slider_0: Slider::new((300., 445.), 200., 1., 1., 1., 1),
+            slider_0_text: Label::new((400., 487.), true, "world".to_string(), 18, Some("Menlo")),
             
-            button_bar_1: ButtonBar::new((385., 140.), ButtonBarOrientation::Horizontal, 25., true),
-            slider_1: Slider::new((300., 200.), 200., 1., 1., 1., 0),
-            slider_1_text: Label::new((400., 242.), true, "hello".to_string(), 18, Some("Menlo")),
+            button_bar_1: ButtonBar::new((385., 240.), ButtonBarOrientation::Horizontal, 25., true),
+            slider_1: Slider::new((300., 300.), 200., 1., 1., 1., 0),
+            slider_1_text: Label::new((400., 342.), true, "hello".to_string(), 18, Some("Menlo")),
           
             players: Vec::new(),
         }
     }
 
-    pub fn prepare(&mut self, players: Vec<Player>) {
+    pub fn prepare(&mut self, players: Vec<Player>) {        
         self.players = players;
         let mut texture;
         let mut button;
 
         // Player 0
         texture = AssetLoader::get_texture("button_human");
-        button = Button::new((385., 140.), texture, Some(HUMAN_ID));
+        button = Button::new((385., 240.), texture, Some(HUMAN_ID));
         self.button_bar_0.add_button(button);
 
         texture = AssetLoader::get_texture("button_ai");
-        button = Button::new((480., 140.), texture, Some(AI_ID));
+        button = Button::new((480., 240.), texture, Some(AI_ID));
         self.button_bar_0.add_button(button);
 
         // Player 1
         texture = AssetLoader::get_texture("button_human");
-        button = Button::new((400., 290.), texture, Some(HUMAN_ID));
+        button = Button::new((400., 390.), texture, Some(HUMAN_ID));
         self.button_bar_1.add_button(button);
 
         texture = AssetLoader::get_texture("button_ai");
-        button = Button::new((495., 290.), texture, Some(AI_ID));
+        button = Button::new((495., 390.), texture, Some(AI_ID));
         self.button_bar_1.add_button(button);
 
         self.set_player_controls(0);

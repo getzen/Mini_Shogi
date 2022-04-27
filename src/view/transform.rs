@@ -2,6 +2,7 @@
 
 use crate::view::{logi_pos, phys_pos};
 
+#[derive(Clone, Copy)]
 pub struct Transform {
     pub phys_position: (f32, f32),
     pub rotation: f32,
