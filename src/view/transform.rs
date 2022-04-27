@@ -16,6 +16,15 @@ impl Transform {
         }
     }
 
+    pub fn add(&self, other: &Transform) -> Transform {
+        let x = self.phys_position.0 + other.phys_position.0;
+        let y = self.phys_position.1 + other.phys_position.1;
+        Self {
+            phys_position: (x, y),
+            rotation: self.rotation + other.rotation,
+        }
+    }
+
     #[allow(dead_code)]
     /// Get the logical position of the sprite.
     pub fn get_logi_position(&self) -> (f32, f32) {
