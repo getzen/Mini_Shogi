@@ -55,15 +55,15 @@ impl ViewSettings {
             background_image: Image::new((200., 100.), texture, false, None),
 
             okay_button: Button::new((365., 410.), okay_texture, None),
+
+            button_bar_0: ButtonBar::new((400., 290.), ButtonBarOrientation::Horizontal, 25., true),
+            slider_0: Slider::new((300., 345.), 200., 1., 1., 1., 1),
+            slider_0_text: Label::new((400., 387.), true, "world".to_string(), 18, Some("Menlo")),
             
-            button_bar_0: ButtonBar::new((385., 140.), ButtonBarOrientation::Horizontal, 25., true),
-            slider_0: Slider::new((300., 200.), 200., 1., 1., 1., 0),
-            slider_0_text: Label::new((400., 242.), true, "hello".to_string(), 18, Some("Menlo")),
-
-            button_bar_1: ButtonBar::new((400., 290.), ButtonBarOrientation::Horizontal, 25., true),
-            slider_1: Slider::new((300., 345.), 200., 1., 1., 1., 1),
-            slider_1_text: Label::new((400., 387.), true, "world".to_string(), 18, Some("Menlo")),
-
+            button_bar_1: ButtonBar::new((385., 140.), ButtonBarOrientation::Horizontal, 25., true),
+            slider_1: Slider::new((300., 200.), 200., 1., 1., 1., 0),
+            slider_1_text: Label::new((400., 242.), true, "hello".to_string(), 18, Some("Menlo")),
+          
             players: Vec::new(),
         }
     }
