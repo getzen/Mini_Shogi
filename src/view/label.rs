@@ -55,6 +55,18 @@ impl Label {
         self.draw_text.text_params.color = color;
     }
 
+    /// The width of the text.
+    pub fn width(&self) -> f32 {
+        let (width, _, _) = self.draw_text.draw_size();
+        width
+    }
+
+    /// The center of the text, ignoring the bits below the baseline.
+    pub fn center(&self) -> (f32, f32) {
+        let (width, height, offset) = self.draw_text.draw_size();
+        (width / 2.0, height / 2.0 + offset / 2.0)
+    }
+
     
     pub fn fade_out(&mut self, duration: Duration) {
         let end_color = Color::from_rgba(255, 255, 255, 0);
