@@ -37,12 +37,12 @@ impl DrawText {
     }
 
     /// Returns the size of the drawn text.
-    fn draw_size(&self) -> (f32, f32) {
+    pub fn draw_size(&self) -> (f32, f32, f32) { // width, height, y offset from baseline
         let font = self.text_params.font;
         let font_size = self.text_params.font_size;
         let font_scale = self.text_params.font_scale;
         let dimensions = measure_text(&self.text, Some(font), font_size, font_scale);
-        (dimensions.width, dimensions.height)
+        (dimensions.width, dimensions.height, dimensions.offset_y)
     }
 
     pub fn draw(&mut self, transform: &Transform, color: Option<Color>) {
