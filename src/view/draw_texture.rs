@@ -40,6 +40,11 @@ impl DrawTexture {
         self.size.1 = logi_size.1 * adj_scale();
     }
 
+    pub fn set_texture(&mut self, texture: Texture2D) {
+        self.texture = texture;
+        self.size = (texture.width() * adj_scale(), texture.height() * adj_scale());
+    }
+
     pub fn draw(&mut self, transform: &Transform, color: Option<Color>) {
         if !self.visible { return }
 
