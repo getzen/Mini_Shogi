@@ -34,7 +34,7 @@ impl ViewRules {
             image: Image::new((0., 0.), rules_texture, false, None),
             close_button: Button::new((680., 745.), close_texture, None),
 
-            test_button: Button2::new((10., 10.), "Okay", None),
+            test_button: Button2::new((10., 10.), "Ki1", None),
         }
     }
 
