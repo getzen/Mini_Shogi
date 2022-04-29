@@ -28,6 +28,13 @@ use crate::view::transform::Transform;
 use crate::view::*;
 use super::label::Label;
 
+const FONT: &str = "Menlo";
+const FONT_SIZE: u16 = 18;
+const LABEL_MARGIN: u32 = 40;
+const BUTTON_HEIGHT: u32 = 64;
+const BUTTON_CORNER_RADIUS: f32 = 20.;
+const BUTTON_COLOR: Color = WHITE;
+
 pub struct Button2 {
     pub id: Option<usize>,
     pub group_id: Option<usize>,
@@ -59,7 +66,7 @@ impl Button2 {
             group_id: None,
             transform: Transform::new(phys_position, 0.0),
             drawable: DrawTexture::new(texture, false),
-            label: Label::new((0., 0.), true, text.to_owned(), 18, Some("Menlo")),
+            label: Label::new((0., 0.), true, text.to_owned(), FONT_SIZE, Some(FONT)),
             eventable: Eventable::new(),
             mode: ButtonMode::Push,
             normal_color: Color::from_rgba(235, 235, 235, 255),
@@ -158,8 +165,8 @@ impl Button2 {
 
     pub fn draw(&mut self) {
         let label_width = self.label.width();
-        let button_width = label_width as u32 + 80;
-        let texture = self.draw_to_texture(draw_rounded_button, button_width, 64);
+        let button_width = label_width as u32 + LABEL_MARGIN * 2;
+        let texture = self.draw_to_texture(draw_rounded_button, button_width,BUTTON_HEIGHT);
         self.drawable.set_texture(texture);
         self.drawable.draw(&self.transform, None);
 
@@ -175,27 +182,24 @@ impl Button2 {
 fn draw_rounded_button(phys_width: u32, phys_height: u32) {
     let width = phys_width as f32;
     let height = phys_height as f32;
-
-    let color = WHITE;
-    let corner_radius = 20.0;
     
     clear_background(Color::from_rgba(255, 255, 255, 0));
 
     // Draw the four corner circles.
-    let mut x = corner_radius;
-    let mut y = corner_radius;
-    draw_circle(x, y, corner_radius, color);
-    x = width - corner_radius;
-    draw_circle(x, y, corner_radius, color);
-    y = height - corner_radius;
-    draw_circle(x, y, corner_radius, color);
-    x = corner_radius;
-    draw_circle(x, y, corner_radius, color);
+    let mut x = BUTTON_CORNER_RADIUS;
+    let mut y = BUTTON_CORNER_RADIUS;
+    draw_circle(x, y, BUTTON_CORNER_RADIUS, BUTTON_COLOR);
+    x = width - BUTTON_CORNER_RADIUS;
+    draw_circle(x, y, BUTTON_CORNER_RADIUS, BUTTON_COLOR);
+    y = height - BUTTON_CORNER_RADIUS;
+    draw_circle(x, y, BUTTON_CORNER_RADIUS, BUTTON_COLOR);
+    x = BUTTON_CORNER_RADIUS;
+    draw_circle(x, y, BUTTON_CORNER_RADIUS, BUTTON_COLOR);
 
     // Draw the top-to-bottom rect.
-    draw_rectangle(corner_radius, 0., width - corner_radius * 2., height, color);
+    //draw_rectangle(BUTTON_CORNER_RADIUS, 0., width - BUTTON_CORNER_RADIUS * 2., height, BUTTON_COLOR);
 
     // Draw the left-to-right rect.
-    draw_rectangle(0., corner_radius, width, height- corner_radius * 2., color);
+    //draw_rectangle(0., BUTTON_CORNER_RADIUS, width, height- BUTTON_CORNER_RADIUS * 2., BUTTON_COLOR);
 }
 
