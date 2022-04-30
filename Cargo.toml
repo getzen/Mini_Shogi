@@ -12,12 +12,12 @@ fastrand = "1.7.0"
 num-format = "0.4.0" # converts integers to comma-separated strings
 
 # Enable only a small amount of optimization in debug mode
-[profile.dev]
-opt-level = 1
+# [profile.dev]
+# opt-level = 1
 
 # Enable high optimizations for dependencies, but not for my code:
-[profile.dev.package."*"]
-opt-level = 3
+# [profile.dev.package."*"]
+# opt-level = 1
 
 # This is for the cargo-bundle crate.
 [package.metadata.bundle]
