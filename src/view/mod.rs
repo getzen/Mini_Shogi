@@ -2,7 +2,6 @@
 
 pub mod animators;
 pub mod button;
-pub mod button2;
 pub mod button3;
 pub mod button_bar;
 pub mod draw_text;
