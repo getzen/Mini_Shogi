@@ -67,14 +67,14 @@ impl ViewGame {
             status_text: Label::new(
                 TEXT_STATUS_CENTER,
                 true,
-                "Welcome!".to_owned(),
+                "Welcome!",
                 18,
                 Some("Menlo"),
             ),
             ai_progress_text: Label::new(
                 AI_PROGRESS_CORNER,
                 false,
-                "".to_owned(), 
+                "", 
                 12,
                 Some("Menlo"),
             ),
