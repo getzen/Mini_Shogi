@@ -76,20 +76,20 @@ impl Button3 {
                 true,
                 text, 
                 14,
-                 Some("Menlo")),
+                 Some("Menlo Bold")),
             eventable: Eventable::new(),
             mode: ButtonMode::Push,
             selected: false,
 
             button_disabled_color: Color::from_rgba(0, 0, 0, 255),
-            button_normal_color: Color::from_rgba(155, 155, 155, 255),
-            button_mouse_over_color: Color::from_rgba(165, 165, 165, 255),
-            button_selected_color: Color::from_rgba(175, 175, 175, 255),
+            button_normal_color: Color::from_rgba(100, 100, 100, 255),
+            button_mouse_over_color: Color::from_rgba(110, 110, 110, 255),
+            button_selected_color: Color::from_rgba(120, 120, 120, 255),
             button_draw_color: WHITE, // set below to normal_color
 
             text_disabled_color: Color::from_rgba(155, 155, 155, 255),
-            text_normal_color: Color::from_rgba(235, 235, 235, 255),
-            text_mouse_over_color: Color::from_rgba(245, 245, 245, 255),
+            text_normal_color: Color::from_rgba(225, 225, 225, 255),
+            text_mouse_over_color: Color::from_rgba(240, 240, 240, 255),
             text_selected_color: Color::from_rgba(255, 255, 255, 255),
             text_draw_color: WHITE, // set below to normal_color
         };

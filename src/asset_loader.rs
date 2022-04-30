@@ -99,6 +99,7 @@ impl AssetLoader {
     pub fn get_font(name: &str) -> Font {
         let res = match name {
             "Menlo" => load_ttf_font_from_bytes(include_bytes!("../assets/Menlo.ttc")),
+            "Menlo Bold" => load_ttf_font_from_bytes(include_bytes!("../assets/Menlo-Bold.ttf")),
             _ => panic!("No font by that name."),
         };
         match res {
