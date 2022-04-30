@@ -39,6 +39,10 @@ impl AssetLoader {
 
     pub fn get_texture(name: &str) -> Texture2D {
         match name {
+            // button
+            "button_0" => Texture2D::from_file_with_format(include_bytes!("../assets/button_60x24_2x.png"),None,),
+            "button_1" => Texture2D::from_file_with_format(include_bytes!("../assets/button_80x24_2x.png"),None,),
+
             // controller
             "bar_about" => Texture2D::from_file_with_format(include_bytes!("../assets/bar_about_2x.png"),None,),
             "bar_rules" => Texture2D::from_file_with_format(include_bytes!("../assets/bar_rules_2x.png"),None,),
