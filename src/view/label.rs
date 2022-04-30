@@ -29,7 +29,7 @@ impl Label {
     pub fn new(
         logi_position: (f32, f32),
         centered: bool,
-        text: String,
+        text: &str,
         logi_font_size: u16,
         font_name: Option<&str>) -> Self {
 
@@ -38,7 +38,7 @@ impl Label {
         Self {
             id: None,
             transform: Transform::new(phys_position, 0.0),
-            draw_text: DrawText::new(centered, text, logi_font_size, font_name),
+            draw_text: DrawText::new(centered, true, text, logi_font_size, font_name),
             fader: None,
         }
     }
