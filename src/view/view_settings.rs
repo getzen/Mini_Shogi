@@ -60,11 +60,11 @@ impl ViewSettings {
 
             button_bar_0: ButtonBar::new((400., 390.), ButtonBarOrientation::Horizontal, 25., true),
             slider_0: Slider::new((300., 445.), 200., 1., 1., 1., 1),
-            slider_0_text: Label::new((400., 487.), true, "world".to_string(), 18, Some("Menlo")),
+            slider_0_text: Label::new((400., 487.), true, "world", 18, Some("Menlo")),
             
             button_bar_1: ButtonBar::new((385., 240.), ButtonBarOrientation::Horizontal, 25., true),
             slider_1: Slider::new((300., 300.), 200., 1., 1., 1., 0),
-            slider_1_text: Label::new((400., 342.), true, "hello".to_string(), 18, Some("Menlo")),
+            slider_1_text: Label::new((400., 342.), true, "hello", 18, Some("Menlo")),
           
             players: Vec::new(),
         }
