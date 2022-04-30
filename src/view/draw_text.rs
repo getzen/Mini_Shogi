@@ -8,7 +8,8 @@ use crate::view::transform::Transform;
 
 pub struct DrawText {
     pub visible: bool,
-    pub centered: bool,
+    pub centered_horiz: bool,
+    pub centered_vert: bool,
     pub text: String,
     pub color: Color,
     pub text_params: TextParams,
@@ -16,8 +17,9 @@ pub struct DrawText {
 
 impl DrawText {
     pub fn new(
-        centered: bool,
-        text: String,
+        centered_horiz: bool,
+        centered_vert: bool,
+        text: &str,
         logi_font_size: u16,
         font_name: Option<&str>) -> Self {
 
@@ -29,8 +31,9 @@ impl DrawText {
 
         Self {
             visible: true,
-            centered,
-            text,
+            centered_horiz,
+            centered_vert,
+            text: text.to_string(),
             color: BLACK,
             text_params,
         }
@@ -48,14 +51,17 @@ impl DrawText {
     pub fn draw(&mut self, transform: &Transform, color: Option<Color>) {
         if !self.visible { return }
 
-        let (x, y) = match self.centered {
-            true => {
-                let draw_size = self.draw_size();
-                (transform.phys_position.0 - draw_size.0 / 2.0,
-                 transform.phys_position.1 - draw_size.1 / 2.0)
-            },
-            false => transform.phys_position
-        };
+        let (w, h, baseline) = self.draw_size();
+        //println!("{}, {}, {}", w, h, baseline);
+        let (mut x, mut y) = transform.phys_position;
+
+        if self.centered_horiz {
+            x -= w / 2.0;
+        }
+
+        if self.centered_vert {
+            y += h / 2.0 - (h - baseline) / 2.0;
+        }
 
         self.text_params.color = if color.is_some() { color.unwrap() } else { self.color };
         draw_text_ex(&self.text, x, y, self.text_params);
