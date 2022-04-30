@@ -9,7 +9,7 @@ use crate::view::button::Button;
 use crate::view::button::ButtonEvent;
 use crate::view::image::Image;
 
-use super::button2::Button2;
+use super::button3::Button3;
 
 pub enum ViewRulesMessage {
     ShouldClose,
@@ -21,7 +21,7 @@ pub struct ViewRules {
     image: Image,
     close_button: Button,
 
-    test_button: Button2
+    test_button: Button3
 }
 
 impl ViewRules {
@@ -34,7 +34,7 @@ impl ViewRules {
             image: Image::new((0., 0.), rules_texture, false, None),
             close_button: Button::new((680., 745.), close_texture, None),
 
-            test_button: Button2::new((10., 10.), "Ki1", None),
+            test_button: Button3::new((0., 0.), 0, "Okay", None),
         }
     }
 
@@ -48,6 +48,9 @@ impl ViewRules {
         if event_opt == Some(ButtonEvent::Pushed(None)) {
             self.tx.send(ViewRulesMessage::ShouldClose).expect("Rules message send error.");
         }
+
+        // Test button
+        let test_opt = self.test_button.process_events();
     }
 
     pub fn draw(&mut self) {
