@@ -52,7 +52,6 @@ impl DrawText {
         if !self.visible { return }
 
         let (w, h, baseline) = self.draw_size();
-        //println!("{}, {}, {}", w, h, baseline);
         let (mut x, mut y) = transform.phys_position;
 
         if self.centered_horiz {
