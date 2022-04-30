@@ -66,7 +66,7 @@ impl Button2 {
             group_id: None,
             transform: Transform::new(phys_position, 0.0),
             drawable: DrawTexture::new(texture, false),
-            label: Label::new((0., 0.), true, text.to_owned(), FONT_SIZE, Some(FONT)),
+            label: Label::new((0., 0.), true, text, FONT_SIZE, Some(FONT)),
             eventable: Eventable::new(),
             mode: ButtonMode::Push,
             normal_color: Color::from_rgba(235, 235, 235, 255),
