@@ -15,6 +15,8 @@ There are two AI opponents:
 
 ## To-Do:
 
+- Add "radio" functionality to ButtonBar. Remove handling from ViewSettings.
+
 - Add sounds: welcome, promotion, win/loss
 
 - Add ability to restart game.
