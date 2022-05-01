@@ -70,7 +70,7 @@ impl Slider {
             tick_divisions: 0,
             show_ticks: true,
             snap_to_tick: false,
-            color: BLACK,
+            color: WHITE,
 
             value, min_value, max_value,
 

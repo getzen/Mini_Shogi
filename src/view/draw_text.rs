@@ -34,7 +34,7 @@ impl DrawText {
             centered_horiz,
             centered_vert,
             text: text.to_string(),
-            color: BLACK,
+            color: WHITE,
             text_params,
         }
     }

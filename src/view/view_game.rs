@@ -17,7 +17,7 @@ use crate::piece::PieceKind::{self, *};
 use crate::view::label::Label;
 use crate::view::sprite::Sprite;
 
-const BACKGROUND_COLOR: (u8, u8, u8) = (0, 0, 0);
+const BACKGROUND_COLOR: (u8, u8, u8) = (40, 40, 40);
 const BOARD_CORNER: (f32, f32) = (165.0, 95.0);
 const SQUARE_SIZE: f32 = 90.0; // matches the square.png size
 const SQUARE_GAP: f32 = 5.0;
@@ -28,7 +28,7 @@ const RESERVE_1_CENTER: (f32, f32) = (95., 140.);
 const RESERVE_BOX_OFFSET: f32 = 20.;
 const RESERVE_PIECE_OFFSET: f32 = 12.;
 const TEXT_STATUS_CENTER: (f32, f32) = (400., 60.0);
-const AI_PROGRESS_CORNER: (f32, f32) = (20., 770.);
+const AI_PROGRESS_CORNER: (f32, f32) = (20., 775.);
 const MOVE_DURATION: f32 = 0.25;
 
 pub enum ViewGameMessage {

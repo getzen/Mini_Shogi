@@ -46,6 +46,9 @@ impl AssetLoader {
             // view_intro
             "view_intro" => Texture2D::from_file_with_format(include_bytes!("../assets/view_intro_2x.png"),None,),
 
+            // view_about
+            "view_about" => Texture2D::from_file_with_format(include_bytes!("../assets/view_about_2x.png"),None,),
+
             // view_settings
             "view_settings" => Texture2D::from_file_with_format(include_bytes!("../assets/view_settings_2x.png"),None,),
 

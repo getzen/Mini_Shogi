@@ -3,8 +3,9 @@
 
 use std::sync::mpsc::Sender;
 
-use crate::asset_loader::AssetLoader;
+use macroquad::prelude::WHITE;
 
+use crate::asset_loader::AssetLoader;
 use crate::controller::Player;
 use crate::controller::PlayerKind::*;
 use crate::view::button::Button;
@@ -32,11 +33,11 @@ pub struct ViewSettings {
 
     button_bar_0: ButtonBar,
     slider_0: Slider,
-    slider_0_text: Label,
+    slider_0_label: Label,
 
     button_bar_1: ButtonBar,
     slider_1: Slider,
-    slider_1_text: Label,
+    slider_1_label: Label,
 
     players: Vec<Player>,
 }
@@ -49,15 +50,17 @@ impl ViewSettings {
             tx,
             background_image: Image::new((200., 200.), texture, false, None),
 
-            okay_button: Button::new((365., 510.), 0, "Okay", None),
+            okay_button: Button::new((370., 510.), 0, "Okay", None),
 
-            button_bar_0: ButtonBar::new((400., 390.), ButtonBarOrientation::Horizontal, 25., true),
-            slider_0: Slider::new((300., 445.), 200., 1., 1., 1., 1),
-            slider_0_text: Label::new((400., 487.), true, "world", 18, Some("Menlo")),
-            
-            button_bar_1: ButtonBar::new((385., 240.), ButtonBarOrientation::Horizontal, 25., true),
+            // Top player (1)
+            button_bar_1: ButtonBar::new((379., 245.), ButtonBarOrientation::Horizontal, 25., true),
             slider_1: Slider::new((300., 300.), 200., 1., 1., 1., 0),
-            slider_1_text: Label::new((400., 342.), true, "hello", 18, Some("Menlo")),
+            slider_1_label: Label::new((400., 325.), true, "slider 1", 14, Some("Menlo")),
+
+            // Botton player (0)
+            button_bar_0: ButtonBar::new((379., 391.), ButtonBarOrientation::Horizontal, 25., true),
+            slider_0: Slider::new((300., 445.), 200., 1., 1., 1., 1),
+            slider_0_label: Label::new((400., 470.), true, "slider 0", 14, Some("Menlo")),
           
             players: Vec::new(),
         }
@@ -68,17 +71,17 @@ impl ViewSettings {
         let mut button;
 
         // Player 0
-        button = Button::new((385., 240.), 1, "Human", Some(HUMAN_ID));
+        button = Button::new((0., 0.), 1, "Human", Some(HUMAN_ID));
         self.button_bar_0.add_button(button);
 
-        button = Button::new((480., 240.), 1, "AI", Some(AI_ID));
+        button = Button::new((0., 0.), 1, "AI", Some(AI_ID));
         self.button_bar_0.add_button(button);
 
         // Player 1
-        button = Button::new((400., 390.), 1, "Human", Some(HUMAN_ID));
+        button = Button::new((0., 0.), 1, "Human", Some(HUMAN_ID));
         self.button_bar_1.add_button(button);
 
-        button = Button::new((495., 390.), 1, "AI", Some(AI_ID));
+        button = Button::new((0., 0.), 1, "AI", Some(AI_ID));
         self.button_bar_1.add_button(button);
 
         self.set_player_controls(0);
@@ -106,11 +109,11 @@ impl ViewSettings {
             match self.players[0].kind {
                 Human => {
                     self.slider_0.is_visible = false;
-                    self.slider_0_text.draw_text.visible = false;
+                    self.slider_0_label.draw_text.visible = false;
                 },
                 AI => {
                     self.slider_0.is_visible = true;
-                    self.slider_0_text.draw_text.visible = true;
+                    self.slider_0_label.draw_text.visible = true;
                     self.slider_0.value = self.players[0].search_depth as f32;
                     self.slider_0.max_value = 9.;
                     self.slider_0.tick_divisions = 7;
@@ -129,11 +132,11 @@ impl ViewSettings {
             match self.players[1].kind {
                 Human => {
                     self.slider_1.is_visible = false;
-                    self.slider_1_text.draw_text.visible = false;
+                    self.slider_1_label.draw_text.visible = false;
                 },
                 AI => {
                     self.slider_1.is_visible = true;
-                    self.slider_1_text.draw_text.visible = true;
+                    self.slider_1_label.draw_text.visible = true;
                     self.slider_1.value = self.players[1].search_depth as f32;
                     self.slider_1.max_value = 9.;
                     self.slider_1.tick_divisions = 7;
@@ -203,8 +206,8 @@ impl ViewSettings {
             Human => "".to_string(),
             AI => format!("{} move look-ahead", self.slider_0.nearest_snap_value()),
         };
-        self.slider_0_text.set_text(text_0);
-        self.slider_0_text.draw();
+        self.slider_0_label.set_text(text_0);
+        self.slider_0_label.draw();
 
         self.slider_1.draw();
 
@@ -213,7 +216,7 @@ impl ViewSettings {
             Human => "".to_string(),
             AI => format!("{} move look-ahead", self.slider_1.nearest_snap_value() as usize),
         };
-        self.slider_1_text.set_text(text_1);
-        self.slider_1_text.draw();
+        self.slider_1_label.set_text(text_1);
+        self.slider_1_label.draw();
     }
 }

@@ -113,7 +113,7 @@ impl Controller {
 
             view_rules: ViewRules::new(view_rules_tx).await,
             view_rules_rx,
-            
+
             view_game: ViewGame::new(view_game_tx, COLS, ROWS).await,
             view_game_rx,
 
@@ -182,6 +182,8 @@ impl Controller {
             // View events
             match self.state {
                 About => {
+                    self.view_about.process_events();
+                    self.check_messages().await;
                 },
                 Settings => {
                     self.view_settings.process_events();
@@ -220,6 +222,9 @@ impl Controller {
             self.view_game.draw_board();
             self.view_game.draw_ui(&self.state, &self.pv_text);
             match self.state {
+                About => {
+                    self.view_about.draw();
+                }
                 Settings => {
                      self.view_settings.draw();
                 },
@@ -248,6 +253,17 @@ impl Controller {
     }
 
     async fn check_messages(&mut self) {
+        // From ViewAbout
+        let received = self.view_about_rx.try_recv();
+        if received.is_ok() {
+            match received.unwrap() {
+                ViewAboutMessage::ShouldClose => {
+                    self.button_bar.visible = true;
+                    self.state = self.previous_state.unwrap();
+                },
+            }
+        }
+
         // From ViewSettings
         let received = self.view_settings_rx.try_recv();
         if received.is_ok() {

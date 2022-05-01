@@ -52,27 +52,30 @@ impl Label {
     #[allow(dead_code)]
     /// A convenience function to set the text color.
     pub fn set_color(&mut self, color: Color) {
-        self.draw_text.text_params.color = color;
+        self.draw_text.color = color;
     }
 
+    #[allow(dead_code)]
     /// The width of the text.
     pub fn width(&self) -> f32 {
         let (width, _, _) = self.draw_text.draw_size();
         width
     }
 
+    #[allow(dead_code)]
     /// The center of the text, ignoring the bits below the baseline.
     pub fn center(&self) -> (f32, f32) {
         let (width, height, offset) = self.draw_text.draw_size();
         (width / 2.0, height / 2.0 + offset / 2.0)
     }
 
-    
+    #[allow(dead_code)]
     pub fn fade_out(&mut self, duration: Duration) {
         let end_color = Color::from_rgba(255, 255, 255, 0);
         self.fader = Some(ColorAnimator::new(WHITE, end_color, duration));
     }
 
+    #[allow(dead_code)]
     pub fn update(&mut self, time_delta: Duration) -> bool {
         if let Some(fader) = &mut self.fader {
             fader.update(time_delta);
