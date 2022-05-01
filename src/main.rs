@@ -24,7 +24,7 @@ fn conf() -> Conf {
         high_dpi: true,
         //fullscreen: bool,
         //sample_count: 0,
-        //window_resizable: bool,
+        window_resizable: false,
         //icon: Option<Icon>,
         ..Default::default()
     }

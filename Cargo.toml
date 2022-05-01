@@ -1,5 +1,5 @@
 [package]
-name = "MiniShogi"
+name = "mini_shogi"
 version = "0.1.0"
 edition = "2021"
 description = "The game of Mini Shogi, a simplified, faster version of Shogi."
