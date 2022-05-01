@@ -16,7 +16,7 @@ use crate::game::*;
 use crate::game::{Game, GameState};
 use crate::controller::AppState::*;
 use crate::controller::PlayerKind::*;
-use crate::view::button3::Button3;
+use crate::view::button::Button;
 use crate::view::view_game::{ViewGame, ViewGameMessage};
 use crate::view::view_intro::ViewIntro;
 use crate::view::view_settings::{ViewSettings, ViewSettingsMessage};
@@ -110,25 +110,17 @@ impl Controller {
 
     pub async fn prepare(&mut self) {
         // Construct ButtonBar (menu bar)
-        //let mut texture = AssetLoader::get_texture("bar_about");
-        let mut button = Button3::new((0.,0.), 1, "About", Some(BAR_ABOUT_ID));
+        let mut button = Button::new((0.,0.), 1, "About", Some(BAR_ABOUT_ID));
         self.button_bar.add_button(button);
 
-        //texture = AssetLoader::get_texture("bar_rules");
-        button = Button3::new((0.,0.), 1, "Rules", Some(BAR_RULES_ID));
+        button = Button::new((0.,0.), 1, "Rules", Some(BAR_RULES_ID));
         self.button_bar.add_button(button);
 
-        //texture = AssetLoader::get_texture("bar_settings");
-        button = Button3::new((0.,0.), 1, "Settings", Some(BAR_SETTINGS_ID));
+        button = Button::new((0.,0.), 1, "Settings", Some(BAR_SETTINGS_ID));
         self.button_bar.add_button(button);
 
-        //texture = AssetLoader::get_texture("bar_quit");
-        button = Button3::new((0.,0.), 1, "Quit", Some(BAR_QUIT_ID));
+        button = Button::new((0.,0.), 1, "Quit", Some(BAR_QUIT_ID));
         self.button_bar.add_button(button);
-
-        // Must do after buttons are added.
-        //self.button_bar.set_color(Color::from_rgba(125, 125, 125, 125));
-        //self.button_bar.set_selected_color(Color::from_rgba(246, 194, 81, 125));
 
         self.players.push( Player {id: 0, kind: Human, search_depth: 3, search_rounds: 500} );
         self.players.push( Player {id: 1, kind: AI, search_depth: 3, search_rounds: 500} );

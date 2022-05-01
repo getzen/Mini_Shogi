@@ -8,7 +8,7 @@ use crate::view::image::Image;
 
 use crate::controller::Player;
 use crate::controller::PlayerKind::*;
-use crate::view::button3::Button3;
+use crate::view::button::Button;
 use crate::view::button_bar::ButtonBar;
 use crate::view::button_bar::ButtonBarOrientation;
 use crate::view::label::Label;
@@ -33,7 +33,7 @@ pub struct ViewSettings {
 
     background_image: Image,
 
-    okay_button: Button3,
+    okay_button: Button,
 
     button_bar_0: ButtonBar,
     slider_0: Slider,
@@ -50,13 +50,11 @@ impl ViewSettings {
     pub async fn new(tx: Sender<ViewSettingsMessage>) -> Self {    
         let texture = AssetLoader::get_texture("view_settings"); 
 
-        let okay_texture = AssetLoader::get_texture("okay");
-
         Self {
             tx,
             background_image: Image::new((200., 200.), texture, false, None),
 
-            okay_button: Button3::new((365., 510.), 0, "Okay", None),
+            okay_button: Button::new((365., 510.), 0, "Okay", None),
 
             button_bar_0: ButtonBar::new((400., 390.), ButtonBarOrientation::Horizontal, 25., true),
             slider_0: Slider::new((300., 445.), 200., 1., 1., 1., 1),
@@ -72,25 +70,20 @@ impl ViewSettings {
 
     pub fn prepare(&mut self, players: Vec<Player>) {        
         self.players = players;
-        //let mut texture;
         let mut button;
 
         // Player 0
-        //texture = AssetLoader::get_texture("button_human");
-        button = Button3::new((385., 240.), 1, "Human", Some(HUMAN_ID));
+        button = Button::new((385., 240.), 1, "Human", Some(HUMAN_ID));
         self.button_bar_0.add_button(button);
 
-        //texture = AssetLoader::get_texture("button_ai");
-        button = Button3::new((480., 240.), 1, "AI", Some(AI_ID));
+        button = Button::new((480., 240.), 1, "AI", Some(AI_ID));
         self.button_bar_0.add_button(button);
 
         // Player 1
-        //texture = AssetLoader::get_texture("button_human");
-        button = Button3::new((400., 390.), 1, "Human", Some(HUMAN_ID));
+        button = Button::new((400., 390.), 1, "Human", Some(HUMAN_ID));
         self.button_bar_1.add_button(button);
 
-        //texture = AssetLoader::get_texture("button_ai");
-        button = Button3::new((495., 390.), 1, "AI", Some(AI_ID));
+        button = Button::new((495., 390.), 1, "AI", Some(AI_ID));
         self.button_bar_1.add_button(button);
 
         self.set_player_controls(0);

@@ -4,8 +4,8 @@
 /// be active at a time.
 
 use crate::view::*;
-use crate::view::button3::ButtonEvent;
-use crate::view::button3::Button3;
+use crate::view::button::ButtonEvent;
+use crate::view::button::Button;
 
 pub enum ButtonBarOrientation {
     Horizontal,
@@ -18,7 +18,7 @@ pub struct ButtonBar {
     pub phys_position: (f32, f32),
     pub orientation: ButtonBarOrientation,
     pub spacing: f32,
-    pub buttons: Vec<Button3>,
+    pub buttons: Vec<Button>,
     pub selected_id: Option<usize>,
     /// If true, then at least one button must be selected, like a radio
     /// button grouping. If false, then all buttons may be unselected and
@@ -59,7 +59,7 @@ impl ButtonBar {
     //     }
     // }
 
-    pub fn add_button(&mut self, mut button: Button3) -> usize {
+    pub fn add_button(&mut self, mut button: Button) -> usize {
         let mut id = self.buttons.len();
         if button.id.is_none() {
             button.id = Some(id);
@@ -121,8 +121,8 @@ impl ButtonBar {
             button.draw();
 
             match self.orientation {
-                ButtonBarOrientation::Horizontal => x += button.drawable.texture.width() + self.spacing,
-                ButtonBarOrientation::Vertical => y += button.drawable.texture.height() + self.spacing,
+                ButtonBarOrientation::Horizontal => x += button.texture_drawable.texture.width() + self.spacing,
+                ButtonBarOrientation::Vertical => y += button.texture_drawable.texture.height() + self.spacing,
             }
         }
     }

@@ -1,8 +1,8 @@
 // Mod.rs
 
 pub mod animators;
+//pub mod button_alt;
 pub mod button;
-pub mod button3;
 pub mod button_bar;
 pub mod draw_text;
 pub mod draw_texture;
