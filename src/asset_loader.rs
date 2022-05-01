@@ -43,21 +43,11 @@ impl AssetLoader {
             "button_0" => Texture2D::from_file_with_format(include_bytes!("../assets/button_60x24_2x.png"),None,),
             "button_1" => Texture2D::from_file_with_format(include_bytes!("../assets/button_80x24_2x.png"),None,),
 
-            // controller
-            "bar_about" => Texture2D::from_file_with_format(include_bytes!("../assets/bar_about_2x.png"),None,),
-            "bar_rules" => Texture2D::from_file_with_format(include_bytes!("../assets/bar_rules_2x.png"),None,),
-            "bar_settings" => Texture2D::from_file_with_format(include_bytes!("../assets/bar_settings_2x.png"),None,),
-            "bar_quit" => Texture2D::from_file_with_format(include_bytes!("../assets/bar_quit_2x.png"),None,),
-
             // view_intro
             "view_intro" => Texture2D::from_file_with_format(include_bytes!("../assets/view_intro_2x.png"),None,),
 
             // view_settings
             "view_settings" => Texture2D::from_file_with_format(include_bytes!("../assets/view_settings_2x.png"),None,),
-            "okay" => Texture2D::from_file_with_format(include_bytes!("../assets/okay_2x.png"),None,),
-            "button_human" => Texture2D::from_file_with_format(include_bytes!("../assets/button_human_2x.png"),None,),
-            "button_ai" => Texture2D::from_file_with_format(include_bytes!("../assets/button_ai_2x.png"),None,),
-            //"monte_carlo" => Texture2D::from_file_with_format(include_bytes!("../assets/monte_carlo_2x.png"),None,),
 
             // view board
             "square" => Texture2D::from_file_with_format(include_bytes!("../assets/square_2x.png"),None,),
@@ -69,9 +59,9 @@ impl AssetLoader {
             "silver_pro" => Texture2D::from_file_with_format(include_bytes!("../assets/silver_pro_2x.png"),None,),
             "pawn" => Texture2D::from_file_with_format(include_bytes!("../assets/pawn_2x.png"),None,),
             "pawn_pro" => Texture2D::from_file_with_format(include_bytes!("../assets/pawn_pro_2x.png"),None,),
+
             // view rules
-            "close" => Texture2D::from_file_with_format(include_bytes!("../assets/close_2x.png"),None,),
-            "rules_view" => Texture2D::from_file_with_format(include_bytes!("../assets/rules_view_2x.png"),None,),
+            "view_rules" => Texture2D::from_file_with_format(include_bytes!("../assets/rules_view_2x.png"),None,),
             _ => panic!("No texture by that name: {}", name),
         }
     }
