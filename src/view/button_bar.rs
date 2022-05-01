@@ -7,6 +7,7 @@ use crate::view::*;
 use crate::view::button::ButtonEvent;
 use crate::view::button::Button;
 
+#[allow(dead_code)]
 pub enum ButtonBarOrientation {
     Horizontal,
     Vertical,
@@ -32,7 +33,7 @@ pub struct ButtonBar {
 
 impl ButtonBar {
 
-    pub fn new(logi_position: (f32, f32), orientation: ButtonBarOrientation, spacing: f32, radio_behavior: bool) -> Self {       
+    pub fn new(logi_position: (f32, f32), orientation: ButtonBarOrientation, spacing: f32) -> Self {       
         Self {
             phys_position: phys_pos(logi_position),
             orientation,
@@ -76,6 +77,7 @@ impl ButtonBar {
         }
     }
 
+    #[allow(dead_code)]
     pub fn unselect_all(&mut self) {
         for button in &mut self.buttons {
             button.set_selected(false);
@@ -83,6 +85,7 @@ impl ButtonBar {
         self.selected_id = None;
     }
 
+    #[allow(dead_code)]
     pub fn set_enabled(&mut self, enabled: bool) {
         self.enabled = enabled;
         for button in &mut self.buttons {

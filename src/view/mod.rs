@@ -56,6 +56,7 @@ pub fn logi_pos(phys_position: (f32, f32)) -> (f32, f32) {
 }
 
 
+#[allow(dead_code)]
 /// Draw to a texture using the given function with drawing commands. Width and height
 /// are passed in as examples of passing arguments to the draw function.
 pub fn draw_to_texture(draw_fn: fn(u32, u32), phys_width: u32, phys_height: u32) -> Texture2D {
@@ -87,6 +88,7 @@ pub fn draw_to_texture(draw_fn: fn(u32, u32), phys_width: u32, phys_height: u32)
     render_target.texture
 }
 
+#[allow(dead_code)]
 /// Sample draw function.
 fn draw_fn(_phys_width: u32, _phys_height: u32) {
     clear_background(Color::from_rgba(255, 255, 255, 255));

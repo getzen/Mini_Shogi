@@ -3,8 +3,6 @@
 
 use std::sync::mpsc::Sender;
 
-use macroquad::prelude::WHITE;
-
 use crate::asset_loader::AssetLoader;
 use crate::controller::Player;
 use crate::controller::PlayerKind::*;
@@ -53,12 +51,12 @@ impl ViewSettings {
             okay_button: Button::new((370., 510.), 0, "Okay", None),
 
             // Top player (1)
-            button_bar_1: ButtonBar::new((379., 245.), ButtonBarOrientation::Horizontal, 25., true),
+            button_bar_1: ButtonBar::new((379., 245.), ButtonBarOrientation::Horizontal, 25.),
             slider_1: Slider::new((300., 300.), 200., 1., 1., 1., 0),
             slider_1_label: Label::new((400., 325.), true, "slider 1", 14, Some("Menlo")),
 
             // Botton player (0)
-            button_bar_0: ButtonBar::new((379., 391.), ButtonBarOrientation::Horizontal, 25., true),
+            button_bar_0: ButtonBar::new((379., 391.), ButtonBarOrientation::Horizontal, 25.),
             slider_0: Slider::new((300., 445.), 200., 1., 1., 1., 1),
             slider_0_label: Label::new((400., 470.), true, "slider 0", 14, Some("Menlo")),
           

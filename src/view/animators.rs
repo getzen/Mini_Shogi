@@ -82,7 +82,8 @@ impl PositionAnimator {
             self.position = self.end_position;
             return;
         }
-        self.calc_ease_out(percentage)
+        //self.calc_ease_out(percentage)
+        self.calc_linear(percentage)
     }
 
     #[allow(dead_code)]

@@ -40,10 +40,12 @@ impl DrawTexture {
         self.size.1 = logi_size.1 * adj_scale();
     }
 
+    #[allow(dead_code)]
     pub fn phys_center(&self) -> (f32, f32) {
         (self.size.0 / 2.0, self.size.1 / 2.0)
     }
 
+    #[allow(dead_code)]
     pub fn set_texture(&mut self, texture: Texture2D) {
         self.texture = texture;
         self.size = (texture.width() * adj_scale(), texture.height() * adj_scale());

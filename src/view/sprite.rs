@@ -75,6 +75,7 @@ impl Sprite {
         self.eventable.contains_phys_position(phy_position, &self.transform, &self.drawable)
     }
 
+    #[allow(dead_code)]
     pub fn process_events(&mut self) -> Option<Event> {
         self.eventable.process_events(&self.transform, &self.drawable)
     }

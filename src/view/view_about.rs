@@ -33,13 +33,17 @@ impl ViewAbout {
     pub fn process_events(&mut self) {
         // Key presses.
         if is_key_released(KeyCode::Escape) {
-            self.tx.send(ViewAboutMessage::ShouldClose).expect("Rules message send error.");
+            self.send_close_message();
         }
         // Button
         let event_opt = self.okay_button.process_events();
         if event_opt == Some(ButtonEvent::Pushed(None)) {
-            self.tx.send(ViewAboutMessage::ShouldClose).expect("Rules message send error.");
+            self.send_close_message();
         }
+    }
+
+    fn send_close_message(&self) {
+        self.tx.send(ViewAboutMessage::ShouldClose).expect("About message send error.");
     }
 
     pub fn draw(&mut self) {

@@ -101,7 +101,7 @@ impl Controller {
         Self {
             players: Vec::new(),
             game: Game::new(),
-            button_bar: ButtonBar::new((4., 4.), Horizontal, 8., false),
+            button_bar: ButtonBar::new((4., 4.), Horizontal, 8.),
 
             view_intro: ViewIntro::new().await,
 
