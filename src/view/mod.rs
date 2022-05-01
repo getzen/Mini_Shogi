@@ -87,7 +87,7 @@ pub fn draw_to_texture(draw_fn: fn(u32, u32), phys_width: u32, phys_height: u32)
 }
 
 /// Sample draw function.
-fn draw_fn(phys_width: u32, phys_height: u32) {
+fn draw_fn(_phys_width: u32, _phys_height: u32) {
     clear_background(Color::from_rgba(255, 255, 255, 255));
     draw_rectangle(0., 0., 100., 100., BLACK);
 }

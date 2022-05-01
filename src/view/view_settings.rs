@@ -1,23 +1,19 @@
-// ViewIntro
-// The intro/title view.
+/// ViewSettings
+/// The player settings view.
 
 use std::sync::mpsc::Sender;
 
 use crate::asset_loader::AssetLoader;
-use crate::view::image::Image;
 
 use crate::controller::Player;
 use crate::controller::PlayerKind::*;
 use crate::view::button::Button;
 use crate::view::button_bar::ButtonBar;
 use crate::view::button_bar::ButtonBarOrientation;
+use crate::view::image::Image;
 use crate::view::label::Label;
 use crate::view::slider::Slider;
 use crate::view::slider::SliderEvent;
-
-use super::transform::Transform;
-
-
 
 // Widget IDs
 const HUMAN_ID: usize = 0;

@@ -98,6 +98,11 @@ impl ButtonBar {
 
         for button in &mut self.buttons {
             if let Some(event) = button.process_events() {
+                
+                if self.radio_behavior {
+                    todo!("add this behavior");
+                }
+
                 match event {
                     ButtonEvent::Pushed(id) => {
                         return id;

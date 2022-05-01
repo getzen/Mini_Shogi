@@ -10,19 +10,18 @@ use num_format::{Locale, ToFormattedString};
 
 use crate::ai::{AI, AIProgress};
 use crate::ai_sender::{AIMessage, AISender};
-use crate::asset_loader::AssetLoader;
-use crate::view::button_bar::ButtonBarOrientation::*;
 use crate::game::*;
 use crate::game::{Game, GameState};
 use crate::controller::AppState::*;
 use crate::controller::PlayerKind::*;
 use crate::view::button::Button;
+use crate::view::button_bar::ButtonBar;
+use crate::view::button_bar::ButtonBarOrientation::*;
 use crate::view::view_game::{ViewGame, ViewGameMessage};
 use crate::view::view_intro::ViewIntro;
 use crate::view::view_settings::{ViewSettings, ViewSettingsMessage};
 use crate::view::view_rules::ViewRules;
 use crate::view::view_rules::ViewRulesMessage;
-use crate::view::button_bar::ButtonBar;
 
 #[derive(Clone, Copy)]
 pub struct Player {
