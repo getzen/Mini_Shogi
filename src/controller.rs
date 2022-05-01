@@ -16,7 +16,7 @@ use crate::game::*;
 use crate::game::{Game, GameState};
 use crate::controller::AppState::*;
 use crate::controller::PlayerKind::*;
-use crate::view::button::Button;
+use crate::view::button3::Button3;
 use crate::view::view_game::{ViewGame, ViewGameMessage};
 use crate::view::view_intro::ViewIntro;
 use crate::view::view_settings::{ViewSettings, ViewSettingsMessage};
@@ -92,7 +92,7 @@ impl Controller {
         Self {
             players: Vec::new(),
             game: Game::new(),
-            button_bar: ButtonBar::new((0., 0.), Horizontal, 0., false),
+            button_bar: ButtonBar::new((4., 4.), Horizontal, 8., false),
             view_settings: ViewSettings::new(view_settings_tx).await,
             view_rules: ViewRules::new(view_rules_tx).await,
             previous_state: None,
@@ -110,20 +110,20 @@ impl Controller {
 
     pub async fn prepare(&mut self) {
         // Construct ButtonBar (menu bar)
-        let mut texture = AssetLoader::get_texture("bar_about");
-        let mut button = Button::new((0.,0.), texture, Some(BAR_ABOUT_ID));
+        //let mut texture = AssetLoader::get_texture("bar_about");
+        let mut button = Button3::new((0.,0.), 1, "About", Some(BAR_ABOUT_ID));
         self.button_bar.add_button(button);
 
-        texture = AssetLoader::get_texture("bar_rules");
-        button = Button::new((0.,0.), texture, Some(BAR_RULES_ID));
+        //texture = AssetLoader::get_texture("bar_rules");
+        button = Button3::new((0.,0.), 1, "Rules", Some(BAR_RULES_ID));
         self.button_bar.add_button(button);
 
-        texture = AssetLoader::get_texture("bar_settings");
-        button = Button::new((0.,0.), texture, Some(BAR_SETTINGS_ID));
+        //texture = AssetLoader::get_texture("bar_settings");
+        button = Button3::new((0.,0.), 1, "Settings", Some(BAR_SETTINGS_ID));
         self.button_bar.add_button(button);
 
-        texture = AssetLoader::get_texture("bar_quit");
-        button = Button::new((0.,0.), texture, Some(BAR_QUIT_ID));
+        //texture = AssetLoader::get_texture("bar_quit");
+        button = Button3::new((0.,0.), 1, "Quit", Some(BAR_QUIT_ID));
         self.button_bar.add_button(button);
 
         // Must do after buttons are added.

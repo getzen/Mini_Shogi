@@ -63,7 +63,12 @@ pub struct Button3 {
 impl Button3 {
     pub fn new(logi_position: (f32, f32), size: usize, text: &str, id: Option<usize>) -> Self {
         let phys_position = phys_pos(logi_position);
+        if size == 2 {
+            println!("{}", text);
+        }
         let texture = AssetLoader::get_texture(BUTTON_FILES[size]);
+
+      
 
         let mut button = Self {
             id,
@@ -159,6 +164,11 @@ impl Button3 {
 
     pub fn draw(&mut self) {        
         self.drawable.draw(&self.texture_transform, Some(self.button_draw_color));
-        self.text.draw(&self.text_transform, Some(self.text_draw_color));
+
+        let mut transform = Transform::new(self.texture_transform.phys_position, 0.);
+        transform.phys_position.0 += self.text_transform.phys_position.0;
+        transform.phys_position.1 += self.text_transform.phys_position.1;
+
+        self.text.draw(&transform, Some(self.text_draw_color));
     }
 }

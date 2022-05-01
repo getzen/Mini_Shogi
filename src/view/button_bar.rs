@@ -3,11 +3,9 @@
 /// but without drop-down, sub-menu capability. Only one button may
 /// be active at a time.
 
-use macroquad::prelude::Color;
-
 use crate::view::*;
-use crate::view::button::Button;
-use crate::view::button::ButtonEvent;
+use crate::view::button3::ButtonEvent;
+use crate::view::button3::Button3;
 
 pub enum ButtonBarOrientation {
     Horizontal,
@@ -20,7 +18,7 @@ pub struct ButtonBar {
     pub phys_position: (f32, f32),
     pub orientation: ButtonBarOrientation,
     pub spacing: f32,
-    pub buttons: Vec<Button>,
+    pub buttons: Vec<Button3>,
     pub selected_id: Option<usize>,
     /// If true, then at least one button must be selected, like a radio
     /// button grouping. If false, then all buttons may be unselected and
@@ -47,21 +45,21 @@ impl ButtonBar {
         }
     }
 
-    /// Convenience method to set the color of all buttons at once.
-    pub fn set_color(&mut self, color: Color) {
-        for button in &mut self.buttons {
-            button.normal_color = color;
-        }
-    }
+    // /// Convenience method to set the color of all buttons at once.
+    // pub fn set_color(&mut self, color: Color) {
+    //     for button in &mut self.buttons {
+    //         button.normal_color = color;
+    //     }
+    // }
 
-    /// Convenience method to set the selected color of all buttons at once.
-    pub fn set_selected_color(&mut self, color: Color) {
-        for button in &mut self.buttons {
-            button.selected_color = color;
-        }
-    }
+    // /// Convenience method to set the selected color of all buttons at once.
+    // pub fn set_selected_color(&mut self, color: Color) {
+    //     for button in &mut self.buttons {
+    //         button.selected_color = color;
+    //     }
+    // }
 
-    pub fn add_button(&mut self, mut button: Button) -> usize {
+    pub fn add_button(&mut self, mut button: Button3) -> usize {
         let mut id = self.buttons.len();
         if button.id.is_none() {
             button.id = Some(id);
@@ -119,7 +117,7 @@ impl ButtonBar {
         let (mut x, mut y) = self.phys_position;
 
         for button in &mut self.buttons {
-            button.transform.phys_position = (x, y);
+            button.texture_transform.phys_position = (x, y);
             button.draw();
 
             match self.orientation {
