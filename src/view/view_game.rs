@@ -29,7 +29,7 @@ const RESERVE_BOX_OFFSET: f32 = 20.;
 const RESERVE_PIECE_OFFSET: f32 = 12.;
 const TEXT_STATUS_CENTER: (f32, f32) = (400., 60.0);
 const AI_PROGRESS_CORNER: (f32, f32) = (20., 778.);
-const MOVE_DURATION: f32 = 1.0;
+const MOVE_DURATION: f32 = 0.25;
 
 pub enum ViewGameMessage {
     PieceSelected(usize), // the piece id

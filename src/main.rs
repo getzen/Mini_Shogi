@@ -14,13 +14,11 @@ mod game;
 mod piece;
 mod view;
 
-
 use crate::controller::Controller;
-//use crate::view::View;
 
 fn conf() -> Conf {
     Conf {
-        window_title: String::from("Yōkaï No Mori"),
+        window_title: String::from("Mini Shogi"),
         window_width: 800,
         window_height: 800,
         high_dpi: true,

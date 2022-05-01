@@ -1,8 +1,8 @@
 [package]
-name = "yokai"
+name = "MiniShogi"
 version = "0.1.0"
 edition = "2021"
-description = "The game of Yokai No Mori."
+description = "The game of Mini Shogi, a simplified, faster version of Shogi."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -21,8 +21,8 @@ opt-level = 1
 
 # This is for the cargo-bundle crate.
 [package.metadata.bundle]
-name = "Yokai"
-identifier = "com.electronzen.Yokai"
-version = "1.0.0"
-copyright = "Copyright (c) Jane Doe 2016. All rights reserved."
+name = "Mini Shogi"
+identifier = "com.electronzen.MiniShogi"
+version = "0.1.0"
+copyright = "Free and open source."
 category = "Game"
