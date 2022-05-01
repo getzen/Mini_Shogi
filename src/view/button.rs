@@ -86,8 +86,8 @@ impl Button {
             selected: false,
 
             button_disabled_color: Color::from_rgba(0, 0, 0, 255),
-            button_normal_color: Color::from_rgba(100, 100, 100, 255),
-            button_mouse_over_color: Color::from_rgba(110, 110, 110, 255),
+            button_normal_color: Color::from_rgba(70, 70, 70, 255),
+            button_mouse_over_color: Color::from_rgba(95, 95, 95, 255),
             button_selected_color: Color::from_rgba(120, 120, 120, 255),
             button_draw_color: WHITE, // set below to normal_color
 

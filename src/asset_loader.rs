@@ -53,15 +53,19 @@ impl AssetLoader {
             "square" => Texture2D::from_file_with_format(include_bytes!("../assets/square_2x.png"),None,),
             "line" => Texture2D::from_file_with_format(include_bytes!("../assets/line_2x.png"),None,),
             "reserve" => Texture2D::from_file_with_format(include_bytes!("../assets/reserve_2x.png"),None,),
-            "king" => Texture2D::from_file_with_format(include_bytes!("../assets/king_2x.png"),None,),
-            "gold" => Texture2D::from_file_with_format(include_bytes!("../assets/gold_2x.png"),None,),
-            "silver" => Texture2D::from_file_with_format(include_bytes!("../assets/silver_2x.png"),None,),
-            "silver_pro" => Texture2D::from_file_with_format(include_bytes!("../assets/silver_pro_2x.png"),None,),
-            "pawn" => Texture2D::from_file_with_format(include_bytes!("../assets/pawn_2x.png"),None,),
-            "pawn_pro" => Texture2D::from_file_with_format(include_bytes!("../assets/pawn_pro_2x.png"),None,),
+            "king" => Texture2D::from_file_with_format(include_bytes!("../assets/piece_king_2x.png"),None,),
+            "gold" => Texture2D::from_file_with_format(include_bytes!("../assets/piece_gold_2x.png"),None,),
+            "silver" => Texture2D::from_file_with_format(include_bytes!("../assets/piece_silver_2x.png"),None,),
+            "silver_pro" => Texture2D::from_file_with_format(include_bytes!("../assets/piece_silver_pro_2x.png"),None,),
+            "rook" => Texture2D::from_file_with_format(include_bytes!("../assets/piece_rook_2x.png"),None,),
+            "rook_pro" => Texture2D::from_file_with_format(include_bytes!("../assets/piece_rook_pro_2x.png"),None,),
+            "bishop" => Texture2D::from_file_with_format(include_bytes!("../assets/piece_bishop_2x.png"),None,),
+            "bishop_pro" => Texture2D::from_file_with_format(include_bytes!("../assets/piece_bishop_pro_2x.png"),None,),
+            "pawn" => Texture2D::from_file_with_format(include_bytes!("../assets/piece_pawn_2x.png"),None,),
+            "pawn_pro" => Texture2D::from_file_with_format(include_bytes!("../assets/piece_pawn_pro_2x.png"),None,),
 
             // view rules
-            "view_rules" => Texture2D::from_file_with_format(include_bytes!("../assets/rules_view_2x.png"),None,),
+            "view_rules" => Texture2D::from_file_with_format(include_bytes!("../assets/view_rules_2x.png"),None,),
             _ => panic!("No texture by that name: {}", name),
         }
     }
@@ -75,8 +79,8 @@ impl AssetLoader {
     /// Returns the sound associated with the given name. Async function.
     pub async fn get_sound(name: &str) -> Sound {
         let res = match name {
-            "piece_move" => load_sound_from_bytes(include_bytes!("../assets/piece_move.wav")).await,
-            "piece_capture" => load_sound_from_bytes(include_bytes!("../assets/piece_capture.wav")).await,
+            "piece_move" => load_sound_from_bytes(include_bytes!("../assets/sound_piece_move.wav")).await,
+            "piece_capture" => load_sound_from_bytes(include_bytes!("../assets/sound_piece_capture.wav")).await,
             _ => panic!("No sound by that name."),
         };
         match res {

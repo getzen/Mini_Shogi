@@ -7,7 +7,7 @@ use crate::asset_loader::AssetLoader;
 use crate::view::image::Image;
 
 pub struct ViewIntro {
-    /// When true, this view should be update and drawn.
+    /// When true, this view should be updated and drawn.
     pub visible: bool,
     // Private
     image: Image,
@@ -21,7 +21,7 @@ impl ViewIntro {
 
         Self {
             visible: true,
-            image: Image::new((200., 210.), texture, false, None),
+            image: Image::new((240., 345.), texture, false, None),
             elapsed_time: Duration::ZERO,
             fade_active: false,
         }

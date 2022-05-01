@@ -14,6 +14,7 @@ pub mod label;
 pub mod transform;
 
 // mods for this app
+pub mod view_about;
 pub mod view_game;
 pub mod view_intro;
 pub mod view_rules;

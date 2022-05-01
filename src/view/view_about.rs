@@ -1,4 +1,4 @@
-/// ViewRules
+/// ViewAbout
 
 use std::sync::mpsc::Sender;
 
@@ -9,36 +9,36 @@ use crate::view::button::Button;
 use crate::view::button::ButtonEvent;
 use crate::view::image::Image;
 
-pub enum ViewRulesMessage {
+pub enum ViewAboutMessage {
     ShouldClose,
 }
 
-pub struct ViewRules {
-    tx: Sender<ViewRulesMessage>, 
+pub struct ViewAbout {
+    tx: Sender<ViewAboutMessage>, 
     image: Image,
     okay_button: Button,
 }
 
-impl ViewRules {
-    pub async fn new(tx: Sender<ViewRulesMessage>) -> Self {       
-        let texture = AssetLoader::get_texture("view_rules");
+impl ViewAbout {
+    pub async fn new(tx: Sender<ViewAboutMessage>) -> Self {       
+        let texture = AssetLoader::get_texture("view_about");
 
         Self {
             tx,
-            image: Image::new((0., 0.), texture, false, None),
-            okay_button: Button::new((370., 760.), 0, "Okay", None),
+            image: Image::new((200., 253.), texture, false, None),
+            okay_button: Button::new((370., 468.), 0, "Okay", None),
         }
     }
 
     pub fn process_events(&mut self) {
         // Key presses.
         if is_key_released(KeyCode::Escape) {
-            self.tx.send(ViewRulesMessage::ShouldClose).expect("Rules message send error.");
+            self.tx.send(ViewAboutMessage::ShouldClose).expect("Rules message send error.");
         }
         // Button
         let event_opt = self.okay_button.process_events();
         if event_opt == Some(ButtonEvent::Pushed(None)) {
-            self.tx.send(ViewRulesMessage::ShouldClose).expect("Rules message send error.");
+            self.tx.send(ViewAboutMessage::ShouldClose).expect("Rules message send error.");
         }
     }
 

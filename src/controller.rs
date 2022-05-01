@@ -17,6 +17,8 @@ use crate::controller::PlayerKind::*;
 use crate::view::button::Button;
 use crate::view::button_bar::ButtonBar;
 use crate::view::button_bar::ButtonBarOrientation::*;
+use crate::view::view_about::ViewAbout;
+use crate::view::view_about::ViewAboutMessage;
 use crate::view::view_game::{ViewGame, ViewGameMessage};
 use crate::view::view_intro::ViewIntro;
 use crate::view::view_settings::{ViewSettings, ViewSettingsMessage};
@@ -67,15 +69,22 @@ pub struct Controller {
     button_bar: ButtonBar, // the command bar at top
 
     view_intro: ViewIntro,
+
+    view_about: ViewAbout,
+    view_about_rx: Receiver<ViewAboutMessage>,
+
     view_settings: ViewSettings,
+    view_settings_rx: Receiver<ViewSettingsMessage>,
+    
     view_rules: ViewRules,
+    view_rules_rx: Receiver<ViewRulesMessage>,
+
     view_game: ViewGame,
+    view_game_rx: Receiver<ViewGameMessage>,
+
     pub state: AppState,
     previous_state: Option<AppState>,
     node_history: Vec<Game>,
-    view_settings_rx: Receiver<ViewSettingsMessage>,
-    view_rules_rx: Receiver<ViewRulesMessage>,
-    view_game_rx: Receiver<ViewGameMessage>,
     ai_tx: Sender<AIMessage>,
     ai_rx: Receiver<AIMessage>,
     pv_text: String,
@@ -83,6 +92,7 @@ pub struct Controller {
 
 impl Controller {
     pub async fn new() -> Self {
+        let (view_about_tx, view_about_rx) = mpsc::channel();
         let (view_settings_tx, view_settings_rx) = mpsc::channel();
         let (view_rules_tx, view_rules_rx) = mpsc::channel();
         let (view_game_tx, view_game_rx) = mpsc::channel();
@@ -92,16 +102,24 @@ impl Controller {
             players: Vec::new(),
             game: Game::new(),
             button_bar: ButtonBar::new((4., 4.), Horizontal, 8., false),
-            view_settings: ViewSettings::new(view_settings_tx).await,
-            view_rules: ViewRules::new(view_rules_tx).await,
-            previous_state: None,
+
             view_intro: ViewIntro::new().await,
+
+            view_about: ViewAbout::new(view_about_tx).await,
+            view_about_rx,
+
+            view_settings: ViewSettings::new(view_settings_tx).await,
+            view_settings_rx,
+
+            view_rules: ViewRules::new(view_rules_tx).await,
+            view_rules_rx,
+            
             view_game: ViewGame::new(view_game_tx, COLS, ROWS).await,
+            view_game_rx,
+
+            previous_state: None,
             state: NextPlayer,
             node_history: Vec::new(),
-            view_settings_rx,
-            view_rules_rx,
-            view_game_rx,
             ai_tx, ai_rx,
             pv_text: String::from(""),
         }
@@ -147,6 +165,7 @@ impl Controller {
                         self.button_bar.visible = false;
                     },
                     BAR_RULES_ID => {
+                        println!("jh");
                         self.previous_state = Some(self.state);
                         self.state = Rules;
                         self.button_bar.visible = false;

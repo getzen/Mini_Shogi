@@ -28,7 +28,6 @@ pub struct ViewSettings {
     tx: Sender<ViewSettingsMessage>, 
 
     background_image: Image,
-
     okay_button: Button,
 
     button_bar_0: ButtonBar,

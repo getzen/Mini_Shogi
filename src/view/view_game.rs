@@ -17,7 +17,7 @@ use crate::piece::PieceKind::{self, *};
 use crate::view::label::Label;
 use crate::view::sprite::Sprite;
 
-const BACKGROUND_COLOR: (u8, u8, u8) = (144, 144, 137);
+const BACKGROUND_COLOR: (u8, u8, u8) = (0, 0, 0);
 const BOARD_CORNER: (f32, f32) = (165.0, 95.0);
 const SQUARE_SIZE: f32 = 90.0; // matches the square.png size
 const SQUARE_GAP: f32 = 5.0;
