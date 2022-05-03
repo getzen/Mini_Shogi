@@ -32,6 +32,9 @@ fn conf() -> Conf {
 
 #[macroquad::main(conf)]
 async fn main() {
+    // Set up backtracing for debugging.
+    std::env::set_var("RUST_BACKTRACE", "1");
+
     println!("dpi_scale: {}", crate::view::dpi_scale());
     let mut controller = Controller::new().await;
     controller.prepare().await;
