@@ -128,6 +128,10 @@ impl ViewGame {
             Gold => AssetLoader::get_texture("gold"),
             Silver => AssetLoader::get_texture("silver"),
             SilverPro => AssetLoader::get_texture("silver_pro"),
+            Rook => AssetLoader::get_texture("rook"),
+            RookPro => AssetLoader::get_texture("rook_pro"),
+            Bishop => AssetLoader::get_texture("bishop"),
+            BishopPro => AssetLoader::get_texture("bishop_pro"),
             Pawn => AssetLoader::get_texture("pawn"),
             PawnPro => AssetLoader::get_texture("pawn_pro"),
         }

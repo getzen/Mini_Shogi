@@ -145,8 +145,12 @@ impl AIMinimax {
                 Gold => 9.,
                 Silver => 6.,
                 SilverPro => 7.,
+                Rook => 6.,
+                RookPro => 8.,
+                Bishop => 4.,
+                BishopPro => 3.,
                 Pawn => 1.,
-                PawnPro => 5.,
+                PawnPro => 3.,
             };
             if piece.player == 0 {
                 p0 += val;

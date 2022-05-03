@@ -130,23 +130,34 @@ impl Game {
 
         match piece.location {
             Board => {
-                let vectors = piece.move_vectors();
                 let (x0, y0) = Game::index_to_column_row(piece.location_index);
-                for (x, y) in vectors {
+
+                // Single-space moves.
+                let short_vectors = piece.short_move_vectors();
+                for (x, y) in short_vectors {
                     let move_x = x0 as i8 + x;
                     let move_y = y0 as i8 + y;
-                    // Is this move out of bounds?
-                    if move_x < 0 || move_x as usize  >= COLS || move_y < 0 || move_y as usize >= ROWS {
-                        continue;
-                    }
                     let to_index = Game::column_row_to_index(move_x as usize, move_y as usize);
-                    // Does this land on own piece?
-                    if let Some(onto_player) = self.player_for_location_index(to_index) { 
-                        if piece.player == onto_player {
-                            continue;
+                    let result = self.validate_move_coord(piece.player, move_x, move_y, to_index);
+                    if result != -1 {
+                        move_indices.push(to_index);
+                    }
+                }
+
+                // Multiple-space (long) moves.
+                let long_vectors = piece.long_move_vectors();
+                for (x, y) in long_vectors {
+                    let mut loop_x = x0 as i8;
+                    let mut loop_y = y0 as i8;
+                    loop {
+                        loop_x += x;
+                        loop_y += y;
+                        let to_index = Game::column_row_to_index(loop_x as usize, loop_y as usize);
+                        let result = self.validate_move_coord(piece.player, loop_x, loop_y, to_index);
+                        if result != -1 {
+                            move_indices.push(to_index);
                         }
                     }
-                    move_indices.push(to_index);
                 }
             },
             Reserve => {
@@ -185,6 +196,28 @@ impl Game {
             _ => {},
         }
         move_indices
+    }
+
+    /// Checks the given board move-to square and returns:
+    ///   -1 if move is out of bounds or lands on own player,
+    ///    0 if move is to empty square,
+    ///   +1 if move is capture of enemy piece.
+    fn validate_move_coord(&self, player: usize, x: i8, y: i8, to_index: usize) -> i8 {
+        // Is this move out of bounds?
+        if x < 0 || x as usize  >= COLS || y < 0 || y as usize >= ROWS {
+            return -1;
+        }        
+        // Does this land on own piece?
+        let onto_player = self.player_for_location_index(to_index);
+        if onto_player.is_none() {
+            return 0;
+        }
+        // Land on own player?
+        if onto_player.unwrap() == player {
+            return -1;
+        }
+        // Must land on enemy piece.
+        return 1;
     }
 
     /// Returns a vector of empty spots in the grid.
