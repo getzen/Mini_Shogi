@@ -137,9 +137,9 @@ impl Game {
                 for (x, y) in short_vectors {
                     let move_x = x0 as i8 + x;
                     let move_y = y0 as i8 + y;
-                    let to_index = Game::column_row_to_index(move_x as usize, move_y as usize);
-                    let result = self.validate_move_coord(piece.player, move_x, move_y, to_index);
+                    let result = self.validate_move_coord(piece.player, move_x, move_y);
                     if result != -1 {
+                        let to_index = Game::column_row_to_index(move_x as usize, move_y as usize);
                         move_indices.push(to_index);
                     }
                 }
@@ -152,10 +152,15 @@ impl Game {
                     loop {
                         loop_x += x;
                         loop_y += y;
-                        let to_index = Game::column_row_to_index(loop_x as usize, loop_y as usize);
-                        let result = self.validate_move_coord(piece.player, loop_x, loop_y, to_index);
-                        if result != -1 {
+                        let result = self.validate_move_coord(piece.player, loop_x, loop_y);
+                        // Add if empty square or capture.
+                        if result == 0 || result == 1 {
+                            let to_index = Game::column_row_to_index(loop_x as usize, loop_y as usize);
                             move_indices.push(to_index);
+                        }
+                        // Break if illegal move or capture.
+                        if result == -1 || result == 1 {
+                            break;
                         }
                     }
                 }
@@ -202,12 +207,13 @@ impl Game {
     ///   -1 if move is out of bounds or lands on own player,
     ///    0 if move is to empty square,
     ///   +1 if move is capture of enemy piece.
-    fn validate_move_coord(&self, player: usize, x: i8, y: i8, to_index: usize) -> i8 {
+    fn validate_move_coord(&self, player: usize, x: i8, y: i8) -> i8 {
         // Is this move out of bounds?
         if x < 0 || x as usize  >= COLS || y < 0 || y as usize >= ROWS {
             return -1;
         }        
         // Does this land on own piece?
+        let to_index = Game::column_row_to_index(x as usize, y as usize);
         let onto_player = self.player_for_location_index(to_index);
         if onto_player.is_none() {
             return 0;
