@@ -12,17 +12,21 @@ There are two AI opponents:
 
 ## To-Do:
 
-- Add "radio" functionality to ButtonBar. Remove handling from ViewSettings.
-
-- Add sounds: welcome, promotion, win/loss
+- Improve minimax evaluation function.
 
 - Add ability to restart game.
- 
-- Add forward/back move functionality.
+
+- Add more sounds: welcome, win/loss.
+
+- Prevent AI from evaluating identical reserve pieces.
 
 - Add rule about no checkmate by parachuting pawn? Doesn't seem particularly crucial though.
 
-- Prevent AI from evaluating identical reserve pieces.
+## Maybe
+
+- Add "radio" functionality to ButtonBar. Remove handling from ViewSettings.
+
+- Add forward/back move functionality.
 
 - Revisit MonteCarloTree implementation.
 
