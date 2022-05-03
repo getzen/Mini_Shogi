@@ -4,9 +4,9 @@ use macroquad::prelude::*;
 
 mod ai;
 mod ai_minimax;
-mod ai_monte_carlo;
-mod ai_monte_carlo_tree;
-mod ai_random;
+//mod ai_monte_carlo;
+//mod ai_monte_carlo_tree;
+//mod ai_random;
 mod ai_sender;
 mod asset_loader;
 mod controller;
