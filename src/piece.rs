@@ -9,6 +9,10 @@ pub enum PieceKind {
     Gold,
     Silver,
     SilverPro,
+    Rook,
+    RookPro,
+    Bishop,
+    BishopPro,
     Pawn,
     PawnPro,
 }
@@ -42,14 +46,18 @@ impl Piece {
         }
     }
 
-    pub fn move_vectors(&self) -> Vec<(i8, i8)> {
+    /// Single-space piece moves.
+    pub fn short_move_vectors(&self) -> Vec<(i8, i8)> {
        let mut vectors =  match self.kind {
             King =>      vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1), (-1,-1), (1,-1)],
             Gold =>      vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1)],
             Silver =>    vec![(0,1), (1,1), (-1,1), (-1,-1), (1,-1)],
             SilverPro => vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1)], // same as Gold
+            RookPro =>   vec![(1,1), (-1,1), (-1,-1), (1,-1)],
+            BishopPro => vec![(1,0), (0,1), (-1,0), (0,-1)],
             Pawn =>      vec![(0,1)],
             PawnPro =>   vec![(1,0), (0,1), (-1,0), (0,-1), (1,1), (-1,1)], // same as Gold
+            _ => vec![],
         };
         // Flip the y axis for player 1. Could optimize by hard-coding these values.
         if self.player == 1 {
@@ -58,25 +66,33 @@ impl Piece {
         vectors
     }
 
+    /// Multiple-space piece moves. These are iterated over and stopped when another piece
+    /// or the edge of the board is found.
+    pub fn long_move_vectors(&self) -> Vec<(i8, i8)> {
+        match self.kind {
+            Rook | RookPro =>      vec![(1,0), (0,1), (-1,0), (0,-1)],
+            Bishop | BishopPro =>  vec![(1,1), (-1,1), (-1,-1), (1,-1)],
+            _ => Vec::new(),
+        }
+    }
+
     pub fn promotion_kind(&self) -> Option<PieceKind> {
         match self.kind {
-            King => None,
-            Gold => None,
             Silver => Some(SilverPro),
-            SilverPro => None,
+            Rook => Some(RookPro),
+            Bishop => Some(BishopPro),
             Pawn => Some(PawnPro),
-            PawnPro => None,
+            King | Gold | SilverPro | RookPro | BishopPro | PawnPro => None,
         }
     }
 
     pub fn demotion_kind(&self) -> Option<PieceKind> {
         match self.kind {
-            King => None,
-            Gold => None,
-            Silver => None,
             SilverPro => Some(Silver),
-            Pawn => None,
+            RookPro => Some(Rook),
+            BishopPro => Some(Bishop),
             PawnPro => Some(Pawn),
+            King | Gold | Silver | Rook | Bishop | Pawn => None,
         }
     }
 
@@ -87,6 +103,10 @@ impl Piece {
             Gold => "G",
             Silver => "S",
             SilverPro => "S+",
+            Rook => "R",
+            RookPro => "R+",
+            Bishop => "B",
+            BishopPro => "B+",
             Pawn => "P",
             PawnPro => "P+",
         }
