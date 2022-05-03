@@ -9,9 +9,9 @@ use crate::piece::Piece;
 use crate::piece::PieceKind::*;
 
 pub const COLS: usize = 5;
-pub const ROWS: usize = 6;
-const GRID_COUNT: usize = 30;
-const PIECES_PER_PLAYER: usize = 8;
+pub const ROWS: usize = 5;
+const GRID_COUNT: usize = 25;
+const PIECES_PER_PLAYER: usize = 6;
 
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -35,7 +35,7 @@ pub const NONE: usize = usize::MAX;
  //              piece.id, location_index, is_capture. See Game.last_move
 pub struct Move (pub usize, pub usize, pub bool);
 
-const STARTING_POSITION: &str = "SGKGS------PPP--ppp------sgkgs";
+const STARTING_POSITION: &str = "KGSBRP-------------prbsgk";
 
 #[derive(Clone, Copy, Debug, Hash)]
 pub struct Game {
@@ -310,10 +310,14 @@ impl Game {
             'K' => Piece::new(id, King, 0),
             'G' => Piece::new(id, Gold, 0),
             'S' => Piece::new(id, Silver, 0),
+            'R' => Piece::new(id, Rook, 0),
+            'B' => Piece::new(id, Bishop, 0),
             'P' => Piece::new(id, Pawn, 0),
             'k' => Piece::new(id, King, 1),
             'g' => Piece::new(id, Gold, 1),
             's' => Piece::new(id, Silver, 1),
+            'r' => Piece::new(id, Rook, 1),
+            'b' => Piece::new(id, Bishop, 1),
             'p' => Piece::new(id, Pawn, 1),
             _ => panic!("piece kind not recognized"),
         }
