@@ -18,16 +18,16 @@ use crate::view::label::Label;
 use crate::view::sprite::Sprite;
 
 const BACKGROUND_COLOR: (u8, u8, u8) = (40, 40, 40);
-const BOARD_CORNER: (f32, f32) = (165.0, 95.0);
+const BOARD_CORNER: (f32, f32) = (165.0, 165.0);
 const SQUARE_SIZE: f32 = 90.0; // matches the square.png size
 const SQUARE_GAP: f32 = 5.0;
-const PROMO_LINE_TOP: (f32, f32) = (405., 287.);
-const PROMO_LINE_BOTTOM: (f32, f32) = (405., 477.);
-const RESERVE_0_CENTER: (f32, f32) = (715., 615.);
-const RESERVE_1_CENTER: (f32, f32) = (95., 140.);
+const PROMO_LINE_TOP: (f32, f32) = (405., 262.);
+const PROMO_LINE_BOTTOM: (f32, f32) = (405., 547.);
+const RESERVE_0_CENTER: (f32, f32) = (710., 680.);
+const RESERVE_1_CENTER: (f32, f32) = (90., 120.);
 const RESERVE_BOX_OFFSET: f32 = 20.;
 const RESERVE_PIECE_OFFSET: f32 = 12.;
-const TEXT_STATUS_CENTER: (f32, f32) = (400., 60.0);
+const TEXT_STATUS_CENTER: (f32, f32) = (400., 120.0);
 const AI_PROGRESS_CORNER: (f32, f32) = (20., 778.);
 const MOVE_DURATION: f32 = 0.25;
 
