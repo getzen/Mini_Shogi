@@ -22,6 +22,7 @@ impl Transform {
         }
     }
 
+    /// Returns a new Transform, combining the self fields with the given Transform.
     pub fn add(&self, other: &Transform) -> Transform {
         let x = self.phys_position.0 + other.phys_position.0;
         let y = self.phys_position.1 + other.phys_position.1;
