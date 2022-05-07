@@ -7,6 +7,9 @@ pub struct Transform {
     pub phys_position: (f32, f32),
     pub rotation: f32,
     // scale?
+
+    pub parent_position: (f32, f32),
+    pub parent_rotation: f32,
 }
 
 impl Transform {
@@ -14,6 +17,8 @@ impl Transform {
         Self {
             phys_position,
             rotation,
+            parent_position: (0.0, 0.0),
+            parent_rotation: 0.0,
         }
     }
 
@@ -23,7 +28,18 @@ impl Transform {
         Self {
             phys_position: (x, y),
             rotation: self.rotation + other.rotation,
+            parent_position: (0.0, 0.0),
+            parent_rotation: 0.0,
         }
+    }
+
+    /// Returns the x, y positions and the rotation plus the parent's x,y and r.
+    pub fn xyr_net(&self) -> (f32, f32, f32) {
+        (
+            self.phys_position.0 + self.parent_position.0,
+            self.phys_position.1 + self.parent_position.1,
+            self.rotation + self.parent_rotation
+        )
     }
 
     #[allow(dead_code)]
