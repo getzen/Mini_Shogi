@@ -35,7 +35,7 @@ impl Transform {
     }
 
     /// Returns the x, y positions and the rotation plus the parent's x,y and r.
-    pub fn xyr_net(&self) -> (f32, f32, f32) {
+    pub fn x_y_rot_net(&self) -> (f32, f32, f32) {
         (
             self.phys_position.0 + self.parent_position.0,
             self.phys_position.1 + self.parent_position.1,
