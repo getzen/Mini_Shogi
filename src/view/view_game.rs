@@ -83,6 +83,15 @@ impl ViewGame {
         }
     }
 
+    pub fn reset_game(&mut self, game: &Game) {
+        self.pieces.clear();
+
+         // Add the game's pieces to the view.
+         for piece in game.pieces {
+            self.add_piece(&piece);
+        }
+    }
+
     pub async fn prepare(&mut self) {
         // Board
         let mut texture = AssetLoader::get_texture("square");

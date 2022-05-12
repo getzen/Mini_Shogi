@@ -60,7 +60,8 @@ pub enum PlayerKind {
 const BAR_ABOUT_ID: usize = 0;
 const BAR_RULES_ID: usize = 1;
 const BAR_SETTINGS_ID: usize = 2;
-const BAR_QUIT_ID: usize = 3;
+const BAR_RESTART_ID: usize = 3;
+const BAR_QUIT_ID: usize = 4;
 
 pub struct Controller {
     players: Vec<Player>,
@@ -136,6 +137,9 @@ impl Controller {
         button = Button::new((0.,0.), 1, "Settings", Some(BAR_SETTINGS_ID));
         self.button_bar.add_button(button);
 
+        button = Button::new((0.,0.), 1, "Restart", Some(BAR_RESTART_ID));
+        self.button_bar.add_button(button);
+
         button = Button::new((0.,0.), 1, "Quit", Some(BAR_QUIT_ID));
         self.button_bar.add_button(button);
 
@@ -145,10 +149,11 @@ impl Controller {
         self.view_settings.prepare(self.players.clone());
         self.view_game.prepare().await;
 
-        // Add the game's pieces to the view.
-        for piece in &self.game.pieces {
-            self.view_game.add_piece(piece); 
-        }
+        // // Add the game's pieces to the view.
+        // for piece in &self.game.pieces {
+        //     self.view_game.add_piece(piece); 
+        // }
+        self.view_game.reset_game(&self.game);
     }
 
     /// The main control loop.
@@ -174,6 +179,12 @@ impl Controller {
                         self.previous_state = Some(self.state);
                         self.state = Settings;
                         self.button_bar.visible = false;
+                    }
+                    BAR_RESTART_ID => {
+                        self.game = Game::new();
+                        self.game.prepare();
+                        self.view_game.reset_game(&self.game);
+                        self.state = NextPlayer;
                     }
                     BAR_QUIT_ID => self.state = Exit,
                     _ => panic!(),
