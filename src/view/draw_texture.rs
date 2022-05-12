@@ -54,15 +54,14 @@ impl DrawTexture {
     pub fn draw(&mut self, transform: &Transform, color: Option<Color>) {
         if !self.visible { return }
 
-        let (x, y) = match self.centered {
-            true => {
-                (transform.phys_position.0 - self.size.0 / 2.0,
-                 transform.phys_position.1 - self.size.1 / 2.0)
-            },
-            false => transform.phys_position
-        };
+        let (mut x, mut y, rot) = transform.combined_x_y_rot();
 
-        self.params.rotation = transform.rotation;
+        if self.centered {
+            x -= self.size.0 / 2.0;
+            y -= self.size.1 / 2.0;
+        }
+
+        self.params.rotation = rot;
         self.params.dest_size = Some(Vec2::new(self.size.0, self.size.1));
 
         let draw_color = if color.is_some() { color.unwrap() } else { WHITE };

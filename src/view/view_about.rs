@@ -8,13 +8,16 @@ use crate::asset_loader::AssetLoader;
 use crate::view::button::Button;
 use crate::view::button::ButtonEvent;
 use crate::view::image::Image;
+use crate::view::transform::Transform;
+
 
 pub enum ViewAboutMessage {
     ShouldClose,
 }
 
 pub struct ViewAbout {
-    tx: Sender<ViewAboutMessage>, 
+    tx: Sender<ViewAboutMessage>,
+    transform: Transform,
     image: Image,
     okay_button: Button,
 }
@@ -25,8 +28,9 @@ impl ViewAbout {
 
         Self {
             tx,
-            image: Image::new((200., 253.), texture, false, None),
-            okay_button: Button::new((370., 468.), 0, "Okay", None),
+            transform: Transform::new((200., 253.), 0.),
+            image: Image::new((0., 0.), texture, false, None),
+            okay_button: Button::new((170., 215.), 0, "Okay", None),
         }
     }
 
@@ -47,6 +51,10 @@ impl ViewAbout {
     }
 
     pub fn draw(&mut self) {
+        self.image.transform.set_parent(self.transform);
         self.image.draw();
-        self.okay_button.draw();    }
+
+        self.okay_button.texture_transform.set_parent(self.transform);
+        self.okay_button.draw();
+    }
 }

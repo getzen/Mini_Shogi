@@ -17,30 +17,51 @@ impl Transform {
         Self {
             phys_position,
             rotation,
+
             parent_position: (0.0, 0.0),
             parent_rotation: 0.0,
         }
     }
 
-    /// Returns a new Transform, combining the self fields with the given Transform.
-    pub fn add(&self, other: &Transform) -> Transform {
-        let x = self.phys_position.0 + other.phys_position.0;
-        let y = self.phys_position.1 + other.phys_position.1;
+    #[allow(dead_code)]
+    pub fn default() -> Self {
         Self {
-            phys_position: (x, y),
-            rotation: self.rotation + other.rotation,
+            phys_position: (0.0, 0.0),
+            rotation: 0.0,
             parent_position: (0.0, 0.0),
             parent_rotation: 0.0,
-        }
+         }
+    }
+
+    pub fn set_parent(&mut self, parent: Transform) {
+        self.parent_position = parent.phys_position;
+        self.parent_rotation = parent.rotation;
+    }
+
+    // /// Returns a new Transform, combining the self fields with the given Transform.
+    // pub fn add(&self, other: &Transform) -> Transform {
+    //     let x = self.phys_position.0 + other.phys_position.0;
+    //     let y = self.phys_position.1 + other.phys_position.1;
+    //     Self {
+    //         phys_position: (x, y),
+    //         rotation: self.rotation + other.rotation,
+    //         parent_position: (0.0, 0.0),
+    //         parent_rotation: 0.0,
+    //     }
+    // }
+
+    /// Returns a Transform with parent position and rotation added to the base
+    /// position and rotation.
+    pub fn combined(&self) -> Transform {
+        let (x, y, rot) = self.combined_x_y_rot();
+        Transform::new((x, y), rot)
     }
 
     /// Returns the x, y positions and the rotation plus the parent's x,y and r.
-    pub fn x_y_rot_net(&self) -> (f32, f32, f32) {
-        (
-            self.phys_position.0 + self.parent_position.0,
-            self.phys_position.1 + self.parent_position.1,
-            self.rotation + self.parent_rotation
-        )
+    pub fn combined_x_y_rot(&self) -> (f32, f32, f32) {
+        (self.phys_position.0 + self.parent_position.0,
+        self.phys_position.1 + self.parent_position.1,
+        self.rotation + self.parent_rotation)
     }
 
     #[allow(dead_code)]

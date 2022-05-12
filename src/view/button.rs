@@ -167,7 +167,7 @@ impl Button {
     pub fn draw(&mut self) {        
         self.texture_drawable.draw(&self.texture_transform, Some(self.button_draw_color));
 
-        let transform = self.texture_transform.add(&self.text_transform);
-        self.text_drawable.draw(&transform, Some(self.text_draw_color));
+        self.text_transform.set_parent(self.texture_transform.combined());
+        self.text_drawable.draw(&self.text_transform, Some(self.text_draw_color));
     }
 }

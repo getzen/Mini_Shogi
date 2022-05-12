@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 use std::time::Duration;
 
-use macroquad::audio::{Sound, play_sound_once};
+use macroquad::audio::{Sound, play_sound_once, play_sound, PlaySoundParams};
 use macroquad::prelude::*;
 
 use crate::asset_loader::AssetLoader;
@@ -182,7 +182,10 @@ impl ViewGame {
         if let Some(piece) = self.piece_for_id(id) {
             if logi_end_position != piece.transform.get_logi_position() {
                 piece.move_to(logi_end_position, Duration::from_secs_f32(MOVE_DURATION));
-                play_sound_once(self.piece_move);
+                
+                //play_sound_once(self.piece_move);
+                let params = PlaySoundParams{looped: false, volume: 0.5};
+                play_sound(self.piece_move, params);
             }
         }
     }

@@ -51,9 +51,9 @@ impl DrawText {
     pub fn draw(&mut self, transform: &Transform, color: Option<Color>) {
         if !self.visible { return }
 
+        let (mut x, mut y, _rot) = transform.combined_x_y_rot();
         let (w, h, baseline) = self.draw_size();
-        let (mut x, mut y) = transform.phys_position;
-
+  
         if self.centered_horiz {
             x -= w / 2.0;
         }
