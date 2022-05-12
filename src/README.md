@@ -14,9 +14,9 @@ There are two AI opponents:
 
 - Improve minimax evaluation function.
 
-- Add ability to restart game.
-
 - Add more sounds: welcome, win/loss.
+
+- Add sound volume setting.
 
 - Prevent AI from evaluating identical reserve pieces.
 
