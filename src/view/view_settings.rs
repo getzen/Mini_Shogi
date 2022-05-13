@@ -11,8 +11,10 @@ use crate::view::button_bar::ButtonBar;
 use crate::view::button_bar::ButtonBarOrientation;
 use crate::view::image::Image;
 use crate::view::label::Label;
+use crate::view::phys_pos;
 use crate::view::slider::Slider;
 use crate::view::slider::SliderEvent;
+use crate::view::transform::Transform;
 
 // Widget IDs
 const HUMAN_ID: usize = 0;
@@ -24,8 +26,9 @@ pub enum ViewSettingsMessage {
 
 pub struct ViewSettings {
     /// Sends messages to controller.
-    tx: Sender<ViewSettingsMessage>, 
-
+    tx: Sender<ViewSettingsMessage>,
+    
+    transform: Transform, // the position of this Settings panel
     background_image: Image,
     okay_button: Button,
 
@@ -46,19 +49,22 @@ impl ViewSettings {
 
         Self {
             tx,
-            background_image: Image::new((200., 200.), texture, false, None),
+            transform: Transform::new(phys_pos((200., 220.)), 0.0),
 
-            okay_button: Button::new((370., 510.), 0, "Okay", None),
+            // All the following positions are relative to 'transform'.
+
+            background_image: Image::new((0., 0.), texture, false, None),
+            okay_button: Button::new((170., 310.), 0, "Okay", None),
 
             // Top player (1)
-            button_bar_1: ButtonBar::new((379., 245.), ButtonBarOrientation::Horizontal, 25.),
-            slider_1: Slider::new((300., 300.), 200., 1., 1., 1., 0),
-            slider_1_label: Label::new((400., 325.), true, "slider 1", 14, Some("Menlo")),
+            button_bar_1: ButtonBar::new((179., 45.), ButtonBarOrientation::Horizontal, 25.),
+            slider_1: Slider::new((100., 100.), 200., 1., 1., 1., 0),
+            slider_1_label: Label::new((200., 125.), true, "slider 1", 14, Some("Menlo")),
 
             // Botton player (0)
-            button_bar_0: ButtonBar::new((379., 391.), ButtonBarOrientation::Horizontal, 25.),
-            slider_0: Slider::new((300., 445.), 200., 1., 1., 1., 1),
-            slider_0_label: Label::new((400., 470.), true, "slider 0", 14, Some("Menlo")),
+            button_bar_0: ButtonBar::new((179., 191.), ButtonBarOrientation::Horizontal, 25.),
+            slider_0: Slider::new((100., 245.), 200., 1., 1., 1., 1),
+            slider_0_label: Label::new((200., 270.), true, "slider 0", 14, Some("Menlo")),
           
             players: Vec::new(),
         }
@@ -190,13 +196,19 @@ impl ViewSettings {
     }
 
     pub fn draw(&mut self) {        
+        self.background_image.transform.set_parent(self.transform);
         self.background_image.draw();
 
+        self.okay_button.transform.set_parent(self.transform);
         self.okay_button.draw();
 
+        self.button_bar_0.transform.set_parent(self.transform);
         self.button_bar_0.draw();
+
+        self.button_bar_1.transform.set_parent(self.transform);
         self.button_bar_1.draw();
 
+        self.slider_0.transform.set_parent(self.transform);
         self.slider_0.draw();
 
         // Use live values here so user sees the values change when dragging.
@@ -205,8 +217,10 @@ impl ViewSettings {
             AI => format!("{} move look-ahead", self.slider_0.nearest_snap_value()),
         };
         self.slider_0_label.set_text(text_0);
+        self.slider_0_label.transform.set_parent(self.transform);
         self.slider_0_label.draw();
 
+        self.slider_1.transform.set_parent(self.transform);
         self.slider_1.draw();
 
         // Use live values here so user sees the values change when dragging.
@@ -215,6 +229,7 @@ impl ViewSettings {
             AI => format!("{} move look-ahead", self.slider_1.nearest_snap_value() as usize),
         };
         self.slider_1_label.set_text(text_1);
+        self.slider_1_label.transform.set_parent(self.transform);
         self.slider_1_label.draw();
     }
 }
