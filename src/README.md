@@ -2,7 +2,7 @@
 
 Mini Shogi a simplified introduction to the Japanese game Shogi.
 
-I created this app as a way to learn both Rust and Macroquad, the graphics framework.
+I created this app as a way to learn a little Shogi, but primarily Rust and Macroquad, the graphics framework.
 
 There are two AI opponents:
 
