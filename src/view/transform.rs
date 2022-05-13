@@ -6,8 +6,6 @@ use crate::view::{logi_pos, phys_pos};
 pub struct Transform {
     pub phys_position: (f32, f32),
     pub rotation: f32,
-    // scale?
-
     pub parent_position: (f32, f32),
     pub parent_rotation: f32,
 }
@@ -17,7 +15,6 @@ impl Transform {
         Self {
             phys_position,
             rotation,
-
             parent_position: (0.0, 0.0),
             parent_rotation: 0.0,
         }
@@ -37,18 +34,6 @@ impl Transform {
         self.parent_position = parent.phys_position;
         self.parent_rotation = parent.rotation;
     }
-
-    // /// Returns a new Transform, combining the self fields with the given Transform.
-    // pub fn add(&self, other: &Transform) -> Transform {
-    //     let x = self.phys_position.0 + other.phys_position.0;
-    //     let y = self.phys_position.1 + other.phys_position.1;
-    //     Self {
-    //         phys_position: (x, y),
-    //         rotation: self.rotation + other.rotation,
-    //         parent_position: (0.0, 0.0),
-    //         parent_rotation: 0.0,
-    //     }
-    // }
 
     /// Returns a Transform with parent position and rotation added to the base
     /// position and rotation.
