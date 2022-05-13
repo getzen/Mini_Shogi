@@ -6,7 +6,7 @@ I created this app as a way to learn a little Shogi, but primarily Rust and Macr
 
 There are two AI opponents:
 
-- (Enabled) Minimax. The classic "look x moves ahead" algorithm used in many perfect information situations. It has alpha-beta pruning, but it otherwise unsophisticated. On my computer, it can search about 900,000 board positions per second, but it's still rather weak since the evaluation function is currently terrible. Be aware that looking ahead more than about 7 moves is rather slow.
+- (Enabled) Minimax. The classic "look x moves ahead" algorithm used in many perfect information situations. It has alpha-beta pruning, but it otherwise unsophisticated. On my computer, it can search about 1 million board positions per second, but it's still rather weak since the evaluation function is currently terrible. Be aware that looking ahead more than about 7 moves is rather slow.
 
 - (Disabled) Monte Carlo. This algorithm makes each available move and then randomly plays out the game to completion a certain number of times (rounds). Due to its random nature, it plays with more variability than Minimax. This is "pure" Monte Carlo, a simple version that doesn't have the advantages of a full Monte Carlo Tree Search, which I hope to add later. It searches about 120,000 positions per second on my computer.
 

@@ -136,6 +136,8 @@ impl AIMinimax {
         }
     }
 
+    /// All this does is return the value of the player's pieces vs those of the opponent.
+    /// Lame, but it works on a tactical level.
     fn evaluate_pieces(&self, node: &Game) -> f64 {
         let mut p0 = 0.;
         let mut p1 = 0.;
