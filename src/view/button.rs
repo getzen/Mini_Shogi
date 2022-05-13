@@ -33,12 +33,9 @@ pub struct Button {
     pub id: Option<usize>,
     pub group_id: Option<usize>,
 
-    pub texture_transform: Transform,
+    pub transform: Transform,
     pub texture_drawable: DrawTexture,
-
-    pub text_transform: Transform,
     pub text_drawable: DrawText,
-
     pub eventable: Eventable,
 
     /// Default is Push.
@@ -57,6 +54,7 @@ pub struct Button {
     // Private
     selected: bool,
     button_draw_color: Color,
+    text_transform: Transform,
     text_draw_color: Color,
 }
 
@@ -72,7 +70,7 @@ impl Button {
         let mut button = Self {
             id,
             group_id: None,
-            texture_transform: Transform::new(phys_position, 0.0),
+            transform: Transform::new(phys_position, 0.0),
             texture_drawable: DrawTexture::new(texture, false),
             text_transform: Transform::new((texture.width() / 2.0, texture.height() / 2.0), 0.),
             text_drawable: DrawText::new(
@@ -87,8 +85,8 @@ impl Button {
 
             button_disabled_color: Color::from_rgba(0, 0, 0, 255),
             button_normal_color: Color::from_rgba(70, 70, 70, 255),
-            button_mouse_over_color: Color::from_rgba(95, 95, 95, 255),
-            button_selected_color: Color::from_rgba(120, 120, 120, 255),
+            button_mouse_over_color: Color::from_rgba(100, 100, 100, 255),
+            button_selected_color: Color::from_rgba(140, 140, 140, 255),
             button_draw_color: WHITE, // set below to normal_color
 
             text_disabled_color: Color::from_rgba(155, 155, 155, 255),
@@ -123,13 +121,13 @@ impl Button {
     // Convenience method
     #[allow(dead_code)]
     pub fn contains_phys_position(&self, phy_position: (f32, f32)) -> bool {
-        self.eventable.contains_phys_position(phy_position, &self.texture_transform, &self.texture_drawable)
+        self.eventable.contains_phys_position(phy_position, &self.transform, &self.texture_drawable)
     }
 
     pub fn process_events(&mut self) -> Option<ButtonEvent> {
         if !self.texture_drawable.visible { return None }
 
-        let event = self.eventable.process_events(&self.texture_transform, &self.texture_drawable);
+        let event = self.eventable.process_events(&self.transform, &self.texture_drawable);
         if event.is_none() { return None }
 
         match event.unwrap() {
@@ -165,9 +163,9 @@ impl Button {
     }
 
     pub fn draw(&mut self) {        
-        self.texture_drawable.draw(&self.texture_transform, Some(self.button_draw_color));
+        self.texture_drawable.draw(&self.transform, Some(self.button_draw_color));
 
-        self.text_transform.set_parent(self.texture_transform.combined());
+        self.text_transform.set_parent(self.transform.combined());
         self.text_drawable.draw(&self.text_transform, Some(self.text_draw_color));
     }
 }

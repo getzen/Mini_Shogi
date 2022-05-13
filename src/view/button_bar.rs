@@ -125,7 +125,7 @@ impl ButtonBar {
         let (mut x, mut y) = self.phys_position;
 
         for button in &mut self.buttons {
-            button.texture_transform.phys_position = (x, y);
+            button.transform.phys_position = (x, y);
             button.draw();
 
             match self.orientation {

@@ -8,9 +8,9 @@ use crate::asset_loader::AssetLoader;
 use crate::view::button::Button;
 use crate::view::button::ButtonEvent;
 use crate::view::image::Image;
+use crate::view::phys_pos;
 use crate::view::transform::Transform;
 
-use crate::view::phys_pos;
 
 
 pub enum ViewAboutMessage {
@@ -58,7 +58,7 @@ impl ViewAbout {
         self.image.transform.set_parent(self.transform);
         self.image.draw();
 
-        self.okay_button.texture_transform.set_parent(self.transform);
+        self.okay_button.transform.set_parent(self.transform);
         self.okay_button.draw();
     }
 }
