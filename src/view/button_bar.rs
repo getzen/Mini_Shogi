@@ -6,6 +6,7 @@
 use crate::view::*;
 use crate::view::button::ButtonEvent;
 use crate::view::button::Button;
+use crate::view::transform::Transform;
 
 #[allow(dead_code)]
 pub enum ButtonBarOrientation {
@@ -14,9 +15,8 @@ pub enum ButtonBarOrientation {
 }
 
 pub struct ButtonBar {
-    /// Position in physical pixels of the top-left corner.
-    /// Use set_logi_position for logical pixel positioning.
-    pub phys_position: (f32, f32),
+    /// Use to set physical position of top-left corner.
+    pub transform: Transform,
     pub orientation: ButtonBarOrientation,
     pub spacing: f32,
     pub buttons: Vec<Button>,
@@ -35,7 +35,7 @@ impl ButtonBar {
 
     pub fn new(logi_position: (f32, f32), orientation: ButtonBarOrientation, spacing: f32) -> Self {       
         Self {
-            phys_position: phys_pos(logi_position),
+            transform: Transform::new(phys_pos(logi_position), 0.0),
             orientation,
             spacing,
             buttons: Vec::new(),
@@ -122,10 +122,12 @@ impl ButtonBar {
     pub fn draw(&mut self) {
         if !self.visible { return }
 
-        let (mut x, mut y) = self.phys_position;
+        let (mut x, mut y) = (0.0, 0.0);
 
         for button in &mut self.buttons {
-            button.transform.phys_position = (x, y);
+            button.transform.set_parent(self.transform.combined());
+            button.transform.phys_position.0 = x;
+            button.transform.phys_position.1 = y;
             button.draw();
 
             match self.orientation {
