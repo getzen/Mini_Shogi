@@ -148,11 +148,6 @@ impl Controller {
         self.game.prepare();
         self.view_settings.prepare(self.players.clone());
         self.view_game.prepare().await;
-
-        // // Add the game's pieces to the view.
-        // for piece in &self.game.pieces {
-        //     self.view_game.add_piece(piece); 
-        // }
         self.view_game.reset_game(&self.game);
     }
 
@@ -170,7 +165,6 @@ impl Controller {
                         self.button_bar.visible = false;
                     },
                     BAR_RULES_ID => {
-                        println!("jh");
                         self.previous_state = Some(self.state);
                         self.state = Rules;
                         self.button_bar.visible = false;
