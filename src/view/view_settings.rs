@@ -150,7 +150,6 @@ impl ViewSettings {
     }
 
     pub fn process_events(&mut self) {
-
         if self.okay_button.process_events().is_some() {
             self.tx.send(ViewSettingsMessage::ShouldStart(self.players.clone()))
             .expect("Intro message send error.");
