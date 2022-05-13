@@ -34,12 +34,14 @@ impl Eventable {
     /// Test whether the physical point lies in the texture rectangle, considering rotation.
     /// Note: Macroquad's mouse_position() gives the physical location of the mouse.
     pub fn contains_phys_position(&self, phy_position: (f32, f32), transform: &Transform, draw: &DrawTexture) -> bool {
+        let (x, y, rot) = transform.combined_x_y_rot();
+
         // Get the net test point relative to the sprite's position.
-        let net_x = phy_position.0 - transform.phys_position.0;
-        let net_y = phy_position.1 - transform.phys_position.1;
+        let net_x = phy_position.0 - x;
+        let net_y = phy_position.1 - y;
         // Rotate the point clockwise (the same direction as Macroquad's rotation). This is a
         // little different than the standard rotation formulas.
-        let theta = transform.rotation;
+        let theta = rot;
         let rot_x = net_x * f32::cos(theta) + net_y * f32::sin(theta);
         let rot_y = -net_x * f32::sin(theta) + net_y * f32::cos(theta);
         // See if the rotated point is in the unrotated sprite rectangle.
