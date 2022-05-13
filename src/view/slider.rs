@@ -3,6 +3,7 @@
 use macroquad::prelude::*;
 
 use crate::view::*;
+use crate::view::transform::Transform;
 
 
 #[derive(Debug)]
@@ -14,9 +15,8 @@ pub enum SliderEvent {
 }
 
 pub struct Slider {
-    /// Position in physical pixels of the left-center.
-    /// Use set_logi_position for logical pixel positioning.
-    pub phys_position: (f32, f32),
+    /// Use to set physical position of top-left corner.
+    pub transform: Transform,
     /// The widget width in physical pixels.
     pub phys_width: f32,
     /// The thickness in physical pixels of the lines that make up the slider.
@@ -61,7 +61,7 @@ impl Slider {
         id: usize) -> Self {
 
         Self {
-            phys_position: phys_pos(logi_position),
+            transform: Transform::new(phys_pos(logi_position), 0.0),
             phys_width: width * dpi_scale(),
             phys_line_thickness: 1.0 * dpi_scale(),
             phys_tick_height: 10.0 * dpi_scale(),
@@ -81,24 +81,13 @@ impl Slider {
         }
     }
 
-    #[allow(dead_code)]
-    /// Get the logical position of the sprite.
-    pub fn get_logi_position(&self) -> (f32, f32) {
-        logi_pos(self.phys_position)
-    }
-
-    #[allow(dead_code)]
-    /// Set the logical position of the sprite.
-    pub fn set_logi_position(&mut self, logi_position: (f32, f32)) {
-        self.phys_position = phys_pos(logi_position);
-    }
-
     fn division_width(&self) -> f32 {
         self.phys_width / ((self.tick_divisions + 1) as f32)
     }
 
     fn mouse_position_to_value(&self, position: (f32, f32)) -> f32 {
-        let rel_x = position.0 - self.phys_position.0;
+        let (x, _, _) = self.transform.combined_x_y_rot();
+        let rel_x = position.0 - x;
         let val = rel_x / self.phys_width * (self.max_value - self.min_value) + self.min_value;
         val.clamp(self.min_value, self.max_value)
     }
@@ -127,10 +116,11 @@ impl Slider {
 
     /// Test whether the physical point lies in the slider's area.
     fn contains_phys_position(&self, phys_position: (f32, f32)) -> bool {
-        phys_position.0 >= self.phys_position.0 
-        && phys_position.0 <= self.phys_position.0 + self.phys_width
-        && phys_position.1 >= self.phys_position.1 - self.phys_value_marker_radius 
-        && phys_position.1 <= self.phys_position.1 + self.phys_value_marker_radius
+        let (x, y, _) = self.transform.combined_x_y_rot();
+        phys_position.0 >= x 
+        && phys_position.0 <= x + self.phys_width
+        && phys_position.1 >= y - self.phys_value_marker_radius 
+        && phys_position.1 <= y + self.phys_value_marker_radius
     }
 
     pub fn process_events(&mut self) -> Option<SliderEvent> {
@@ -171,7 +161,7 @@ impl Slider {
     pub fn draw(&self) {
         if !self.is_visible { return; }
 
-        let (x, y) = self.phys_position;
+        let (x, y, _) = self.transform.combined_x_y_rot();
 
         // Slider line
         draw_line(x, y, x + self.phys_width, y, self.phys_line_thickness, self.color);
