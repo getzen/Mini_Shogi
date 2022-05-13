@@ -70,11 +70,9 @@ impl Eventable {
        
         let left_mouse_down = is_mouse_button_down(MouseButton::Left);
 
-        if mouse_over && left_mouse_down {
-            if !self.left_mouse_down {
-                self.left_mouse_down = true;
-                return Some(Event::LeftMousePressed);
-            }
+        if mouse_over && left_mouse_down && !self.left_mouse_down {
+            self.left_mouse_down = true;
+            return Some(Event::LeftMousePressed);
         }
         self.left_mouse_down = false;
 

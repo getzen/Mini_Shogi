@@ -127,10 +127,10 @@ impl Button {
     pub fn process_events(&mut self) -> Option<ButtonEvent> {
         if !self.texture_drawable.visible { return None }
 
-        let event = self.eventable.process_events(&self.transform, &self.texture_drawable);
-        if event.is_none() { return None }
+        let event_opt = self.eventable.process_events(&self.transform, &self.texture_drawable);
+        let event = event_opt?;
 
-        match event.unwrap() {
+        match event {
             Event::MouseEntered => {
                 if !self.selected {
                     self.button_draw_color = self.button_mouse_over_color;

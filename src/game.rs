@@ -223,7 +223,7 @@ impl Game {
             return -1;
         }
         // Must land on enemy piece.
-        return 1;
+        1
     }
 
     /// Returns a vector of empty spots in the grid.

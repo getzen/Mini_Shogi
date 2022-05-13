@@ -63,8 +63,8 @@ impl DrawTexture {
 
         self.params.rotation = rot;
         self.params.dest_size = Some(Vec2::new(self.size.0, self.size.1));
-
-        let draw_color = if color.is_some() { color.unwrap() } else { WHITE };
+        
+        let draw_color = color.unwrap_or(WHITE);
         draw_texture_ex(self.texture, x, y, draw_color, self.params.clone());
     }
 }

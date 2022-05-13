@@ -72,10 +72,9 @@ impl ViewSettings {
 
     pub fn prepare(&mut self, players: Vec<Player>) {        
         self.players = players;
-        let mut button;
 
         // Player 0
-        button = Button::new((0., 0.), 1, "Human", Some(HUMAN_ID));
+        let mut button = Button::new((0., 0.), 1, "Human", Some(HUMAN_ID));
         self.button_bar_0.add_button(button);
 
         button = Button::new((0., 0.), 1, "AI", Some(AI_ID));

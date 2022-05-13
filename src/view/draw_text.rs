@@ -23,8 +23,11 @@ impl DrawText {
         logi_font_size: u16,
         font_name: Option<&str>) -> Self {
 
-        let mut text_params = TextParams::default();
-        text_params.font_size = (logi_font_size as f32 * dpi_scale()) as u16;
+        let mut text_params = TextParams {
+            font_size: (logi_font_size as f32 * dpi_scale()) as u16,
+             ..Default::default()
+            };
+
         if let Some(name) = font_name {
             text_params.font = AssetLoader::get_font(name);
         }
@@ -62,7 +65,7 @@ impl DrawText {
             y += h / 2.0 - (h - baseline) / 2.0;
         }
 
-        self.text_params.color = if color.is_some() { color.unwrap() } else { self.color };
+        self.text_params.color = color.unwrap_or(self.color);
         draw_text_ex(&self.text, x, y, self.text_params);
     }
 }
