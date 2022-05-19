@@ -4,4 +4,4 @@ target/*
 other/*
 *.o
 *.bc
-.DS_Store
+*.DS_Store
