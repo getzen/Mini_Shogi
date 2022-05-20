@@ -232,10 +232,12 @@ impl ViewGame {
         for (kind, id_vec) in reserve_hash {
             // Could match PieceKind here to specific reserve index. Pawns = 0, etc
             let reserve_index = match kind {
-                Gold => 2,
-                Silver => 1,
+                Gold => 4,
+                Silver => 3,
+                Rook => 2,
+                Bishop => 1,
                 Pawn => 0,
-                _ => 3,
+                _ => 5,
             };
             for (count_index, id) in id_vec.iter().enumerate() {
                 if let Some(piece) = self.piece_for_id(*id) {
