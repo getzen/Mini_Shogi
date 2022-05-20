@@ -4,7 +4,7 @@ Mini Shogi a simplified introduction to the Japanese game Shogi.
 
 I created this app as a way to learn a little Shogi, but primarily Rust and Macroquad, the graphics framework.
 
-<img width="912" alt="Screen Shot 2022-05-20 at 2 06 59 PM" src="https://user-images.githubusercontent.com/2192842/169587520-f399349c-9bf4-4c23-b512-abdf05aad51d.png">
+<img width="684" alt="Screen Shot" src="https://user-images.githubusercontent.com/2192842/169587792-20082888-91da-4769-b5e3-61836ed225b0.png">
 
 There are two AI opponents:
 
