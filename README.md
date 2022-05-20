@@ -4,6 +4,8 @@ Mini Shogi a simplified introduction to the Japanese game Shogi.
 
 I created this app as a way to learn a little Shogi, but primarily Rust and Macroquad, the graphics framework.
 
+<img width="912" alt="Screen Shot 2022-05-20 at 2 06 59 PM" src="https://user-images.githubusercontent.com/2192842/169587520-f399349c-9bf4-4c23-b512-abdf05aad51d.png">
+
 There are two AI opponents:
 
 - (Enabled) Minimax. The classic "look x moves ahead" algorithm used in many perfect information situations. It has alpha-beta pruning, but it otherwise unsophisticated. On my computer, it can search about 1 million board positions per second, but it's still rather weak since the evaluation function is currently terrible. Be aware that looking ahead more than about 7 moves is rather slow.
