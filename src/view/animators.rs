@@ -12,7 +12,7 @@ pub struct ColorAnimator {
     start_color: Color,
     end_color: Color,
     duration: Duration,
-    elasped: Duration, 
+    elapsed: Duration, 
 }
 
 impl ColorAnimator {
@@ -23,7 +23,7 @@ impl ColorAnimator {
             start_color,
             end_color,
             duration,
-            elasped: Duration::ZERO,
+            elapsed: Duration::ZERO,
         }
     }
     /// Update the lerp with the time_delta and return the new values plus
@@ -31,9 +31,9 @@ impl ColorAnimator {
     pub fn update(&mut self, time_delta: Duration) {
         if self.complete { return }
 
-        self.elasped += time_delta;
+        self.elapsed += time_delta;
         
-        let percentage = self.elasped.as_secs_f32() / self.duration.as_secs_f32();
+        let percentage = self.elapsed.as_secs_f32() / self.duration.as_secs_f32();
         if percentage >= 1.0 {
             self.complete = true;
             self.color = self.end_color;
@@ -54,7 +54,7 @@ pub struct PositionAnimator {
     start_position: (f32, f32),
     end_position: (f32, f32),
     duration: Duration,
-    elasped: Duration, 
+    elapsed: Duration, 
 }
 
 impl PositionAnimator {
@@ -65,7 +65,7 @@ impl PositionAnimator {
             start_position,
             end_position,
             duration,
-            elasped: Duration::ZERO,
+            elapsed: Duration::ZERO,
         }
     }
 
@@ -74,9 +74,9 @@ impl PositionAnimator {
     pub fn update(&mut self, time_delta: Duration) {
         if self.complete { return }
 
-        self.elasped += time_delta;
+        self.elapsed += time_delta;
 
-        let percentage = self.elasped.as_secs_f32() / self.duration.as_secs_f32();
+        let percentage = self.elapsed.as_secs_f32() / self.duration.as_secs_f32();
         if percentage >= 1.0 {
             self.complete = true;
             self.position = self.end_position;
