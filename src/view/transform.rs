@@ -4,16 +4,16 @@ use crate::view::{logi_pos, phys_pos};
 
 #[derive(Clone, Copy)]
 pub struct Transform {
-    pub phys_position: (f32, f32),
+    pub position: (f32, f32),
     pub rotation: f32,
     pub parent_position: (f32, f32),
     pub parent_rotation: f32,
 }
 
 impl Transform {
-    pub fn new(phys_position: (f32, f32), rotation: f32) -> Self {
+    pub fn new(position: (f32, f32), rotation: f32) -> Self {
         Self {
-            phys_position,
+            position,
             rotation,
             parent_position: (0.0, 0.0),
             parent_rotation: 0.0,
@@ -23,7 +23,7 @@ impl Transform {
     #[allow(dead_code)]
     pub fn default() -> Self {
         Self {
-            phys_position: (0.0, 0.0),
+            position: (0.0, 0.0),
             rotation: 0.0,
             parent_position: (0.0, 0.0),
             parent_rotation: 0.0,
@@ -31,7 +31,7 @@ impl Transform {
     }
 
     pub fn set_parent(&mut self, parent: Transform) {
-        self.parent_position = parent.phys_position;
+        self.parent_position = parent.position;
         self.parent_rotation = parent.rotation;
     }
 
@@ -44,20 +44,8 @@ impl Transform {
 
     /// Returns the x, y positions and the rotation plus the parent's x,y and r.
     pub fn combined_x_y_rot(&self) -> (f32, f32, f32) {
-        (self.phys_position.0 + self.parent_position.0,
-        self.phys_position.1 + self.parent_position.1,
+        (self.position.0 + self.parent_position.0,
+        self.position.1 + self.parent_position.1,
         self.rotation + self.parent_rotation)
-    }
-
-    #[allow(dead_code)]
-    /// Get the logical position of the sprite.
-    pub fn get_logi_position(&self) -> (f32, f32) {
-        logi_pos(self.phys_position)
-    }
-
-    #[allow(dead_code)]
-    /// Set the logical position of the sprite.
-    pub fn set_logi_position(&mut self, logi_position: (f32, f32)) {
-        self.phys_position = phys_pos(logi_position);
     }
 }
