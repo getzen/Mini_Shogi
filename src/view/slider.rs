@@ -2,9 +2,7 @@
 
 use macroquad::prelude::*;
 
-use crate::view::*;
 use crate::view::transform::Transform;
-
 
 #[derive(Debug)]
 pub enum SliderEvent {
@@ -15,17 +13,16 @@ pub enum SliderEvent {
 }
 
 pub struct Slider {
-    /// Use to set physical position of top-left corner.
+    /// Use to set position of top-left corner.
     pub transform: Transform,
-    /// The widget width in physical pixels.
-    pub phys_width: f32,
-    /// The thickness in physical pixels of the lines that make up the slider.
-    pub phys_line_thickness: f32,
-    /// The tick height in physical pixels. Half the tick is above
-    /// the line, half is below.
-    pub phys_tick_height: f32,
-    /// The marker radius in physical pixels.
-    pub phys_value_marker_radius: f32, // the current value marker
+    /// The widget width.
+    pub width: f32,
+    /// The thickness of the lines that make up the slider.
+    pub line_thickness: f32,
+    /// The tick height. Half the tick is above the line, half is below.
+    pub tick_height: f32,
+    /// The marker radius.
+    pub value_marker_radius: f32, // the current value marker
     /// If true, the marker is a solid circle, otherwise an outline.
     pub is_value_marker_solid: bool,
     /// The number of ticks betweeen mix and max values.
@@ -62,10 +59,10 @@ impl Slider {
 
         Self {
             transform: Transform::new(position, 0.0),
-            phys_width: width * dpi_scale(),
-            phys_line_thickness: 1.0 * dpi_scale(),
-            phys_tick_height: 10.0 * dpi_scale(),
-            phys_value_marker_radius: 10.0 * dpi_scale(),
+            width,
+            line_thickness: 1.0,
+            tick_height: 10.0,
+            value_marker_radius: 10.0,
             is_value_marker_solid: true,
             tick_divisions: 0,
             show_ticks: true,
@@ -82,13 +79,13 @@ impl Slider {
     }
 
     fn division_width(&self) -> f32 {
-        self.phys_width / ((self.tick_divisions + 1) as f32)
+        self.width / ((self.tick_divisions + 1) as f32)
     }
 
     fn mouse_position_to_value(&self, position: (f32, f32)) -> f32 {
         let (x, _, _) = self.transform.combined_x_y_rot();
         let rel_x = position.0 - x;
-        let val = rel_x / self.phys_width * (self.max_value - self.min_value) + self.min_value;
+        let val = rel_x / self.width * (self.max_value - self.min_value) + self.min_value;
         val.clamp(self.min_value, self.max_value)
     }
 
@@ -115,12 +112,12 @@ impl Slider {
     }
 
     /// Test whether the physical point lies in the slider's area.
-    fn contains_phys_position(&self, phys_position: (f32, f32)) -> bool {
+    fn contains_point(&self, point: (f32, f32)) -> bool {
         let (x, y, _) = self.transform.combined_x_y_rot();
-        phys_position.0 >= x 
-        && phys_position.0 <= x + self.phys_width
-        && phys_position.1 >= y - self.phys_value_marker_radius 
-        && phys_position.1 <= y + self.phys_value_marker_radius
+        point.0 >= x 
+        && point.0 <= x + self.width
+        && point.1 >= y - self.value_marker_radius 
+        && point.1 <= y + self.value_marker_radius
     }
 
     pub fn process_events(&mut self) -> Option<SliderEvent> {
@@ -131,7 +128,7 @@ impl Slider {
         let old_value = self.value;
         let mut value_changed = false;
 
-        let hovering = self.contains_phys_position(mouse_pos);
+        let hovering = self.contains_point(mouse_pos);
         if hovering {
             event = Some(SliderEvent::Hovering(self.id));
         }
@@ -164,24 +161,24 @@ impl Slider {
         let (x, y, _) = self.transform.combined_x_y_rot();
 
         // Slider line
-        draw_line(x, y, x + self.phys_width, y, self.phys_line_thickness, self.color);
+        draw_line(x, y, x + self.width, y, self.line_thickness, self.color);
 
         if self.show_ticks {
             // Min value tick
             draw_line(
                 x, 
-                y - self.phys_tick_height * 0.5, 
-                x, y + self.phys_tick_height * 0.5, 
-                self.phys_line_thickness, 
+                y - self.tick_height * 0.5, 
+                x, y + self.tick_height * 0.5, 
+                self.line_thickness, 
                 self.color);
 
             // Max value tick
             draw_line(
-                x + self.phys_width, 
-                y - self.phys_tick_height * 0.5, 
-                x + self.phys_width, 
-                y + self.phys_tick_height * 0.5, 
-                self.phys_line_thickness, 
+                x + self.width, 
+                y - self.tick_height * 0.5, 
+                x + self.width, 
+                y + self.tick_height * 0.5, 
+                self.line_thickness, 
                 self.color);
 
             // Division ticks in between
@@ -190,10 +187,10 @@ impl Slider {
                     let x = x + self.division_width() * ((d + 1) as f32);
                     draw_line(
                         x, 
-                        y - self.phys_tick_height * 0.5, 
+                        y - self.tick_height * 0.5, 
                         x, 
-                        y + self.phys_tick_height * 0.5, 
-                        self.phys_line_thickness,
+                        y + self.tick_height * 0.5, 
+                        self.line_thickness,
                         self.color);
                 }
             }
@@ -201,11 +198,11 @@ impl Slider {
 
         // Value marker
         let x_ratio = (self.value - self.min_value) / (self.max_value - self.min_value);
-        let pt_x = x_ratio * self.phys_width;
+        let pt_x = x_ratio * self.width;
         if self.is_value_marker_solid {
-            draw_circle(x + pt_x, y, self.phys_value_marker_radius, self.color);
+            draw_circle(x + pt_x, y, self.value_marker_radius, self.color);
         } else {
-            draw_circle_lines(x + pt_x, y, self.phys_value_marker_radius, self.phys_line_thickness, self.color);
+            draw_circle_lines(x + pt_x, y, self.value_marker_radius, self.line_thickness, self.color);
         }
     }
 }
