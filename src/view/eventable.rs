@@ -31,14 +31,14 @@ impl Eventable {
         }
     }
 
-    /// Test whether the physical point lies in the texture rectangle, considering rotation.
+    /// Test whether the point lies in the texture rectangle, considering rotation.
     /// Note: Macroquad's mouse_position() gives the physical location of the mouse.
-    pub fn contains_phys_position(&self, phy_position: (f32, f32), transform: &Transform, draw: &DrawTexture) -> bool {
+    pub fn contains_point(&self, point: (f32, f32), transform: &Transform, draw: &DrawTexture) -> bool {
         let (x, y, rot) = transform.combined_x_y_rot();
 
         // Get the net test point relative to the sprite's position.
-        let net_x = phy_position.0 - x;
-        let net_y = phy_position.1 - y;
+        let net_x = point.0 - x;
+        let net_y = point.1 - y;
         // Rotate the point clockwise (the same direction as Macroquad's rotation). This is a
         // little different than the standard rotation formulas.
         let theta = rot;
@@ -56,7 +56,7 @@ impl Eventable {
     pub fn process_events(&mut self, transform: &Transform, draw: &DrawTexture) -> Option<Event> {
         if !self.enabled { return None }
 
-        let mouse_over = self.contains_phys_position(mouse_position(), transform, draw);
+        let mouse_over = self.contains_point(mouse_position(), transform, draw);
 
         if mouse_over && !self.mouse_over {
             self.mouse_over = true;

@@ -285,7 +285,7 @@ impl ViewGame {
 
         // Detect piece hits first.
         for piece in &self.pieces {
-            if left_button && piece.contains_phys_position(mouse_pos) {
+            if left_button && piece.contains_point(mouse_pos) {
                 self.tx.send(ViewGameMessage::PieceSelected(piece.id.unwrap())).expect("ViewGame message send error.");
                 clicked_handled = true;
             }
@@ -294,7 +294,7 @@ impl ViewGame {
         if !clicked_handled {
             // Squares
             for (index, square) in &self.squares {
-                if left_button && square.contains_phys_position(mouse_pos) {
+                if left_button && square.contains_point(mouse_pos) {
                     self.tx.send(ViewGameMessage::SquareSelected(*index)).expect("ViewGame message send error.");
                     clicked_handled = true;
                 }
@@ -305,7 +305,7 @@ impl ViewGame {
             // Reserves
             for i in 0..2 {
                 for reserve in self.reserve_boxes[i].values() {
-                    if left_button && reserve.contains_phys_position(mouse_pos) {
+                    if left_button && reserve.contains_point(mouse_pos) {
                         self.tx.send(ViewGameMessage::ReserveSelected(i)).expect("ViewGame message send error.");
                     }
                 }
