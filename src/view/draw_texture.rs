@@ -5,6 +5,10 @@ use macroquad::prelude::*;
 use crate::view::*;
 use crate::view::transform::Transform;
 
+// The size of the textures divided by the presentation (draw) size.
+// 2.0 is common for high dpi monitors.
+const TEXTURE_SCALE: f32 = 2.0;
+
 pub struct DrawTexture {
     pub visible: bool,
     pub centered: bool,
@@ -18,37 +22,22 @@ pub struct DrawTexture {
 
 impl DrawTexture {
     pub fn new(texture: Texture2D, centered: bool) -> Self {
-        Self {
+        let mut sprite = Self {
             visible: true,
-            centered, texture,
-            size: (texture.width() * adj_scale(), texture.height() * adj_scale()),
+            centered,
+            texture,
+            size: (0., 0.),
             z_order: 0,
             params: DrawTextureParams::default(),
-        }
-    }
-
-    #[allow(dead_code)]
-    /// Get the size of the diplayed texture in logical pixels.
-    pub fn get_logi_size(&self) -> (f32, f32) {
-        (self.size.0 / dpi_scale(), self.size.1 / dpi_scale())
-    }
-
-    #[allow(dead_code)]
-    /// Set the size of the displayed texture using logical pixel size.
-    pub fn set_logi_size(&mut self, logi_size: (f32, f32)) {
-        self.size.0 = logi_size.0 * adj_scale();
-        self.size.1 = logi_size.1 * adj_scale();
-    }
-
-    #[allow(dead_code)]
-    pub fn phys_center(&self) -> (f32, f32) {
-        (self.size.0 / 2.0, self.size.1 / 2.0)
+        };
+        sprite.set_texture(texture);
+        sprite
     }
 
     #[allow(dead_code)]
     pub fn set_texture(&mut self, texture: Texture2D) {
         self.texture = texture;
-        self.size = (texture.width() * adj_scale(), texture.height() * adj_scale());
+        self.size = (texture.width() / TEXTURE_SCALE, texture.height() / TEXTURE_SCALE);
     }
 
     pub fn draw(&mut self, transform: &Transform, color: Option<Color>) {
