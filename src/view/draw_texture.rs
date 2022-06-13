@@ -2,7 +2,6 @@
 
 use macroquad::prelude::*;
 
-use crate::view::*;
 use crate::view::transform::Transform;
 
 // The size of the textures divided by the presentation (draw) size.

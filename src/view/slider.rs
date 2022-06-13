@@ -53,7 +53,7 @@ pub struct Slider {
 impl Slider {
     /// Creates a new Slider with the given position and width in logical pixels.
     pub fn new(
-        logi_position: (f32, f32), 
+        position: (f32, f32), 
         width: f32, 
         value: f32,
         min_value: f32, 
@@ -61,7 +61,7 @@ impl Slider {
         id: usize) -> Self {
 
         Self {
-            transform: Transform::new(phys_pos(logi_position), 0.0),
+            transform: Transform::new(position, 0.0),
             phys_width: width * dpi_scale(),
             phys_line_thickness: 1.0 * dpi_scale(),
             phys_tick_height: 10.0 * dpi_scale(),

@@ -21,12 +21,10 @@ pub struct Image {
 }
 
 impl Image {
-    pub fn new(logi_position: (f32, f32), texture: Texture2D, centered: bool, id: Option<usize>) -> Self {
-        let phys_position = phys_pos(logi_position);
-
+    pub fn new(position: (f32, f32), texture: Texture2D, centered: bool, id: Option<usize>) -> Self {
         Self {
             id,
-            transform: Transform::new(phys_position, 0.0),
+            transform: Transform::new(position, 0.0),
             drawable: DrawTexture::new(texture, centered),
             fader: None,
         }

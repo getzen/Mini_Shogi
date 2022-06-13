@@ -37,24 +37,12 @@ pub fn dpi_scale() -> f32 {
     }
 }
 
+#[allow(dead_code)]
 /// Returns the scaling factor that should be used for textures and images,
 /// given the dpi scale and the asset scale.
 pub fn adj_scale() -> f32 {
     1.0 / IMAGE_ASSETS_SCALE * dpi_scale()
 }
-
-/// Returns the physical pixels position, considering the dpi scale,
-/// given the logical positions. Use to place sprites and other elements.
-pub fn phys_pos(logi_position: (f32, f32)) -> (f32, f32) {
-    (logi_position.0 * dpi_scale(), logi_position.1 * dpi_scale())
-}
-
-/// Returns the logical position, considering the dpi scale, given the 
-/// physical pixel position. Use to scale mouse coordinates, for instance.
-pub fn logi_pos(phys_position: (f32, f32)) -> (f32, f32) {
-    (phys_position.0 / dpi_scale(), phys_position.1 / dpi_scale())
-}
-
 
 #[allow(dead_code)]
 /// Draw to a texture using the given function with drawing commands. Width and height
@@ -88,9 +76,3 @@ pub fn draw_to_texture(draw_fn: fn(u32, u32), phys_width: u32, phys_height: u32)
     render_target.texture
 }
 
-#[allow(dead_code)]
-/// Sample draw function.
-fn draw_fn(_phys_width: u32, _phys_height: u32) {
-    clear_background(Color::from_rgba(255, 255, 255, 255));
-    draw_rectangle(0., 0., 100., 100., BLACK);
-}

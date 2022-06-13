@@ -11,7 +11,6 @@ use std::time::Duration;
 
 use macroquad::prelude::*;
 
-use crate::view::*;
 use crate::view::animators::ColorAnimator;
 use crate::view::transform::Transform;
 
@@ -27,18 +26,16 @@ pub struct Label {
 
 impl Label {
     pub fn new(
-        logi_position: (f32, f32),
+        position: (f32, f32),
         centered: bool,
         text: &str,
-        logi_font_size: u16,
+        font_size: u16,
         font_name: Option<&str>) -> Self {
-
-        let phys_position = phys_pos(logi_position);
 
         Self {
             id: None,
-            transform: Transform::new(phys_position, 0.0),
-            draw_text: DrawText::new(centered, true, text, logi_font_size, font_name),
+            transform: Transform::new(position, 0.0),
+            draw_text: DrawText::new(centered, true, text, font_size, font_name),
             fader: None,
         }
     }

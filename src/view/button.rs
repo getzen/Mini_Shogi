@@ -59,18 +59,16 @@ pub struct Button {
 }
 
 impl Button {
-    pub fn new(logi_position: (f32, f32), size: usize, text: &str, id: Option<usize>) -> Self {
+    pub fn new(position: (f32, f32), size: usize, text: &str, id: Option<usize>) -> Self {
         if size >= BUTTON_FILES.len() {
             panic!("Button size for {} must be less than {}", text, BUTTON_FILES.len());
         }
-
-        let phys_position = phys_pos(logi_position);
         let texture = AssetLoader::get_texture(BUTTON_FILES[size]);
 
         let mut button = Self {
             id,
             group_id: None,
-            transform: Transform::new(phys_position, 0.0),
+            transform: Transform::new(position, 0.0),
             texture_drawable: DrawTexture::new(texture, false),
             text_transform: Transform::new((texture.width() / 2.0, texture.height() / 2.0), 0.),
             text_drawable: DrawText::new(
@@ -120,8 +118,8 @@ impl Button {
 
     // Convenience method
     #[allow(dead_code)]
-    pub fn contains_phys_position(&self, phy_position: (f32, f32)) -> bool {
-        self.eventable.contains_phys_position(phy_position, &self.transform, &self.texture_drawable)
+    pub fn contains_point(&self, point: (f32, f32)) -> bool {
+        self.eventable.contains_point(point, &self.transform, &self.texture_drawable)
     }
 
     pub fn process_events(&mut self) -> Option<ButtonEvent> {

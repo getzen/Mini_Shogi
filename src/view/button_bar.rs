@@ -33,9 +33,9 @@ pub struct ButtonBar {
 
 impl ButtonBar {
 
-    pub fn new(logi_position: (f32, f32), orientation: ButtonBarOrientation, spacing: f32) -> Self {       
+    pub fn new(position: (f32, f32), orientation: ButtonBarOrientation, spacing: f32) -> Self {       
         Self {
-            transform: Transform::new(phys_pos(logi_position), 0.0),
+            transform: Transform::new(position, 0.0),
             orientation,
             spacing,
             buttons: Vec::new(),
@@ -126,8 +126,8 @@ impl ButtonBar {
 
         for button in &mut self.buttons {
             button.transform.set_parent(self.transform.combined());
-            button.transform.phys_position.0 = x;
-            button.transform.phys_position.1 = y;
+            button.transform.position.0 = x;
+            button.transform.position.1 = y;
             button.draw();
 
             match self.orientation {

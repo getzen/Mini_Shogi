@@ -36,12 +36,10 @@ pub struct Sprite {
 
 impl Sprite {
     /// Creates a new Sprite with the given logical position, texture, and optonal id.
-    pub fn new(logi_position: (f32, f32), texture: Texture2D, id: Option<usize>) -> Self {
-        let phys_position = phys_pos(logi_position);
-
+    pub fn new(position: (f32, f32), texture: Texture2D, id: Option<usize>) -> Self {
         Self {
             id,
-            transform: Transform::new(phys_position, 0.0),
+            transform: Transform::new(position, 0.0),
             drawable: DrawTexture::new(texture, true),
             eventable: Eventable::new(),
 
@@ -53,15 +51,14 @@ impl Sprite {
         }
     }
 
-    pub fn move_to(&mut self, logi_end_pos: (f32, f32), duration: Duration) {
-        let phys_end_pos = phys_pos(logi_end_pos);
-        self.mover = Some(PositionAnimator::new(self.transform.phys_position, phys_end_pos, duration));
+    pub fn move_to(&mut self, end_position: (f32, f32), duration: Duration) {
+        self.mover = Some(PositionAnimator::new(self.transform.position, end_position, duration));
     }
 
     pub fn update(&mut self, time_delta: Duration) -> bool {
         if let Some(mover) = &mut self.mover {
             mover.update(time_delta);
-            self.transform.phys_position = mover.position;
+            self.transform.position = mover.position;
             if mover.complete {
                 self.mover = None;
             }
@@ -71,8 +68,8 @@ impl Sprite {
     }
 
     // Convenience method
-    pub fn contains_phys_position(&self, phy_position: (f32, f32)) -> bool {
-        self.eventable.contains_phys_position(phy_position, &self.transform, &self.drawable)
+    pub fn contains_point(&self, point: (f32, f32)) -> bool {
+        self.eventable.contains_point(point, &self.transform, &self.drawable)
     }
 
     #[allow(dead_code)]

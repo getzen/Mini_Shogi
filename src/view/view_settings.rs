@@ -11,7 +11,6 @@ use crate::view::button_bar::ButtonBar;
 use crate::view::button_bar::ButtonBarOrientation;
 use crate::view::image::Image;
 use crate::view::label::Label;
-use crate::view::phys_pos;
 use crate::view::slider::Slider;
 use crate::view::slider::SliderEvent;
 use crate::view::transform::Transform;
@@ -49,7 +48,7 @@ impl ViewSettings {
 
         Self {
             tx,
-            transform: Transform::new(phys_pos((200., 220.)), 0.0),
+            transform: Transform::new((200., 220.), 0.0),
 
             // All the following positions are relative to 'transform'.
 

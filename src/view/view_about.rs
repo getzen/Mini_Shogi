@@ -8,7 +8,6 @@ use crate::asset_loader::AssetLoader;
 use crate::view::button::Button;
 use crate::view::button::ButtonEvent;
 use crate::view::image::Image;
-use crate::view::phys_pos;
 use crate::view::transform::Transform;
 
 
@@ -27,12 +26,9 @@ pub struct ViewAbout {
 impl ViewAbout {
     pub async fn new(tx: Sender<ViewAboutMessage>) -> Self {       
         let texture = AssetLoader::get_texture("view_about");
-
-        let phys_position = phys_pos((200., 250.));
-
         Self {
             tx,
-            transform: Transform::new(phys_position, 0.),
+            transform: Transform::new((200., 250.), 0.),
             image: Image::new((0., 0.), texture, false, None),
             okay_button: Button::new((170., 215.), 0, "Okay", None),
         }

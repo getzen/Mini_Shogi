@@ -1,7 +1,5 @@
 /// Transform
 
-use crate::view::{logi_pos, phys_pos};
-
 #[derive(Clone, Copy)]
 pub struct Transform {
     pub position: (f32, f32),
