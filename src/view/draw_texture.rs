@@ -6,7 +6,7 @@ use crate::view::transform::Transform;
 
 // The size of the textures divided by the presentation (draw) size.
 // 2.0 is common for high dpi monitors.
-const TEXTURE_SCALE: f32 = 2.0;
+pub const TEXTURE_SCALE: f32 = 2.0;
 
 pub struct DrawTexture {
     pub visible: bool,

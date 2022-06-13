@@ -21,7 +21,7 @@ fn conf() -> Conf {
         window_title: String::from("Mini Shogi"),
         window_width: 800,
         window_height: 800,
-        high_dpi: true,
+        high_dpi: false,
         //fullscreen: bool,
         //sample_count: 0,
         window_resizable: false,

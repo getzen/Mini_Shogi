@@ -19,9 +19,9 @@ pub enum ButtonEvent {
 use macroquad::prelude::{Color, WHITE};
 
 use crate::asset_loader::AssetLoader;
-use crate::view::*;
 use crate::view::draw_text::DrawText;
 use crate::view::draw_texture::DrawTexture;
+use crate::view::draw_texture::TEXTURE_SCALE;
 use crate::view::eventable::Event;
 use crate::view::eventable::Eventable;
 use crate::view::transform::Transform;
@@ -64,13 +64,16 @@ impl Button {
             panic!("Button size for {} must be less than {}", text, BUTTON_FILES.len());
         }
         let texture = AssetLoader::get_texture(BUTTON_FILES[size]);
+        let tex_mid_x = texture.width() / TEXTURE_SCALE / 2.0;
+        let tex_mid_y = texture.height() / TEXTURE_SCALE / 2.0;
 
         let mut button = Self {
             id,
             group_id: None,
             transform: Transform::new(position, 0.0),
             texture_drawable: DrawTexture::new(texture, false),
-            text_transform: Transform::new((texture.width() / 2.0, texture.height() / 2.0), 0.),
+            //text_transform: Transform::new((texture.width() / TEXTURE_SCALE, texture.height() / TEXTURE_SCALE), 0.),
+            text_transform: Transform::new((tex_mid_x, tex_mid_y), 0.),
             text_drawable: DrawText::new(
                 true, 
                 true,

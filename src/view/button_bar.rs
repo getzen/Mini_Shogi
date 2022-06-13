@@ -131,8 +131,8 @@ impl ButtonBar {
             button.draw();
 
             match self.orientation {
-                ButtonBarOrientation::Horizontal => x += button.texture_drawable.texture.width() + self.spacing,
-                ButtonBarOrientation::Vertical => y += button.texture_drawable.texture.height() + self.spacing,
+                ButtonBarOrientation::Horizontal => x += button.texture_drawable.size.0 + self.spacing,
+                ButtonBarOrientation::Vertical => y += button.texture_drawable.size.1 + self.spacing,
             }
         }
     }

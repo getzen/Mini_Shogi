@@ -3,7 +3,6 @@
 use macroquad::prelude::*;
 
 use crate::asset_loader::AssetLoader;
-use crate::view::*;
 use crate::view::transform::Transform;
 
 pub struct DrawText {
@@ -20,11 +19,11 @@ impl DrawText {
         centered_horiz: bool,
         centered_vert: bool,
         text: &str,
-        logi_font_size: u16,
+        font_size: u16,
         font_name: Option<&str>) -> Self {
 
         let mut text_params = TextParams {
-            font_size: (logi_font_size as f32 * dpi_scale()) as u16,
+            font_size: font_size,
              ..Default::default()
             };
 
@@ -55,14 +54,17 @@ impl DrawText {
         if !self.visible { return }
 
         let (mut x, mut y, _rot) = transform.combined_x_y_rot();
-        let (w, h, baseline) = self.draw_size();
+        let (w, _h, offset_y) = self.draw_size();
   
         if self.centered_horiz {
             x -= w / 2.0;
         }
 
         if self.centered_vert {
-            y += h / 2.0 - (h - baseline) / 2.0;
+            // I thought the math was this...
+            // y += h / 2.0 - (h - baseline) / 2.0;
+            // ...but this works. I don't get it.
+            y += offset_y * 0.25;
         }
 
         self.text_params.color = color.unwrap_or(self.color);
