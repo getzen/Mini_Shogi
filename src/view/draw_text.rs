@@ -24,22 +24,11 @@ impl DrawText {
         text: &str,
         font_size: u16,
         font_name: Option<&str>) -> Self {
-
-        let mut text_params = TextParams {
-            font_size: font_size,
-             ..Default::default()
-            };
-
         
-        let mut font = match font_name {
+        let font = match font_name {
             Some(name) => Some(AssetLoader::get_font(name)),
             None => None,
         };
-        
-        // AssetLoader::get_font(name)
-        // let font if let Some(name) = font_name {
-        //     text_params.font = Some(&AssetLoader::get_font(name));
-        // }
 
         Self {
             visible: true,
@@ -50,15 +39,11 @@ impl DrawText {
             font,
             font_size,
             font_scale: 1.0,
-            //text_params,
         }
     }
 
     /// Returns the size of the drawn text.
     pub fn draw_size(&self) -> (f32, f32, f32) { // width, height, y offset from baseline
-        // let font = self.text_params.font;
-        // let font_size = self.text_params.font_size;
-        // let font_scale = self.text_params.font_scale;
         let font = match &self.font {
             Some(font) => Some(font),
             None => None,
@@ -99,7 +84,6 @@ impl DrawText {
             rotation: 0.0,
             color,
         };
-        // self.text_params.color = color.unwrap_or(self.color);
         draw_text_ex(&self.text, x, y, params);
     }
 }
