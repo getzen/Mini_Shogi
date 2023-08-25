@@ -21,21 +21,22 @@ pub struct DrawTexture {
 
 impl DrawTexture {
     pub fn new(texture: Texture2D, centered: bool) -> Self {
-        let mut sprite = Self {
+
+        let size = (texture.width() / TEXTURE_SCALE, texture.height() / TEXTURE_SCALE);
+        let sprite = Self {
             visible: true,
             centered,
             texture,
-            size: (0., 0.),
+            size,
             z_order: 0,
             params: DrawTextureParams::default(),
         };
-        sprite.set_texture(texture);
         sprite
     }
 
     #[allow(dead_code)]
     pub fn set_texture(&mut self, texture: Texture2D) {
-        self.texture = texture;
+        self.texture = texture.clone();
         self.size = (texture.width() / TEXTURE_SCALE, texture.height() / TEXTURE_SCALE);
     }
 
@@ -53,6 +54,6 @@ impl DrawTexture {
         self.params.dest_size = Some(Vec2::new(self.size.0, self.size.1));
         
         let draw_color = color.unwrap_or(WHITE);
-        draw_texture_ex(self.texture, x, y, draw_color, self.params.clone());
+        draw_texture_ex(&self.texture, x, y, draw_color, self.params.clone());
     }
 }

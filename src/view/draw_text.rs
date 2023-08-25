@@ -11,7 +11,10 @@ pub struct DrawText {
     pub centered_vert: bool,
     pub text: String,
     pub color: Color,
-    pub text_params: TextParams,
+    pub font: Option<Font>,
+    pub font_size: u16,
+    pub font_scale: f32,
+    //pub text_params: TextParams,
 }
 
 impl DrawText {
@@ -27,9 +30,16 @@ impl DrawText {
              ..Default::default()
             };
 
-        if let Some(name) = font_name {
-            text_params.font = AssetLoader::get_font(name);
-        }
+        
+        let mut font = match font_name {
+            Some(name) => Some(AssetLoader::get_font(name)),
+            None => None,
+        };
+        
+        // AssetLoader::get_font(name)
+        // let font if let Some(name) = font_name {
+        //     text_params.font = Some(&AssetLoader::get_font(name));
+        // }
 
         Self {
             visible: true,
@@ -37,16 +47,23 @@ impl DrawText {
             centered_vert,
             text: text.to_string(),
             color: WHITE,
-            text_params,
+            font,
+            font_size,
+            font_scale: 1.0,
+            //text_params,
         }
     }
 
     /// Returns the size of the drawn text.
     pub fn draw_size(&self) -> (f32, f32, f32) { // width, height, y offset from baseline
-        let font = self.text_params.font;
-        let font_size = self.text_params.font_size;
-        let font_scale = self.text_params.font_scale;
-        let dimensions = measure_text(&self.text, Some(font), font_size, font_scale);
+        // let font = self.text_params.font;
+        // let font_size = self.text_params.font_size;
+        // let font_scale = self.text_params.font_scale;
+        let font = match &self.font {
+            Some(font) => Some(font),
+            None => None,
+        };
+        let dimensions = measure_text(&self.text, font, self.font_size, self.font_scale);
         (dimensions.width, dimensions.height, dimensions.offset_y)
     }
 
@@ -67,8 +84,23 @@ impl DrawText {
             y += offset_y * 0.25;
         }
 
-        self.text_params.color = color.unwrap_or(self.color);
-        draw_text_ex(&self.text, x, y, self.text_params);
+        let font = match &self.font {
+            Some(font) => Some(font),
+            None => None,
+        };
+
+        let color = color.unwrap_or(self.color);
+
+        let params = TextParams {
+            font,
+            font_size: self.font_size,
+            font_scale: self.font_scale,
+            font_scale_aspect: 1.0,
+            rotation: 0.0,
+            color,
+        };
+        // self.text_params.color = color.unwrap_or(self.color);
+        draw_text_ex(&self.text, x, y, params);
     }
 }
 

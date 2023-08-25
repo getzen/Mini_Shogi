@@ -99,7 +99,7 @@ impl ViewGame {
             for r in 0..self.rows {
                 let index = Game::column_row_to_index(c, r);
                 let position = self.center_position_for(index);
-                let mut square = Sprite::new(position, texture, None);
+                let mut square = Sprite::new(position, texture.clone(), None);
                 square.alt_color = Some(LIGHTGRAY);
                 self.squares.insert(index, square);
             }
@@ -107,7 +107,7 @@ impl ViewGame {
 
         // Promotion lines
         texture = AssetLoader::get_texture("line");
-        let line_top = Sprite::new(PROMO_LINE_TOP, texture, None);
+        let line_top = Sprite::new(PROMO_LINE_TOP, texture.clone(), None);
         self.promotion_lines.push(line_top);
         let line_bottom = Sprite::new(PROMO_LINE_BOTTOM, texture, None);
         self.promotion_lines.push(line_bottom);
@@ -118,12 +118,12 @@ impl ViewGame {
             // Reserve, player 0
             let mut pos_x = RESERVE_0_CENTER.0;
             let mut pos_y = RESERVE_0_CENTER.1 - i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET); 
-            let mut reserve = Sprite::new((pos_x, pos_y), texture, None);
+            let mut reserve = Sprite::new((pos_x, pos_y), texture.clone(), None);
             self.reserve_boxes[0].insert(i, reserve);
             // Reserve, player 1
             pos_x = RESERVE_1_CENTER.0;
             pos_y = RESERVE_1_CENTER.1 + i as f32 * (SQUARE_SIZE + RESERVE_BOX_OFFSET);
-            reserve = Sprite::new((pos_x, pos_y), texture, None);
+            reserve = Sprite::new((pos_x, pos_y), texture.clone(), None);
             self.reserve_boxes[1].insert(i, reserve);
         }
 
@@ -185,7 +185,7 @@ impl ViewGame {
                 
                 //play_sound_once(self.piece_move);
                 let params = PlaySoundParams{looped: false, volume: 0.5};
-                play_sound(self.piece_move, params);
+                play_sound(&self.piece_move, params);
             }
         }
     }
@@ -206,7 +206,7 @@ impl ViewGame {
                 piece.transform.rotation = theta;
                 if end_position != piece.transform.position {
                     piece.move_to(end_position, Duration::from_secs_f32(MOVE_DURATION));
-                    play_sound_once(self.piece_capture);
+                    play_sound_once(&self.piece_capture);
                 }
         }
     }
