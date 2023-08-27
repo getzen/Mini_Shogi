@@ -7,7 +7,7 @@ description = "The game of Mini Shogi, a simplified, faster version of Shogi."
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-macroquad = "0.4.2"
+macroquad = { version = "0.4.2", features = ["audio"] }
 fastrand = "1.7.0"
 num-format = "0.4.0" # converts integers to comma-separated strings
 
