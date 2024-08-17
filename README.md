@@ -27,6 +27,8 @@ There are two AI opponents:
 
 - Check out Macroquad's Texture2D.get_texture_data -> Image.get_pixel() for hit detection. Docs have warning: "This operation can be expensive."
 
+- Check out Macroquad's 'set_pc_assets_folder' function.
+
 - Add "radio" functionality to ButtonBar. Remove handling from ViewSettings.
 
 - Add forward/back move functionality.
